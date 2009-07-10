@@ -48,32 +48,46 @@ JSZip.prototype.add = function(name, data, o)
 
    var header = "";
 
+   // PK � �� �� �� �� x-13 b53c30�0d �0 d� 09 �� hello.txtHello, World!
+   // PK � �� �� �� �� x-cD ß'!�!� �� smile.gif
+
    // local file header signature
-   header += 0x504b0304;
+   header += "\x50\x4b\x03\x04";
    // version needed to extract TODO
-   header += 0x1400;
+   header += "\x14\x00";
    // general purpose bit flag
-   header += 0x0000;
+   header += "\x00\x00";
    // compression method
-   header += 0x0000;
+   header += "\x00\x00";
    // last mod file time TODO
-   header += 0x0000;
+   header += "\x00\x00";
    // last mod file date TODO
-   header += 0x0000;
+   header += "\x00\x00";
    // crc-32
-   header += crc32(data);
+   header += this.decToHex(crc32(data), 4);
    // compressed size
-   header += data.length;
+   header += this.decToHex(data.length, 4);
    // uncompressed size
-   header += data.length;
+   header += this.decToHex(data.length, 4);
    // file name length
-   header += name.length;
+   header += this.decToHex(name.length, 2);
    // extra field length
-   header += 0x0000;
+   header += "\x00\x00";
 
-   console.log(header);
+   // file name
+   //header += name;
 
-   this.files[name] = data;
+   this.files[name] = header+name+data;
+
+   console.log(header+name+data);
+
+   var temp = "";
+   for (var i = 0; i < header.length; i++)
+   {
+      temp += (header.charCodeAt(i)).toString(16)+" ";
+   }
+
+   console.log(temp);
 
    return this;
 };
@@ -101,6 +115,27 @@ JSZip.prototype.generate = function()
 }
 
 // Utility functions
+
+JSZip.prototype.decToHex = function(d, bytes)
+{
+   var hex = d.toString(16);
+
+   while (hex.length < bytes*2)
+   {
+      hex = "0"+hex;
+   }
+
+   var result = "";
+
+   for (var i=0; i < hex.length; i+=2)
+   {
+      result += eval("'\\x"+hex.substr(i, 2)+"'");
+   }
+
+   console.log(hex);
+
+   return result;
+}
 
 /**
 *
