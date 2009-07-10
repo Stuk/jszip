@@ -1,0 +1,42 @@
+<html>
+<head>
+<title>JavaScript Zip Testing</title>
+<link media="screen" href="../lib/testsuite.css" type="text/css" rel="stylesheet">
+<script src="../javascript-zip.js"></script>
+<script src="../lib/jquery-1.3.2.min.js"></script>
+<script src="../lib/testrunner.js"></script>
+<script>
+
+$(document).ready(function(){
+   var zip;
+
+   test("JSZip", function(){
+      ok(JSZip, "JSZip exists");
+
+      zip = new JSZip();
+      ok(zip, "Constructor works");
+   });
+
+   test("Add text file", function()
+   {
+      zip.add("hello.txt", "Hello, World!");
+   });
+
+   test("Add an image file", function()
+   {
+      zip.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=",
+         {base64: true});
+   });
+
+});
+
+</script>
+</head>
+<body>
+   <h1>CssGridGen Testing</h1>
+   <h2 id="banner"></h2>
+   <h2 id="userAgent"></h2>
+   <ol id="tests"></ol>
+   <div id="main"></div>
+</body>
+</html>
