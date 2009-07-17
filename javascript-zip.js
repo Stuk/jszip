@@ -199,7 +199,7 @@ JSZip.prototype.decToHex = function(d, bytes)
 
    var result = "";
 
-   for (var i=0; i < hex.length; i+=2)
+   for (var i=hex.length-2; i >= 0; i-=2)
    {
       result += eval("'\\x"+hex.substr(i, 2)+"'");
    }
