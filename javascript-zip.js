@@ -2,8 +2,9 @@
 
 Usage:
    zip = new JSZip();
-   zip.add("hello.txt", "Hello, World!");
+   zip.add("hello.txt", "Hello, World!").add("tempfile", "nothing");
    zip.dir("images").add("smile.gif", base64Data, {base64: true});
+   zip.del("tempfile");
 
    base64zip = zip.generate();
 
@@ -51,8 +52,6 @@ JSZip.prototype.add = function(name, data, o)
    // PK � �� �� �� �� x-13 b53c30�0d �0 d� 09 �� hello.txtHello, World!
    // PK � �� �� �� �� x-cD ß'!�!� �� smile.gif
 
-   // local file header signature
-   header += "\x50\x4b\x03\x04";
    // version needed to extract TODO
    header += "\x14\x00";
    // general purpose bit flag
@@ -64,7 +63,8 @@ JSZip.prototype.add = function(name, data, o)
    // last mod file date TODO
    header += "\x00\x00";
    // crc-32
-   header += this.decToHex(crc32(data), 4);
+   //header += this.decToHex(crc32(data), 4);
+   header += "\x01\x02\x03\x04";
    // compressed size
    header += this.decToHex(data.length, 4);
    // uncompressed size
@@ -77,7 +77,8 @@ JSZip.prototype.add = function(name, data, o)
    // file name
    //header += name;
 
-   this.files[name] = header+name+data;
+   //this.files[name] = header+name+data;
+   this.files[name] = {header: header, data: data}
 
    console.log(header+name+data);
 
@@ -92,6 +93,17 @@ JSZip.prototype.add = function(name, data, o)
    return this;
 };
 
+/**
+ * Delete a file, or a directory and all sub-files, from the zip
+ * @param   name  the name of the file to delete
+ * @return  this JSZip object
+ */
+JSZip.prototype.del = function(name)
+{
+   // TODO check if this is a directory and remove all sub-files
+   delete this.files[name]
+   return this;
+}
 
 /**
  * Add a directory to the zip file
@@ -102,15 +114,75 @@ JSZip.prototype.dir = function(name)
 {
    name = this.root+name;
 
-   this.files[name] = "";
+   //this.files[name] = "";
+   this.add(name, '');
 
+   // Allow chaining by returning a new object with this dir as the root
    var ret = this.clone();
    ret.root = name+"/";
    return ret;
 };
 
+/**
+ * Generate the complete zip file
+ * @return  A base64 encoded string of the zip file
+ */
 JSZip.prototype.generate = function()
 {
+   // The central directory, and files data
+   var directory = [], files = [], fileOffset = 0;
+
+   for (name in this.files)
+   {
+      var fileRecord = dirRecord = "";
+      fileRecord = "\x50\x4b\x03\x04" + this.files[name].header + name + this.files[name].data;
+
+      dirRecord = "\x50\x4b\x01\x02" +
+      // version made by TODO
+      "\x00\x00" + this.files[name].header +
+      // file comment length
+      "\x00\x00" +
+      // disk number start
+      "\x00\x00" +
+      // internal file attributes TODO
+      "\x00\x00" +
+      // external file attributes TODO
+      "\x00\x00\x00\x00" +
+      // relative offset of local header
+      this.decToHex(fileOffset, 4) +
+      // file name
+      name;
+
+      fileOffset += fileRecord.length;
+
+      files.push(fileRecord);
+      directory.push(dirRecord);
+   }
+
+   var fileData = files.join("");
+   var dirData = directory.join("");
+
+   var dirEnd = "";
+
+   // end of central dir signature
+   dirEnd = "\x50\x4b\x05\x06" +
+   // number of this disk
+   "\x00\x00" +
+   // number of the disk with the start of the central directory
+   "\x00\x00" +
+   // total number of entries in the central directory on this disk
+   this.decToHex(files.length, 2) +
+   // total number of entries in the central directory
+   this.decToHex(files.length, 2) +
+   // size of the central directory   4 bytes
+   this.decToHex(dirData.length, 4) +
+   // offset of start of central directory with respect to the starting disk number
+   this.decToHex(fileData.length, 4) +
+   // .ZIP file comment length
+   "\x00\x00";
+
+   var zip = fileData + dirData + dirEnd;
+   return Base64.encode(zip);
 
 }
 
