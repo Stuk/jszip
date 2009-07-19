@@ -4,7 +4,7 @@ Usage:
    zip = new JSZip();
    zip.add("hello.txt", "Hello, World!").add("tempfile", "nothing");
    zip.folder("images").add("smile.gif", base64Data, {base64: true});
-   zip.del("tempfile");
+   zip.remove("tempfile");
 
    base64zip = zip.generate();
 
@@ -85,7 +85,7 @@ JSZip.prototype.add = function(name, data, o)
  * @param   name  the name of the file to delete
  * @return  this JSZip object
  */
-JSZip.prototype.del = function(name)
+JSZip.prototype.remove = function(name)
 {
    // TODO check if this is a directory and remove all sub-files
    delete this.files[name]
