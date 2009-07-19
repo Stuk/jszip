@@ -7,26 +7,105 @@
 <script src="../lib/testrunner.js"></script>
 <script>
 
+function similar(actual, expected, mistakes, message)
+{
+   if (actual.length !== expected.length) mistakes--;
+
+   for (var i = 0; i < Math.min(actual.length, expected.length); i++)
+   {
+      if (actual[i] !== expected[i]) mistakes--;
+   }
+
+   //QUnit.push(mistakes >= 0, actual, expected, message);
+   if (mistakes < 0)
+      throw Math.abs(mistakes)+" too many mistakes";
+   else
+      return true;
+}
+
+function encodeToHex(str){
+    var r="";
+    var e=str.length;
+    var c=0;
+    var h;
+    while(c<e){
+        h=str.charCodeAt(c++).toString(16);
+        while(h.length<2) h="0"+h;
+        r+=h;
+    }
+    return r;
+}
+
+
 $(document).ready(function(){
-   var zip;
 
    test("JSZip", function(){
       ok(JSZip, "JSZip exists");
 
-      zip = new JSZip();
+      var zip = new JSZip();
       ok(zip, "Constructor works");
    });
 
-   test("Add text file", function()
+   test("Text file zip", function()
    {
-      zip.add("hello.txt", "Hello, World!");
+      // If anyone can work out how to get binary data over AJAX without it
+      // being mangled by UTF-8 transforms, I would be very grateful
+      var expected = "UEsDBAoDAAAAAJx08Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsBAhQDCgMAAAAAnHTxOuPllbAMAAAADAAAAAkAAAAAAAAAAAAggKSBAAAAAEhlbGxvLnR4dFBLBQYAAAAAAQABADcAAAAzAAAAAAA=";
+
+      var zip = new JSZip();
+      zip.add("Hello.txt", "Hello World\n");
+      content = zip.generate();
+
+      content = Base64.decode(content);
+      expected = Base64.decode(expected);
+
+      /*
+      Expected differing bytes:
+      2  version number
+      4  date/time
+      4  central dir version numbers
+      4  central dir date/time
+      4  external file attributes
+
+      18 Total
+      */
+      similar(content, expected, 18, "Generated ZIP matches reference ZIP");
+
    });
 
-   test("Add an image file", function()
+
+   test("Image file zip", function()
    {
-      zip.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=",
-         {base64: true});
+      var expected = "UEsDBAoDAAAAABVv6jo8P+uKKQAAACkAAAAJAAAAc21pbGUuZ2lmR0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADtQSwECFAMKAwAAAAAVb+o6PD/riikAAAApAAAACQAAAAAAAAAAACCApIEAAAAAc21pbGUuZ2lmUEsFBgAAAAABAAEANwAAAFAAAAAAAA=="
+
+      var zip = new JSZip();
+      zip.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
+      content = zip.generate();
+
+      content = Base64.decode(content);
+      expected = Base64.decode(expected);
+
+      /*
+      Expected differing bytes:
+      2  version number
+      4  date/time
+      4  central dir version numbers
+      4  central dir date/time
+      4  external file attributes
+
+      18 Total
+      */
+      similar(content, expected, 18, "Generated ZIP matches reference ZIP");
+
    });
+
+/*
+   test("Add a directory", function()
+   {
+      dir = zip.dir("directory");
+      dir.add("directoryFile.txt", "Success");
+   });
+*/
 
 });
 
