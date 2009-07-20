@@ -61,8 +61,6 @@ JSZip.prototype.add = function(name, data, o)
    header += "\x00\x00";
    // crc-32 TODO
    header += this.decToHex(crc32(data), 4);
-   console.log(crc32(data), crc32(data).toString(16));
-   //header += "\x01\x02\x03\x04";
    // compressed size
    header += this.decToHex(data.length, 4);
    // uncompressed size

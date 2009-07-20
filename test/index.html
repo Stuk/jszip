@@ -7,7 +7,7 @@
 <script src="../lib/testrunner.js"></script>
 <script>
 
-function similar(actual, expected, mistakes, message)
+function similar(actual, expected, mistakes)
 {
    if (actual.length !== expected.length) mistakes--;
 
@@ -22,20 +22,6 @@ function similar(actual, expected, mistakes, message)
    else
       return true;
 }
-
-function encodeToHex(str){
-    var r="";
-    var e=str.length;
-    var c=0;
-    var h;
-    while(c<e){
-        h=str.charCodeAt(c++).toString(16);
-        while(h.length<2) h="0"+h;
-        r+=h;
-    }
-    return r;
-}
-
 
 $(document).ready(function(){
 
@@ -69,9 +55,7 @@ $(document).ready(function(){
 
       18 Total
       */
-      similar(actual, expected, 18, "Generated ZIP matches reference ZIP");
-
-      console.log("data:application/zip;base64,"+content);
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
    });
 
@@ -97,8 +81,8 @@ $(document).ready(function(){
 
       18 Total
       */
-      similar(actual, expected, 18, "Generated ZIP matches reference ZIP");
-      console.log("data:application/zip;base64,"+content);
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+
    });
 
 /*
