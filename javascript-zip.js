@@ -61,6 +61,7 @@ JSZip.prototype.add = function(name, data, o)
    header += "\x00\x00";
    // crc-32 TODO
    header += this.decToHex(crc32(data), 4);
+   console.log(crc32(data), crc32(data).toString(16));
    //header += "\x01\x02\x03\x04";
    // compressed size
    header += this.decToHex(data.length, 4);
@@ -126,7 +127,9 @@ JSZip.prototype.generate = function()
 
       dirRecord = "\x50\x4b\x01\x02" +
       // version made by TODO
-      "\x00\x00" + this.files[name].header +
+      "\x00\x00" +
+      // file header (common to file and central directory)
+      this.files[name].header +
       // file comment length
       "\x00\x00" +
       // disk number start
@@ -175,24 +178,19 @@ JSZip.prototype.generate = function()
 
 // Utility functions
 
-JSZip.prototype.decToHex = function(d, bytes)
+JSZip.prototype.decToHex = function(dec, bytes)
 {
-   var hex = d.toString(16);
+   var hex = "";
 
-   while (hex.length < bytes*2)
+   for (var i = 0; i<bytes*2; i+=2)
    {
-      hex = "0"+hex;
+      var t = (dec >>> (i*4)) & 0xFF;
+      t = t.toString(16);
+      if (t.length != 2) t = "0"+t;
+      hex += eval("'\\x"+t+"'")
    }
 
-   var result = "";
-
-   // Reverse the order for little endian-ness
-   for (var i=hex.length-2; i >= 0; i-=2)
-   {
-      result += eval("'\\x"+hex.substr(i, 2)+"'");
-   }
-
-   return result;
+   return hex;
 }
 
 /**
@@ -343,7 +341,7 @@ Base64 = {
 *
 **/
 
-function crc32(str)
+function crc32(str, crc)
 {
 
 	//str = Base64._utf8_encode(str);
