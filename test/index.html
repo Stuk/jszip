@@ -18,12 +18,17 @@ function similar(actual, expected, mistakes)
 
    //QUnit.push(mistakes >= 0, actual, expected, message);
    if (mistakes < 0)
-      throw Math.abs(mistakes)+" too many mistakes";
+      return false;
    else
       return true;
 }
 
 $(document).ready(function(){
+   var refZips = [];
+   refZips["text"]=Base64.decode("UEsDBAoDAAAAAJx08Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsBAhQDCgMAAAAAnHTxOuPllbAMAAAADAAAAAkAAAAAAAAAAAAggKSBAAAAAEhlbGxvLnR4dFBLBQYAAAAAAQABADcAAAAzAAAAAAA=");
+   refZips["image"]=Base64.decode("UEsDBAoDAAAAABVv6jo8P+uKKQAAACkAAAAJAAAAc21pbGUuZ2lmR0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADtQSwECFAMKAwAAAAAVb+o6PD/riikAAAApAAAACQAAAAAAAAAAACCApIEAAAAAc21pbGUuZ2lmUEsFBgAAAAABAAEANwAAAFAAAAAAAA==");
+   refZips["folder"]=Base64.decode("UEsDBAoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAZm9sZGVyL1BLAQIUAwoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAAAAAAAAAEIDtQQAAAABmb2xkZXIvUEsFBgAAAAABAAEANQAAACUAAAAAAA==");
+   refZips["all"]=Base64.decode("UEsDBAoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsDBAoDAAAAALFs8ToAAAAAAAAAAAAAAAAHAAAAaW1hZ2VzL1BLAwQKAwAAAAAVZ+o6PD/riikAAAApAAAAEAAAAGltYWdlcy9zbWlsZS5naWZHSUY4N2EFAAUAgAIAAAAA/94ALAAAAAAFAAUAAAIIjA+RZ6sKUgEAO1BLAQIUAwoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAAAAAAAAAAIICkgQAAAABIZWxsby50eHRQSwECFAMKAwAAAACxbPE6AAAAAAAAAAAAAAAABwAAAAAAAAAAABCA7UEzAAAAaW1hZ2VzL1BLAQIUAwoDAAAAABVn6jo8P+uKKQAAACkAAAAQAAAAAAAAAAAAIICkgVgAAABpbWFnZXMvc21pbGUuZ2lmUEsFBgAAAAADAAMAqgAAAK8AAAAAAA==");
 
    test("JSZip", function(){
       ok(JSZip, "JSZip exists");
@@ -32,18 +37,19 @@ $(document).ready(function(){
       ok(zip, "Constructor works");
    });
 
-   test("Text file zip", function()
+   module("Essential");
+
+   test("Zip text file", function()
    {
       // If anyone can work out how to get binary data over AJAX without it
       // being mangled by UTF-8 transforms, I would be very grateful
-      var expected = "UEsDBAoDAAAAAJx08Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsBAhQDCgMAAAAAnHTxOuPllbAMAAAADAAAAAkAAAAAAAAAAAAggKSBAAAAAEhlbGxvLnR4dFBLBQYAAAAAAQABADcAAAAzAAAAAAA=";
+      var expected = refZips["text"];
 
       var zip = new JSZip();
       zip.add("Hello.txt", "Hello World\n");
       content = zip.generate();
 
       var actual = Base64.decode(content);
-      expected = Base64.decode(expected);
 
       /*
       Expected differing bytes:
@@ -60,16 +66,44 @@ $(document).ready(function(){
    });
 
 
-   test("Image file zip", function()
+   test("Zip image file", function()
    {
-      var expected = "UEsDBAoDAAAAABVv6jo8P+uKKQAAACkAAAAJAAAAc21pbGUuZ2lmR0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADtQSwECFAMKAwAAAAAVb+o6PD/riikAAAApAAAACQAAAAAAAAAAACCApIEAAAAAc21pbGUuZ2lmUEsFBgAAAAABAAEANwAAAFAAAAAAAA=="
+      var expected = refZips["image"];
 
       var zip = new JSZip();
       zip.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
       content = zip.generate();
 
       actual = Base64.decode(content);
-      expected = Base64.decode(expected);
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+
+   });
+
+   test("Zip empty folder", function()
+   {
+      var expected = refZips["folder"];
+
+      var zip = new JSZip();
+      zip.folder("folder")
+      content = zip.generate();
+
+      actual = Base64.decode(content);
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+
+   });
+
+   test("Zip text, folder and image", function()
+   {
+      var expected = refZips["all"];
+
+      var zip = new JSZip();
+      zip.add("Hello.txt", "Hello World\n");
+      zip.folder("images").add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
+      content = zip.generate();
+
+      actual = Base64.decode(content);
 
       /*
       Expected differing bytes:
@@ -79,19 +113,47 @@ $(document).ready(function(){
       4  central dir date/time
       4  external file attributes
 
-      18 Total
+      18 * 3 files
+      54 Total
       */
+
+      //console.log("data:application/zip;base64,"+content);
+      ok(similar(actual, expected, 54) , "Generated ZIP matches reference ZIP");
+   });
+
+   module("More advanced");
+
+   test("Delete file", function()
+   {
+      var expected = refZips["text"];
+
+      var zip = new JSZip();
+      zip.add("Remove.txt", "This file should be deleted\n");
+      zip.add("Hello.txt", "Hello World\n");
+      zip.remove("Remove.txt");
+      content = zip.generate();
+
+      actual = Base64.decode(content);
+
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
    });
 
-/*
-   test("Add a directory", function()
+   test("Delete folder", function()
    {
-      dir = zip.dir("directory");
-      dir.add("directoryFile.txt", "Success");
+      var expected = refZips["text"];
+
+      var zip = new JSZip();
+      zip.folder("remove").add("Remove.txt", "This folder and file should be deleted\n");
+      zip.add("Hello.txt", "Hello World\n");
+      zip.remove("remove");
+      content = zip.generate();
+
+      actual = Base64.decode(content);
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+
    });
-*/
 
 });
 
