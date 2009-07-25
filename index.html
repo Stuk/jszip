@@ -3,10 +3,213 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <title>JavaScript Zip class</title>
-<link rel="stylesheet" href="css/style.css" type="text/css" media="all" />
-<script type="text/javascript" src="javascript-zip.js"></script>
+<link rel="stylesheet" href="lib/960.css" type="text/css" media="all" />
+<style type="text/css">
+body
+{
+   font-family: Helvetica, Deja Vu Sans, sans-serif;
+   font-size: 90%;
+}
+
+h2
+{
+   font-weight: 100;
+}
+
+h4
+{
+   border-bottom: 1px solid #CCCCCC;
+}
+
+.border
+{
+   border-right: 1px solid #CCCCCC;
+   margin-right: 0;
+   padding-right: 9px;
+}
+
+table
+{
+   margin-right: 2em;
+}
+
+th, td
+{
+   padding: 2px 5px;
+   text-align: center;
+}
+
+th {border-width: 0 0 2px 0;border-style: solid;}
+
+.ie {border-color: #0275BA;}
+.ff {border-color: #DF7215;}
+.sf {border-color: #43B3E9;}
+.cr {border-color: #39B642;}
+.op {border-color: #C42122;}
+
+hr
+{
+   clear: both;
+   border: none;
+   border-top: 1px solid #CCCCCC;
+}
+
+#where p
+{
+   text-align: center;
+}
+
+#where .download
+{
+   background: #4FBD4A;
+   color: #FFFFFF;
+   height: 2em;
+   line-height: 2em;
+}
+
+pre.example
+{
+   background: #E8E8E8;
+   margin-left: -10px;
+   padding: 10px;
+}
+</style>
+<script type="text/javascript" src="jszip.js"></script>
+<script type="text/javascript">
+imgData = "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=";
+
+window.onload = function()
+{
+   d = document.getElementById("demo");
+   d.onclick = runDemo;
+   if (d.captureEvents) d.captureEvents(Event.CLICK);
+
+   function runDemo()
+   {
+      var zip = new JSZip();
+      zip.add("Hello.txt", "Hello World\n");
+      img = zip.folder("images")
+      img.add("smile.gif", imgData, {base64: true});
+      content = zip.generate();
+      location.href="data:application/zip;base64,"+content;
+   }
+}
+
+</script>
 </head>
 <body>
+
+<div class="container_12">
+   <div class="grid_12">
+   <h1>JSZip</h1>
+   </div>
+
+   <div id="how" class="grid_5 border">
+      <h2>How?</h2>
+      <pre class="example">
+var zip = new JSZip();
+zip.add("Hello.txt", "Hello World\n");
+img = zip.folder("images")
+img.add("smile.gif", imgData, {base64: true});
+content = zip.generate();
+location.href="data:application/zip;base64,"+content;
+      </pre>
+      <button id="demo">Run!</button>
+   </div>
+
+   <div id="why" class="grid_4 border">
+      <h2>Why?</h2>
+      <ol>
+      <li>JavaScript today is capable of generating a lot of data. The easiest way to deliver multiple files to your users is in a zip file. Why waste server resources and bandwidth when you can get the client to do it for you?</li>
+      <li>Because it's cool.</li>
+      </ol>
+   </div>
+
+   <div id="where" class="grid_3">
+      <h2>Where?</h2>
+      <p>
+      <a href="#" class="download grid_3 alpha omega">Download</a>
+      <small>from <a href="#">Github</a></small>
+      </p>
+
+      <p>
+      See also: the <a href="test/">test suite</a>
+   </div>
+   <hr/>
+   <div class="grid_9 border">
+      <h2>Tell me more!</h2>
+
+      <h3>Browser support</h3>
+      <table style="float: left">
+         <tr><th class="ff">Firefox</th> <th class="op">Opera</th> <th class="sf">Safari</th> <th class="cr">Chrome</th> <th class="ie">IE*</th> </tr>
+         <tr><td>Yes</td> <td>Yes</td> <td>Slightly</td> <td>Maybe</td> <td>No</td></tr>
+      </table>
+
+      <p>* Internet Explorer 8 only supports data URLs for images, and only up to 32k in size. So basically JSZip <em>doesn't work</em> under IE8. Sorry. See <a href="http://msdn.microsoft.com/en-us/library/cc848897(VS.85).aspx">MSDN</a>.</p>
+      <p>Tests still need to be run on historical browsers to check which versions are supported.</p>
+
+      <h3>Documentation</h3>
+
+      <h4>new JSZip()</h4>
+      <p>The constructor</p>
+      <pre class="example">
+zip = new JSZip();</pre>
+
+      <h4>add(name, data [,options])</h4>
+      <p>Add a file to the zip file. Supports chaining.</p>
+
+      <p>Options:</p>
+      <ul>
+         <li><code>base64</code> boolean, is the data base64 encoded?</li>
+      </ul>
+
+      <pre class="example">
+zip.add("Hello.txt", "Hello World\n");
+zip.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
+zip.add("animals.txt", "dog,platypus\n").add("people.txt", "james,sebastian\n");</pre>
+
+      <p>
+      Result: <code>Hello.txt, smile.gif, animals.txt, people.txt</code>
+      </p>
+
+      <h4>folder(name)</h4>
+      <p>Add a directory to the zip file. Supports chaining.</p>
+      <pre class="example">
+zip.folder("images");
+zip.folder("css").add("style.css", "body {background: #FF0000}");</pre>
+
+      <p>
+      Result: <code>images/, css/, css/style.css</code>
+
+
+      <h4>remove(name)</h4>
+      <p>Delete a file. (<em>Todo: make recursive on folders</em>)</p>
+      <pre class="example">
+zip.add("Hello.txt", "Hello World\n");
+zip.folder("css").add("style.css", "body {background: #FF0000}");
+zip.remove("Hello.txt").remove("css");</pre>
+
+      <p>
+      Result: an empty zip.
+      </p>
+
+
+      <h4>generate()</h4>
+      <p>Generates the complete base64 encoded zip file.</p>
+      <pre class="example">
+content = zip.generate();
+location.href="data:application/zip;base64,"+content;</pre>
+
+   </div>
+
+   <div id="who" class="grid_3">
+      <h2>Who?</h2>
+      <p>
+      Stuart Knightley
+      </p>
+   </div>
+
+</div>
 
 </body>
 </html>
