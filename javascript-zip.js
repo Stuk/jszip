@@ -80,18 +80,6 @@ JSZip.prototype.add = function(name, data, o)
 };
 
 /**
- * Delete a file, or a directory and all sub-files, from the zip
- * @param   name  the name of the file to delete
- * @return  this JSZip object
- */
-JSZip.prototype.remove = function(name)
-{
-   // TODO check if this is a directory and remove all sub-files
-   delete this.files[name]
-   return this;
-}
-
-/**
  * Add a directory to the zip file
  * @param   name  The name of the directory to add
  * @return  JSZip object with the new directory as the root
@@ -100,14 +88,51 @@ JSZip.prototype.folder = function(name)
 {
    name = this.root+name;
 
-   //this.files[name] = "";
-   this.add(name, '');
+   // Check the name ends with a /
+   if (name.substr(-1) != "/") name += "/";
 
-   // Allow chaining by returning a new object with this dir as the root
+   // Does this folder already exist?
+   if (typeof this.files[name] === "undefined") this.add(name, '');
+
+   // Allow chaining by returning a new object with this folder as the root
    var ret = this.clone();
-   ret.root = name+"/";
+   ret.root = name;
    return ret;
 };
+
+/**
+ * Delete a file, or a directory and all sub-files, from the zip
+ * @param   name  the name of the file to delete
+ * @return  this JSZip object
+ */
+JSZip.prototype.remove = function(name)
+{
+   // TODO check if this is a directory and remove all sub-files
+   file = this.files[name];
+   if (!file)
+   {
+      // Look for any folders
+      if (name.substr(-1) != "/") name += "/";
+      file = this.files[name];
+   }
+
+   if (file)
+   {
+      if (name.match("/") === null)
+      {
+         // file
+         delete this.files[name];
+      }
+      else
+      {
+         // folder
+         delete this.files[name];
+         console.log("folder");
+      }
+   }
+
+   return this;
+}
 
 /**
  * Generate the complete zip file
