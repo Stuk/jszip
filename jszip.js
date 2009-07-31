@@ -59,7 +59,7 @@ JSZip.prototype.add = function(name, data, o)
    header += "\x00\x00";
    // last mod file date TODO
    header += "\x00\x00";
-   // crc-32 TODO
+   // crc-32
    header += this.decToHex(crc32(data), 4);
    // compressed size
    header += this.decToHex(data.length, 4);
@@ -127,7 +127,6 @@ JSZip.prototype.remove = function(name)
       {
          // folder
          delete this.files[name];
-         console.log("folder");
       }
    }
 
