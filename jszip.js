@@ -20,8 +20,7 @@ function JSZip()
    // Default properties for a new file
    this.d = {
       base64: false,
-      modified: new Date(),
-      attributes: ""
+      dir: false,
    }
 }
 
@@ -49,8 +48,8 @@ JSZip.prototype.add = function(name, data, o)
 
    var header = "";
 
-   // version needed to extract TODO
-   header += "\x14\x00";
+   // version needed to extract
+   header += "\x0A\x00";
    // general purpose bit flag
    header += "\x00\x00";
    // compression method
@@ -74,7 +73,7 @@ JSZip.prototype.add = function(name, data, o)
    //header += name;
 
    //this.files[name] = header+name+data;
-   this.files[name] = {header: header, data: data}
+   this.files[name] = {header: header, data: data, dir: o["dir"]}
 
    return this;
 };
@@ -92,7 +91,7 @@ JSZip.prototype.folder = function(name)
    if (name.substr(-1) != "/") name += "/";
 
    // Does this folder already exist?
-   if (typeof this.files[name] === "undefined") this.add(name, '');
+   if (typeof this.files[name] === "undefined") this.add(name, '', {dir:true});
 
    // Allow chaining by returning a new object with this folder as the root
    var ret = this.clone();
@@ -148,8 +147,8 @@ JSZip.prototype.generate = function()
       fileRecord = "\x50\x4b\x03\x04" + this.files[name].header + name + this.files[name].data;
 
       dirRecord = "\x50\x4b\x01\x02" +
-      // version made by TODO
-      "\x00\x00" +
+      // version made by (00: DOS)
+      "\x14\x00" +
       // file header (common to file and central directory)
       this.files[name].header +
       // file comment length
@@ -158,8 +157,8 @@ JSZip.prototype.generate = function()
       "\x00\x00" +
       // internal file attributes TODO
       "\x00\x00" +
-      // external file attributes TODO
-      "\x00\x00\x00\x00" +
+      // external file attributes
+      (this.files[name].dir===true?"\x10\x00\x00\x00":"\x00\x00\x00\x00")+
       // relative offset of local header
       this.decToHex(fileOffset, 4) +
       // file name
