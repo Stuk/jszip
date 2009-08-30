@@ -1,3 +1,5 @@
+Here are the notes I made while working through the ZIP file specification.
+
 For each file:
 
         local file header signature     4 bytes  (0x04034b50)
