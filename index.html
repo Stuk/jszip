@@ -20,12 +20,14 @@ ul, ol
    padding-left: 20px;
 }
 
-h1 { letter-spacing: -0.06em; }
-
-h2
-{
-   font-weight: 100;
+h1 {
+   letter-spacing: -0.06em;
+   font-size: 3em;
+   text-align: center;
 }
+h2 { font-weight: 100; }
+h3 { margin-bottom: 0; }
+p, ul { margin: 0.5em 0; }
 
 h4
 {
@@ -48,6 +50,7 @@ th, td
 {
    padding: 2px 5px;
    text-align: center;
+   border-right: 1px solid #CCC;
 }
 
 th {border-width: 0 0 2px 0;border-style: solid;}
@@ -109,10 +112,12 @@ window.onload = function()
    {
       var zip = new JSZip();
       zip.add("Hello.txt", "Hello World\n");
-      img = zip.folder("images")
+      img = zip.folder("images");
       img.add("smile.gif", imgData, {base64: true});
       content = zip.generate();
       location.href="data:application/zip;base64,"+content;
+
+      document.getElementById("demo-code").style.backgroundColor = "#FEFFA3";
    }
 }
 
@@ -122,27 +127,26 @@ window.onload = function()
 
 <div class="container_12">
    <div class="grid_12">
-   <h1>JS<span style="font-weight:100">Zip</span></h1>
+   <h1 class="grid_5">JS<span style="font-weight:100">Zip</span></h1>
    </div>
 
    <div id="how" class="grid_5 border">
       <h2>How?</h2>
-      <pre class="example">
+      <pre id="demo-code" class="example">
 var zip = new JSZip();
 zip.add("Hello.txt", "Hello World\n");
-img = zip.folder("images")
+img = zip.folder("images");
 img.add("smile.gif", imgData, {base64: true});
 content = zip.generate();
-location.href="data:application/zip;base64,"+content;
-      </pre>
+location.href="data:application/zip;base64,"+content;</pre>
       <button id="demo">Run!</button>
    </div>
 
    <div id="why" class="grid_4 border">
       <h2>Why?</h2>
       <ol>
-      <li>JavaScript today is capable of generating a lot of data. The easiest way to deliver multiple files to your users is in a zip file. Instead of wasting server resources and bandwidth you can get the client to do it for you!</li>
-      <li>Because it's cool.</li>
+      <li>JavaScript today is capable of generating a lot of data. The easiest way to deliver multiple files to your users is in a zip file. Instead of wasting server resources and bandwidth you can get the client to do it for you.</li>
+      <li>Because it's cool!</li>
       </ol>
    </div>
 
@@ -162,12 +166,18 @@ location.href="data:application/zip;base64,"+content;
       <h2>Tell me more!</h2>
 
       <h3>Browser support</h3>
-      <table style="float: left">
-         <tr><th class="ff">Firefox</th> <th class="op">Opera</th> <th class="sf">Safari</th> <th class="cr">Chrome</th> <th class="ie">IE*</th> </tr>
-         <tr><td>3.0+</td> <td>7.5+</td> <td>Slightly</td> <td>Maybe</td> <td>No</td></tr>
+      <table cellspacing="0">
+         <tr><th class="op">Opera</th> <th class="ff">Firefox</th> <th class="sf">Safari</th> <th class="cr">Chrome</th> <th class="ie">Internet Explorer</th> </tr>
+         <tr><td>7.5+</td> <td>3.0+</td> <td>Yes</td> <td>No</td> <td>No</td></tr>
+         <tr>
+          <td>Filename is "default.zip"</td>
+          <td>Filename is random alphanumeric with ".part" extension</td>
+          <td>Filename is "Unknown" (no extension)</td>
+          <td>Appears to only support data URLs for some content</td>
+          <td><a href="http://msdn.microsoft.com/en-us/library/cc848897(VS.85).aspx">Only supports data URLs for some content</a>. (May be able to use <a href="http://www.phpied.com/mhtml-when-you-need-data-uris-in-ie7-and-under/">MHTML</a>?)</td>
+         </tr>
       </table>
 
-      <p>* Internet Explorer 8 only supports data URLs for images, and only up to 32k in size. So basically JSZip <em>doesn't work</em> under IE8. Sorry. See <a href="http://msdn.microsoft.com/en-us/library/cc848897(VS.85).aspx">MSDN</a>. (There may be a way to get it working in IE using <a href="http://www.phpied.com/mhtml-when-you-need-data-uris-in-ie7-and-under/">MHTML</a>.)</p>
       <p>Tests still need to be run on historical browsers to check which versions are supported.</p>
 
       <h3>Documentation</h3>
@@ -242,6 +252,7 @@ location.href="data:application/zip;base64,"+content;</pre>
        <li>Recursively remove files when <code>remove()</code>ing a directory</li>
        <li>Set internal and external file attributes in central directory</li>
        <li>Allow setting of modification dates/attributes/other info in <code>add()</code> options object</li>
+       <li>Look into using <a href="http://www.phpied.com/mhtml-when-you-need-data-uris-in-ie7-and-under/">MHTML</a> for IE</li>
       </ul>
 
       <h3>Who?</h3>
