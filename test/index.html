@@ -25,10 +25,10 @@ function similar(actual, expected, mistakes)
 
 $(document).ready(function(){
    var refZips = [];
-   refZips["text"]=Base64.decode("UEsDBAoDAAAAAJx08Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsBAhQDCgMAAAAAnHTxOuPllbAMAAAADAAAAAkAAAAAAAAAAAAggKSBAAAAAEhlbGxvLnR4dFBLBQYAAAAAAQABADcAAAAzAAAAAAA=");
-   refZips["image"]=Base64.decode("UEsDBAoDAAAAABVv6jo8P+uKKQAAACkAAAAJAAAAc21pbGUuZ2lmR0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADtQSwECFAMKAwAAAAAVb+o6PD/riikAAAApAAAACQAAAAAAAAAAACCApIEAAAAAc21pbGUuZ2lmUEsFBgAAAAABAAEANwAAAFAAAAAAAA==");
-   refZips["folder"]=Base64.decode("UEsDBAoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAZm9sZGVyL1BLAQIUAwoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAAAAAAAAAEIDtQQAAAABmb2xkZXIvUEsFBgAAAAABAAEANQAAACUAAAAAAA==");
-   refZips["all"]=Base64.decode("UEsDBAoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsDBAoDAAAAALFs8ToAAAAAAAAAAAAAAAAHAAAAaW1hZ2VzL1BLAwQKAwAAAAAVZ+o6PD/riikAAAApAAAAEAAAAGltYWdlcy9zbWlsZS5naWZHSUY4N2EFAAUAgAIAAAAA/94ALAAAAAAFAAUAAAIIjA+RZ6sKUgEAO1BLAQIUAwoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAAAAAAAAAAIICkgQAAAABIZWxsby50eHRQSwECFAMKAwAAAACxbPE6AAAAAAAAAAAAAAAABwAAAAAAAAAAABCA7UEzAAAAaW1hZ2VzL1BLAQIUAwoDAAAAABVn6jo8P+uKKQAAACkAAAAQAAAAAAAAAAAAIICkgVgAAABpbWFnZXMvc21pbGUuZ2lmUEsFBgAAAAADAAMAqgAAAK8AAAAAAA==");
+   refZips["text"]=JSZipBase64.decode("UEsDBAoDAAAAAJx08Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsBAhQDCgMAAAAAnHTxOuPllbAMAAAADAAAAAkAAAAAAAAAAAAggKSBAAAAAEhlbGxvLnR4dFBLBQYAAAAAAQABADcAAAAzAAAAAAA=");
+   refZips["image"]=JSZipBase64.decode("UEsDBAoDAAAAABVv6jo8P+uKKQAAACkAAAAJAAAAc21pbGUuZ2lmR0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADtQSwECFAMKAwAAAAAVb+o6PD/riikAAAApAAAACQAAAAAAAAAAACCApIEAAAAAc21pbGUuZ2lmUEsFBgAAAAABAAEANwAAAFAAAAAAAA==");
+   refZips["folder"]=JSZipBase64.decode("UEsDBAoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAZm9sZGVyL1BLAQIUAwoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAAAAAAAAAEIDtQQAAAABmb2xkZXIvUEsFBgAAAAABAAEANQAAACUAAAAAAA==");
+   refZips["all"]=JSZipBase64.decode("UEsDBAoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsDBAoDAAAAALFs8ToAAAAAAAAAAAAAAAAHAAAAaW1hZ2VzL1BLAwQKAwAAAAAVZ+o6PD/riikAAAApAAAAEAAAAGltYWdlcy9zbWlsZS5naWZHSUY4N2EFAAUAgAIAAAAA/94ALAAAAAAFAAUAAAIIjA+RZ6sKUgEAO1BLAQIUAwoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAAAAAAAAAAIICkgQAAAABIZWxsby50eHRQSwECFAMKAwAAAACxbPE6AAAAAAAAAAAAAAAABwAAAAAAAAAAABCA7UEzAAAAaW1hZ2VzL1BLAQIUAwoDAAAAABVn6jo8P+uKKQAAACkAAAAQAAAAAAAAAAAAIICkgVgAAABpbWFnZXMvc21pbGUuZ2lmUEsFBgAAAAADAAMAqgAAAK8AAAAAAA==");
 
    test("JSZip", function(){
       ok(JSZip, "JSZip exists");
@@ -49,7 +49,7 @@ $(document).ready(function(){
       zip.add("Hello.txt", "Hello World\n");
       content = zip.generate();
 
-      var actual = Base64.decode(content);
+      var actual = JSZipBase64.decode(content);
 
       /*
       Expected differing bytes:
@@ -74,7 +74,7 @@ $(document).ready(function(){
       zip.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
       content = zip.generate();
 
-      actual = Base64.decode(content);
+      actual = JSZipBase64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
@@ -88,7 +88,7 @@ $(document).ready(function(){
       zip.folder("folder")
       content = zip.generate();
 
-      actual = Base64.decode(content);
+      actual = JSZipBase64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
@@ -103,7 +103,7 @@ $(document).ready(function(){
       zip.folder("images").add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
       content = zip.generate();
 
-      actual = Base64.decode(content);
+      actual = JSZipBase64.decode(content);
 
       /*
       Expected differing bytes:
@@ -133,7 +133,7 @@ $(document).ready(function(){
       zip.remove("Remove.txt");
       content = zip.generate();
 
-      actual = Base64.decode(content);
+      actual = JSZipBase64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
@@ -149,7 +149,7 @@ $(document).ready(function(){
       zip.remove("remove");
       content = zip.generate();
 
-      actual = Base64.decode(content);
+      actual = JSZipBase64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
