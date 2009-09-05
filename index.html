@@ -198,7 +198,9 @@ zip = new JSZip();</pre>
       <p>Add a file to the zip file. Supports chaining.</p>
       <p>Options:</p>
       <ul>
-         <li><code>base64</code> boolean, is the data base64 encoded?</li>
+         <li><code>base64</code>, boolean. Set to <code>true</code> if the data
+         is base64 encoded. For example image data from a <code>&lt;canvas&gt;</code> element.
+         Plain text does not need this option.</li>
       </ul>
       <pre class="example">
 zip.add("Hello.txt", "Hello World\n");
@@ -269,9 +271,9 @@ location.href="data:application/zip;base64,"+content;</pre>
 
       <h3>Thanks and comments</h3>
       <ul>
-         <li><a href="mailto:stuart -at- stuartk.co.uk?subject=JSZip thanks">Email me</a> with a thank you</li>
+         <li><a href="mailto:stuart -at- stuartk.co.uk?subject=JSZip">Email me</a></li>
          <li>Buy something from my <a href="http://www.amazon.co.uk/gp/registry/29NPQFRWIMH81">Amazon wishlist</a></li>
-         <li><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=H26VJELQBHJJ6&amp;lc=GB&amp;item_name=JSZip&amp;currency_code=GBP&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted">Donate</a> real money</li>
+         <li>or even <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=H26VJELQBHJJ6&amp;lc=GB&amp;item_name=JSZip&amp;currency_code=GBP&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted">donate</a></li>
       </ul>
    </div>
 
