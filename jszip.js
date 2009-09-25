@@ -101,13 +101,43 @@ JSZip.prototype.folder = function(name)
 };
 
 /**
+ * Compare a string or regular expression against all of the filenames and
+ * return an informational object for each that matches.
+ * @param   regex The regular expression to test against
+ * @return  An array of objects representing the matched files. In the form
+ *          {name: "filename", data: "file data", dir: true/false}
+ */
+JSZip.prototype.find = function(needle)
+{
+   var result = [];
+   if (typeof needle === "string")
+   {
+      var re = new RegExp("^"+needle+"$");
+   }
+   else
+   {
+      var re = needle;
+   }
+
+   for (var filename in this.files)
+   {
+      if (re.test(filename))
+      {
+         var file = this.files[filename];
+         result.push({name: filename, data: file.data, dir: file.dir});
+      }
+   }
+
+   return result;
+};
+
+/**
  * Delete a file, or a directory and all sub-files, from the zip
  * @param   name  the name of the file to delete
  * @return  this JSZip object
  */
 JSZip.prototype.remove = function(name)
 {
-   // TODO check if this is a directory and remove all sub-files
    file = this.files[name];
    if (!file)
    {
@@ -126,7 +156,18 @@ JSZip.prototype.remove = function(name)
       else
       {
          // folder
-         delete this.files[name];
+         var kids = this.find(new RegExp("^"+name));
+         for (var i = 0; i < kids.length; i++)
+         {
+            if (kids[i].name == name)
+            {
+               delete this.files[name];
+            }
+            else
+            {
+               this.remove(kids[i].name);
+            }
+         }
       }
    }
 
