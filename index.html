@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <title>JSZip: JavaScript zip class</title>
-<meta name="description" content="Create .zip files using Javascript. Provides a simple API to ">
+<meta name="description" content="Create .zip files using Javascript. Provides a simple API to " />
 <link rel="stylesheet" href="lib/960.css" type="text/css" media="all" />
 <style type="text/css">
 body
@@ -227,6 +227,21 @@ zip.add("css/font.css", "body {font-family: sans-serif}")</pre>
       Result: <code>images/, css/, css/style.css, css/font.css</code>
       </p>
 
+      <h4>find(needle)</h4>
+      <p>Compare a string or <a href="http://www.javascriptkit.com/javatutors/redev.shtml">regular expression</a>
+      against all of the filenames and returns an informational object for each that matches.</p>
+      <pre class="example">
+zip.add("Readme", "Hello World!\n");
+zip.add("Readme.French", "Bonjour tout le monde!\n");
+zip.add("Readme.Pirate", "Ahoy m'hearty!\n");
+
+zip.find("Readme"); // only finds "Readme"
+zip.find(/^Readme/); // Regular expression finds all three</pre>
+      <p>
+      Result: Array of matched file objects in the form:
+      <code>{name: "Readme", data: "Hello World!", dir: false}</code>
+      </p>
+
       <h4>remove(name)</h4>
       <p>Delete a file. (<em>Todo: make recursive on folders</em>)</p>
       <pre class="example">
@@ -240,8 +255,7 @@ zip.add("Hello.txt", "Hello World\n");
 zip.folder("css").add("style.css", "body {background: #FF0000}");
 zip.remove("Hello.txt").remove("css");</pre>
       <p>
-      Result: <code>css/style.css</code> (<strong class="bad">Currently a bug</strong>)<br/>
-      Expected Result: Empty zip.
+      Result: Empty zip.
       </p>
 
       <h4>generate()</h4>
@@ -264,7 +278,6 @@ location.href="data:application/zip;base64,"+content;</pre>
        <li>Set correct version needed to extract</li>
        <li>Set correct version made by</li>
        <li>Set modification date/times (convert from <code>Date()</code> to hex)</li>
-       <li>Recursively remove files when <code>remove()</code>ing a directory</li>
        <li>Set internal and external file attributes in central directory</li>
        <li>Allow setting of modification dates/attributes/other info in <code>add()</code> options object</li>
        <li>Look into using <a href="http://www.phpied.com/mhtml-when-you-need-data-uris-in-ie7-and-under/">MHTML</a> for IE</li>
