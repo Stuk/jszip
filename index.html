@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<title>JavaScript Zip class</title>
+<title>JSZip: JavaScript zip class</title>
+<meta name="description" content="Create .zip files using Javascript. Provides a simple API to ">
 <link rel="stylesheet" href="lib/960.css" type="text/css" media="all" />
 <style type="text/css">
 body
@@ -80,7 +81,7 @@ hr
 
 #where .download
 {
-   background: #39B642;
+   background: #28AA31;
    color: #FFFFFF;
    height: 2em;
    line-height: 2em;
@@ -98,10 +99,8 @@ pre.example
    overflow: hidden;
 }
 
-.bad
-{
-   color: #B63939;
-}
+.bad { color: #B63939; }
+#status { color: #28AA31; }
 </style>
 <script type="text/javascript" src="jszip.js"></script>
 <script type="text/javascript">
@@ -109,20 +108,24 @@ imgData = "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=";
 
 window.onload = function()
 {
-   d = document.getElementById("demo");
+   var d = document.getElementById("demo");
    d.onclick = runDemo;
    if (d.captureEvents) d.captureEvents(Event.CLICK);
 
+   document.getElementById("demo-code").onkeypress = function()
+   {
+      document.getElementById("status").innerHTML = "";
+   }
+
    function runDemo()
    {
-      var zip = new JSZip();
-      zip.add("Hello.txt", "Hello World\n");
-      img = zip.folder("images");
-      img.add("smile.gif", imgData, {base64: true});
-      content = zip.generate();
-      location.href="data:application/zip;base64,"+content;
-
-      document.getElementById("demo-code").style.backgroundColor = "#FEFFA3";
+      var err = false;
+      try { eval(document.getElementById("demo-code").value); }
+      catch (e) {
+         err = true;
+         document.getElementById("status").innerHTML = e;
+      }
+      if (!err) document.getElementById("status").innerHTML = "Done!";
    }
 }
 
@@ -132,21 +135,24 @@ window.onload = function()
 
 <div class="container_12">
    <div id="header" class="grid_12">
-   <span class="alpha grid_5">
+   <div class="alpha grid_5">
     <h1>JS<span style="font-weight:100">Zip</span></h1>
     Create .zip files with Javascript
+   </div>
    </div>
 
    <div id="how" class="grid_5 border">
       <h2>How?</h2>
-      <pre id="demo-code" class="example">
+      <textarea id="demo-code" rows="7" class="grid_5 alpha omega">
 var zip = new JSZip();
 zip.add("Hello.txt", "Hello World\n");
 img = zip.folder("images");
 img.add("smile.gif", imgData, {base64: true});
 content = zip.generate();
-location.href="data:application/zip;base64,"+content;</pre>
+location.href="data:application/zip;base64,"+content;
+      </textarea>
       <button id="demo">Run!</button>
+      <span id="status"></span>
    </div>
 
    <div id="why" class="grid_4 border">
@@ -250,7 +256,7 @@ location.href="data:application/zip;base64,"+content;</pre>
 
       <h3>License</h3>
       <p>
-      GPL and/or MIT
+      GPLv3 and/or MIT
       </p>
 
       <h3>Todo</h3>
