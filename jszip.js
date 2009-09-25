@@ -124,7 +124,7 @@ JSZip.prototype.find = function(needle)
       if (re.test(filename))
       {
          var file = this.files[filename];
-         result.push({name: filename, data: file.data, dir: file.dir});
+         result.push({name: filename, data: file.data, dir: !!file.dir});
       }
    }
 
