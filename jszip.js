@@ -41,7 +41,7 @@ JSZip.prototype.add = function(name, data, o)
    o = o || {};
    name = this.root+name;
 
-   for (var opt in this.defaults)
+   for (var opt in this.d)
    {
       o[opt] = o[opt] || this.d[opt];
    }
@@ -178,8 +178,10 @@ JSZip.prototype.remove = function(name)
  * Generate the complete zip file
  * @return  A base64 encoded string of the zip file
  */
-JSZip.prototype.generate = function()
+JSZip.prototype.generate = function(asBytes)
 {
+   asBytes = asBytes || false;
+
    // The central directory, and files data
    var directory = [], files = [], fileOffset = 0;
 
@@ -235,7 +237,7 @@ JSZip.prototype.generate = function()
    "\x00\x00";
 
    var zip = fileData + dirData + dirEnd;
-   return JSZipBase64.encode(zip);
+   return (asBytes) ? zip : JSZipBase64.encode(zip);
 
 }
 

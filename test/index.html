@@ -183,6 +183,18 @@ function similar(actual, expected, mistakes)
 
    });
 
+   test("Byte string output", function()
+   {
+      var expected = refZips["text"];
+
+      var zip = new JSZip();
+      zip.add("Hello.txt", "Hello World\n");
+      content = zip.generate(true);
+
+      var actual = content;
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+
 </script>
 </head>
 <body>

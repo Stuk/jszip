@@ -258,11 +258,19 @@ zip.remove("Hello.txt").remove("css");</pre>
       Result: Empty zip.
       </p>
 
-      <h4>generate()</h4>
-      <p>Generates the complete base64 encoded zip file.</p>
+      <h4>generate(asBytes = false)</h4>
+      <p>Generates the complete zip file. By default encoded as base64, pass <code>true</code> to get the raw byte string</p>
       <pre class="example">
 content = zip.generate();
 location.href="data:application/zip;base64,"+content;</pre>
+
+      <pre class="example">
+content = zip.generate(true);
+for (var c = 0; c &lt; content.length; c++)
+{
+    console.log(content.charCodeAt(c));
+    // do other things
+}</pre>
    </div>
 
    <div id="who" class="grid_3">
