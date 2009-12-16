@@ -1,8 +1,9 @@
 /**
 
 JSZip - A Javascript class for generating Zip files
-(c) 2009 Stuart Knightley <stuart [at] stuartk.co.uk>
+<http://jszip.stuartk.co.uk>
 
+(c) 2009 Stuart Knightley <stuart [at] stuartk.co.uk>
 Licenced under the GPLv3 and the MIT licences
 
 Usage:
@@ -26,7 +27,7 @@ function JSZip()
    this.d = {
       base64: false,
       dir: false
-   }
+   };
 }
 
 /**
@@ -46,7 +47,7 @@ JSZip.prototype.add = function(name, data, o)
       o[opt] = o[opt] || this.d[opt];
    }
 
-   if (o["base64"] === true)
+   if (o.base64 === true)
    {
       data = JSZipBase64.decode(data);
    }
@@ -76,7 +77,7 @@ JSZip.prototype.add = function(name, data, o)
 
    // file name
 
-   this.files[name] = {header: header, data: data, dir: o["dir"]}
+   this.files[name] = {header: header, data: data, dir: o.dir};
 
    return this;
 };
@@ -103,20 +104,20 @@ JSZip.prototype.folder = function(name)
 /**
  * Compare a string or regular expression against all of the filenames and
  * return an informational object for each that matches.
- * @param   regex The regular expression to test against
+ * @param   string/regex The regular expression to test against
  * @return  An array of objects representing the matched files. In the form
  *          {name: "filename", data: "file data", dir: true/false}
  */
 JSZip.prototype.find = function(needle)
 {
-   var result = [];
+   var result = [], re;
    if (typeof needle === "string")
    {
-      var re = new RegExp("^"+needle+"$");
+      re = new RegExp("^"+needle+"$");
    }
    else
    {
-      var re = needle;
+      re = needle;
    }
 
    for (var filename in this.files)
@@ -138,7 +139,7 @@ JSZip.prototype.find = function(needle)
  */
 JSZip.prototype.remove = function(name)
 {
-   file = this.files[name];
+   var file = this.files[name];
    if (!file)
    {
       // Look for any folders
@@ -161,10 +162,12 @@ JSZip.prototype.remove = function(name)
          {
             if (kids[i].name == name)
             {
+               // Delete this folder
                delete this.files[name];
             }
             else
             {
+               // Remove a child of this folder
                this.remove(kids[i].name);
             }
          }
@@ -172,7 +175,7 @@ JSZip.prototype.remove = function(name)
    }
 
    return this;
-}
+};
 
 /**
  * Generate the complete zip file
@@ -185,9 +188,9 @@ JSZip.prototype.generate = function(asBytes)
    // The central directory, and files data
    var directory = [], files = [], fileOffset = 0;
 
-   for (name in this.files)
+   for (var name in this.files)
    {
-      var fileRecord = dirRecord = "";
+      var fileRecord = "", dirRecord = "";
       fileRecord = "\x50\x4b\x03\x04" + this.files[name].header + name + this.files[name].data;
 
       dirRecord = "\x50\x4b\x01\x02" +
@@ -239,7 +242,7 @@ JSZip.prototype.generate = function(asBytes)
    var zip = fileData + dirData + dirEnd;
    return (asBytes) ? zip : JSZipBase64.encode(zip);
 
-}
+};
 
 // Utility functions
 
@@ -252,11 +255,11 @@ JSZip.prototype.decToHex = function(dec, bytes)
       var t = (dec >>> (i*4)) & 0xFF;
       t = t.toString(16);
       if (t.length != 2) t = "0"+t;
-      hex += eval("'\\x"+t+"'")
+      hex += eval("'\\x"+t+"'");
    }
 
    return hex;
-}
+};
 
 /**
 *
@@ -291,11 +294,11 @@ JSZip.prototype.crc32 = function(str, crc)
 JSZip.prototype.clone = function()
 {
    var newObj = new JSZip();
-   for (i in this)
+   for (var i in this)
    {
       if (typeof this[i] !== "function")
       {
-         newObj[i] = this[i]
+         newObj[i] = this[i];
       }
    }
    return newObj;
