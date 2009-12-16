@@ -25,7 +25,7 @@ function JSZip()
    // Default properties for a new file
    this.d = {
       base64: false,
-      dir: false,
+      dir: false
    }
 }
 
