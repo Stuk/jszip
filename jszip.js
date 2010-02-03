@@ -190,6 +190,8 @@ JSZip.prototype.generate = function(asBytes)
 
    for (var name in this.files)
    {
+      if( !this.files.hasOwnProperty(name) ) { continue; }
+       
       var fileRecord = "", dirRecord = "";
       fileRecord = "\x50\x4b\x03\x04" + this.files[name].header + name + this.files[name].data;
 
