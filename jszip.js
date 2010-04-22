@@ -10,6 +10,7 @@ Usage:
    zip = new JSZip();
    zip.add("hello.txt", "Hello, World!").add("tempfile", "nothing");
    zip.folder("images").add("smile.gif", base64Data, {base64: true});
+   zip.add("Xmas.txt", "Ho ho ho !", {date : new Date("December 25, 2007 00:00:01")});
    zip.remove("tempfile");
 
    base64zip = zip.generate();

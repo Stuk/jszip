@@ -63,6 +63,28 @@ function similar(actual, expected, mistakes)
 
    });
 
+   test("Zip text file with date", function()
+   {
+      var expected = refZips["text"];
+
+      var zip = new JSZip();
+	  zip.add("Hello.txt", "Hello World\n", {date : new Date("July 17, 2009 14:36:57")});
+      content = zip.generate();
+
+      var actual = JSZipBase64.decode(content);
+
+      /*
+      Expected differing bytes:
+      2  version number
+      4  central dir version numbers
+      4  external file attributes
+
+      10 Total
+      */
+      ok(similar(actual, expected, 10) , "Generated ZIP matches reference ZIP");
+
+   });
+
 
    test("Zip image file", function()
    {
