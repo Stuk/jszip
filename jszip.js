@@ -26,7 +26,8 @@ function JSZip()
    // Default properties for a new file
    this.d = {
       base64: false,
-      dir: false
+      dir: false,
+      date: null
    };
 }
 
@@ -46,6 +47,26 @@ JSZip.prototype.add = function(name, data, o)
    {
       o[opt] = o[opt] || this.d[opt];
    }
+   
+   // date
+   // @see http://www.delorie.com/djgpp/doc/rbinter/it/52/13.html
+   // @see http://www.delorie.com/djgpp/doc/rbinter/it/65/16.html
+   // @see http://www.delorie.com/djgpp/doc/rbinter/it/66/16.html
+
+   o.date = o.date || new Date();
+   var dosTime, dosDate;
+
+   dosTime = o.date.getHours();
+   dosTime = dosTime << 6;
+   dosTime = dosTime | o.date.getMinutes();
+   dosTime = dosTime << 5;
+   dosTime = dosTime | o.date.getSeconds() / 2;
+
+   dosDate = o.date.getFullYear() - 1980;
+   dosDate = dosDate << 4;
+   dosDate = dosDate | (o.date.getMonth() + 1);
+   dosDate = dosDate << 5;
+   dosDate = dosDate | o.date.getDate();
 
    if (o.base64 === true)
    {
@@ -60,10 +81,10 @@ JSZip.prototype.add = function(name, data, o)
    header += "\x00\x00";
    // compression method
    header += "\x00\x00";
-   // last mod file time TODO
-   header += "\x00\x00";
-   // last mod file date TODO
-   header += "\x00\x00";
+   // last mod file time
+   header += this.decToHex(dosTime, 2);
+   // last mod file date
+   header += this.decToHex(dosDate, 2);
    // crc-32
    header += this.decToHex(this.crc32(data), 4);
    // compressed size

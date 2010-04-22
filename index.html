@@ -229,6 +229,8 @@ zip = new JSZip();</pre>
          <li><code>base64</code>, boolean. Set to <code>true</code> if the data
          is base64 encoded. For example image data from a <code>&lt;canvas&gt;</code> element.
          Plain text and HTML do not need this option.</li>
+         <li><code>date</code>, Date. Use it to specify the last mod date.
+         If not setted, the current date is used.</li>
       </ul>
       <pre class="example">
 zip.add("Hello.txt", "Hello World\n");
@@ -307,9 +309,8 @@ for (var c = 0; c &lt; content.length; c++)
       <ul>
        <li>Set correct version needed to extract</li>
        <li>Set correct version made by</li>
-       <li>Set modification date/times (convert from <code>Date()</code> to hex)</li>
        <li>Set internal and external file attributes in central directory</li>
-       <li>Allow setting of modification dates/attributes/other info in <code>add()</code> options object</li>
+       <li>Allow setting of attributes/other info in <code>add()</code> options object</li>
        <li>Look into using <a href="http://www.phpied.com/mhtml-when-you-need-data-uris-in-ie7-and-under/">MHTML</a> for IE</li>
       </ul>
 
