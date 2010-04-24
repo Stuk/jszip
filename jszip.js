@@ -17,8 +17,10 @@ Usage:
 
 **/
 
-function JSZip()
+function JSZip(compression)
 {
+   // default : no compression
+   this.compression = (compression || "STORE").toUpperCase();
    this.files = [];
 
    // Where we are in the hierarchy
@@ -30,6 +32,10 @@ function JSZip()
       dir: false,
       date: null
    };
+
+   if (!JSZip.compressions[this.compression]) {
+      throw compression + " is not a valid compression method !";
+   }
 }
 
 /**
@@ -74,6 +80,9 @@ JSZip.prototype.add = function(name, data, o)
       data = JSZipBase64.decode(data);
    }
 
+   var compression    = JSZip.compressions[this.compression];
+   var compressedData = compression.compress(data);
+
    var header = "";
 
    // version needed to extract
@@ -81,7 +90,7 @@ JSZip.prototype.add = function(name, data, o)
    // general purpose bit flag
    header += "\x00\x00";
    // compression method
-   header += "\x00\x00";
+   header += compression.magic;
    // last mod file time
    header += this.decToHex(dosTime, 2);
    // last mod file date
@@ -89,7 +98,7 @@ JSZip.prototype.add = function(name, data, o)
    // crc-32
    header += this.decToHex(this.crc32(data), 4);
    // compressed size
-   header += this.decToHex(data.length, 4);
+   header += this.decToHex(compressedData.length, 4);
    // uncompressed size
    header += this.decToHex(data.length, 4);
    // file name length
@@ -99,7 +108,7 @@ JSZip.prototype.add = function(name, data, o)
 
    // file name
 
-   this.files[name] = {header: header, data: data, dir: o.dir};
+   this.files[name] = {header: header, data: compressedData, dir: o.dir};
 
    return this;
 };
@@ -266,6 +275,26 @@ JSZip.prototype.generate = function(asBytes)
    var zip = fileData + dirData + dirEnd;
    return (asBytes) ? zip : JSZipBase64.encode(zip);
 
+};
+
+/*
+ * Compression methods
+ * This object is filled in as follow : 
+ * name : {
+ *    magic // the 2 bytes indentifying the compression method
+ *    compress // function, take the uncompressed content and return it compressed.
+ * }
+ * 
+ * STORE is the default compression method, so it's included in this file.
+ * Other methods should go to separated files : the user wants modularity.
+ */
+JSZip.compressions = {
+   "STORE" : {
+      magic : "\x00\x00",
+      compress : function (content) {
+         return content; // no compression
+      }
+   }
 };
 
 // Utility functions

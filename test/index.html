@@ -4,6 +4,7 @@
 <title>JavaScript Zip Testing</title>
 <link media="screen" href="qunit.css" type="text/css" rel="stylesheet">
 <script type="text/javascript" src="../jszip.js"></script>
+<script type="text/javascript" src="../jszip-deflate.js"></script>
 <script type="text/javascript" src="qunit.js"></script>
 <script type="text/javascript">
 
@@ -27,6 +28,8 @@ function similar(actual, expected, mistakes)
    refZips["image"]=JSZipBase64.decode("UEsDBAoDAAAAABVv6jo8P+uKKQAAACkAAAAJAAAAc21pbGUuZ2lmR0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADtQSwECFAMKAwAAAAAVb+o6PD/riikAAAApAAAACQAAAAAAAAAAACCApIEAAAAAc21pbGUuZ2lmUEsFBgAAAAABAAEANwAAAFAAAAAAAA==");
    refZips["folder"]=JSZipBase64.decode("UEsDBAoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAZm9sZGVyL1BLAQIUAwoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAAAAAAAAAEIDtQQAAAABmb2xkZXIvUEsFBgAAAAABAAEANQAAACUAAAAAAA==");
    refZips["all"]=JSZipBase64.decode("UEsDBAoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsDBAoDAAAAALFs8ToAAAAAAAAAAAAAAAAHAAAAaW1hZ2VzL1BLAwQKAwAAAAAVZ+o6PD/riikAAAApAAAAEAAAAGltYWdlcy9zbWlsZS5naWZHSUY4N2EFAAUAgAIAAAAA/94ALAAAAAAFAAUAAAIIjA+RZ6sKUgEAO1BLAQIUAwoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAAAAAAAAAAIICkgQAAAABIZWxsby50eHRQSwECFAMKAwAAAACxbPE6AAAAAAAAAAAAAAAABwAAAAAAAAAAABCA7UEzAAAAaW1hZ2VzL1BLAQIUAwoDAAAAABVn6jo8P+uKKQAAACkAAAAQAAAAAAAAAAAAIICkgVgAAABpbWFnZXMvc21pbGUuZ2lmUEsFBgAAAAADAAMAqgAAAK8AAAAAAA==");
+   refZips["STORE-text"]=JSZipBase64.decode("UEsDBAoAAAAAANRxmDyTTw7hXgAAAF4AAAAJAAAASGVsbG8udHh0VGhpcyBhIGxvb29uZyBmaWxlIDogd2UgbmVlZCB0byBzZWUgdGhlIGRpZmZlcmVuY2UgYmV0d2VlbiB0aGUgZGlmZmVyZW50IGNvbXByZXNzaW9uIG1ldGhvZHMuClBLAQIeAwoAAAAAANRxmDyTTw7hXgAAAF4AAAAJAAAAAAAAAAAAAACkgQAAAABIZWxsby50eHRQSwUGAAAAAAEAAQA3AAAAhQAAAAAA");
+   refZips["DEFLATE-text"]=JSZipBase64.decode("UEsDBBQAAAAIANRxmDyTTw7hSQAAAF4AAAAJAAAASGVsbG8udHh0VcixDYAwDATAnil+AgZgDhaA+EMsJTaKLWV9aq68s2ngQnd3e1C1EwcWYaQgHUEiGyFaKyetEDdzkfbrRPHxTkaoGwazucS+fVBLAQIeAxQAAAAIANRxmDyTTw7hSQAAAF4AAAAJAAAAAAAAAAEAAACkgQAAAABIZWxsby50eHRQSwUGAAAAAAEAAQA3AAAAcAAAAAAA");
 
    test("JSZip", function(){
       ok(JSZip, "JSZip exists");
@@ -216,6 +219,49 @@ function similar(actual, expected, mistakes)
       var actual = content;
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
+
+   test("STORE is the default method", function()
+   {
+      var expected = refZips["text"];
+
+      var zip = new JSZip("STORE");
+      zip.add("Hello.txt", "Hello World\n");
+      content = zip.generate();
+
+      actual = JSZipBase64.decode(content);
+      
+	  // no difference with the "Zip text file" test.
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+
+   test("STORE doesn't compress", function()
+   {
+      var expected = refZips["STORE-text"]; // zip -0 -X store.zip Hello.txt
+
+      var zip = new JSZip("STORE");
+      zip.add("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
+      content = zip.generate();
+
+      actual = JSZipBase64.decode(content);
+      
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+
+
+   test("DEFLATE compress", function()
+   {
+      var expected = refZips["DEFLATE-text"]; // zip -6 -X deflate.zip Hello.txt
+
+      var zip = new JSZip("DEFLATE");
+      zip.add("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
+      content = zip.generate();
+
+      actual = JSZipBase64.decode(content);
+      
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+
+
 
 </script>
 </head>

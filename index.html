@@ -103,6 +103,7 @@ pre.example
 #status { color: #28AA31; }
 </style>
 <script type="text/javascript" src="jszip.js"></script>
+<script type="text/javascript" src="jszip-deflate.js"></script>
 <script type="text/javascript">
 imgData = "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=";
 
@@ -217,10 +218,17 @@ Downloadify.create('downloadify',{
 
       <h2 style="margin-top: 2em;">Documentation</h2>
 
-      <h4>new JSZip()</h4>
-      <p>The constructor</p>
+      <h4>new JSZip([compressionMethod])</h4>
+	  <p>The constructor</p>
+	  <p><code>compressionMethod</code>, string. The compression method. Available methods :
+	  <ul>
+	     <li><code>"STORE"</code> no compression, the default.</li>
+		 <li><code>"DEFLATE"</code> default zip compression, need the file jszip-deflate.js</li>
+	  </ul>
+	  </p>
       <pre class="example">
-zip = new JSZip();</pre>
+zip = new JSZip(); // same as new JSZip("STORE");
+zip = new JSZip("DEFLATE");</pre>
 
       <h4>add(name, data [,options])</h4>
       <p>Add a file to the zip file. Supports chaining.</p>
