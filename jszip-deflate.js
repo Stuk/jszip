@@ -1,14 +1,12 @@
-/**
-
-JSZip - A Javascript class for generating Zip files
-<http://jszip.stuartk.co.uk>
-
-This file add the DEFLATE compression method.
-
-(c) 2009 Stuart Knightley <stuart [at] stuartk.co.uk>
-Licenced under the GPLv3 and the MIT licences
-
-**/
+/*
+ * Port of a script by Masanao Izumo.
+ *
+ * Only changes : wrap all the variables in a function and add the 
+ * main function to JSZip (DEFLATE compression method).
+ * Everything else was written by M. Izumo.
+ *
+ * Original code can be found here: http://www.onicos.com/staff/iz/amuse/javascript/expert/inflate.txt
+ */
 
 if(!JSZip)
 {
@@ -1680,6 +1678,9 @@ var zip_deflate = function(str, level) {
     return aout.join("");
 }
 
+//
+// end of the script of Masanao Izumo.
+//
 
 // we add the compression method for JSZip
 JSZip.compressions["DEFLATE"] = {
