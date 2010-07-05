@@ -229,8 +229,8 @@ Downloadify.create('downloadify',{
       </ul>
       </p>
       <pre class="example">
-zip = new JSZip(); // same as new JSZip("STORE");
-zip = new JSZip("DEFLATE");</pre>
+var zip = new JSZip(); // same as new JSZip("STORE");
+var zip = new JSZip("DEFLATE");</pre>
 
       <h4>add(name, data [,options])</h4>
       <p>Add a file to the zip file. Supports chaining.</p>
@@ -239,16 +239,21 @@ zip = new JSZip("DEFLATE");</pre>
          <li><code>base64</code>, boolean. Set to <code>true</code> if the data
          is base64 encoded. For example image data from a <code>&lt;canvas&gt;</code> element.
          Plain text and HTML do not need this option.</li>
+         <li><code>binary</code>, boolean. Defaults to <code>true</code> if the data
+         is base64 encoded, <code>false</code> otherwise. If set to false then
+         UTF-8 characters will be encoded.</li>
          <li><code>date</code>, Date. Use it to specify the last modification date.
          If not set the current date is used.</li>
       </ul>
       <pre class="example">
 zip.add("Hello.txt", "Hello World\n");
 zip.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
+zip.add("magic.txt", "U2VjcmV0IGNvZGU=", {base64: true, binary: false});
 zip.add("Xmas.txt", "Ho ho ho !", {date : new Date("December 25, 2007 00:00:01")});
+
 zip.add("animals.txt", "dog,platypus\n").add("people.txt", "james,sebastian\n");</pre>
       <p>
-      Result: <code>Hello.txt, smile.gif, Xmas.txt, animals.txt, people.txt</code>
+      Result: <code>Hello.txt, smile.gif, magic.txt, Xmas.txt, animals.txt, people.txt</code>
       </p>
 
       <h4>folder(name)</h4>
@@ -326,12 +331,12 @@ for (var c = 0; c &lt; content.length; c++)
       </ul>
 
       <h3>Who?</h3>
-      <p><a href="http://stuartk.co.uk">Stuart Knightley</a></p>
-      <em>with contributions from</em>
+      <p><a href="http://stuartk.co.uk">Stuart Knightley</a>, with contributions from:</p>
       <ul>
        <li><a href="http://www.picurl.org/blog/author/franz/">Franz Buchinger</a></li>
        <li><a href="http://www.aadsm.net/">António Afonso</a></li>
        <li><a href="http://github.com/dduponchel">David Duponchel</a></li>
+       <li><a href="http://yiminghe.javaeye.com">yiminghe</a></li>
       </ul>
 
       <h3>Thanks and comments</h3>

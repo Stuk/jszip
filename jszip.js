@@ -29,6 +29,7 @@ function JSZip(compression)
    // Default properties for a new file
    this.d = {
       base64: false,
+      binary: false,
       dir: false,
       date: null
    };
@@ -49,6 +50,8 @@ JSZip.prototype.add = function(name, data, o)
 {
    o = o || {};
    name = this.root+name;
+
+   if (o.base64 === true && o.binary == null) o.binary = true;
 
    for (var opt in this.d)
    {
@@ -75,10 +78,10 @@ JSZip.prototype.add = function(name, data, o)
    dosDate = dosDate << 5;
    dosDate = dosDate | o.date.getDate();
 
-   if (o.base64 === true)
-   {
-      data = JSZipBase64.decode(data);
-   }
+   if (o.base64 === true) data = JSZipBase64.decode(data);
+   // decode UTF-8 strings if we are dealing with text data
+   if(o.binary === false) data = this.utf8encode(data);
+
 
    var compression    = JSZip.compressions[this.compression];
    var compressedData = compression.compress(data);
@@ -352,6 +355,16 @@ JSZip.prototype.clone = function()
    return newObj;
 };
 
+JSZip.prototype.utf8encode = function(input)
+{
+   input = encodeURIComponent(input);
+   input = input.replace(/%.{2,2}/g, function(m) {
+      var hex = m.substring(1);
+      return String.fromCharCode(parseInt(hex,16));
+   });
+   return input;
+};
+
 /**
 *
 *  Base64 encode / decode
@@ -360,75 +373,76 @@ JSZip.prototype.clone = function()
 *  Hacked so that it doesn't utf8 en/decode everything
 **/
 
-var JSZipBase64 = {
-
+var JSZipBase64 = function() {
    // private property
-   _keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+   var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-   // public method for encoding
-   encode : function (input) {
-      var output = "";
-      var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-      var i = 0;
+   return {
+      // public method for encoding
+      encode : function(input, utf8) {
+         var output = "";
+         var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+         var i = 0;
 
-      while (i < input.length) {
+         while (i < input.length) {
 
-         chr1 = input.charCodeAt(i++);
-         chr2 = input.charCodeAt(i++);
-         chr3 = input.charCodeAt(i++);
+            chr1 = input.charCodeAt(i++);
+            chr2 = input.charCodeAt(i++);
+            chr3 = input.charCodeAt(i++);
 
-         enc1 = chr1 >> 2;
-         enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-         enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-         enc4 = chr3 & 63;
+            enc1 = chr1 >> 2;
+            enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+            enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+            enc4 = chr3 & 63;
 
-         if (isNaN(chr2)) {
-            enc3 = enc4 = 64;
-         } else if (isNaN(chr3)) {
-            enc4 = 64;
+            if (isNaN(chr2)) {
+               enc3 = enc4 = 64;
+            } else if (isNaN(chr3)) {
+               enc4 = 64;
+            }
+
+            output = output +
+            _keyStr.charAt(enc1) + _keyStr.charAt(enc2) +
+            _keyStr.charAt(enc3) + _keyStr.charAt(enc4);
+
          }
 
-         output = output +
-         this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
-         this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
+         return output;
+      },
+
+      // public method for decoding
+      decode : function(input, utf8) {
+         var output = "";
+         var chr1, chr2, chr3;
+         var enc1, enc2, enc3, enc4;
+         var i = 0;
+
+         input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+         while (i < input.length) {
+
+            enc1 = _keyStr.indexOf(input.charAt(i++));
+            enc2 = _keyStr.indexOf(input.charAt(i++));
+            enc3 = _keyStr.indexOf(input.charAt(i++));
+            enc4 = _keyStr.indexOf(input.charAt(i++));
+
+            chr1 = (enc1 << 2) | (enc2 >> 4);
+            chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+            chr3 = ((enc3 & 3) << 6) | enc4;
+
+            output = output + String.fromCharCode(chr1);
+
+            if (enc3 != 64) {
+               output = output + String.fromCharCode(chr2);
+            }
+            if (enc4 != 64) {
+               output = output + String.fromCharCode(chr3);
+            }
+
+         }
+
+         return output;
 
       }
-
-      return output;
-   },
-
-   // public method for decoding
-   decode : function (input) {
-      var output = "";
-      var chr1, chr2, chr3;
-      var enc1, enc2, enc3, enc4;
-      var i = 0;
-
-      input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-
-      while (i < input.length) {
-
-         enc1 = this._keyStr.indexOf(input.charAt(i++));
-         enc2 = this._keyStr.indexOf(input.charAt(i++));
-         enc3 = this._keyStr.indexOf(input.charAt(i++));
-         enc4 = this._keyStr.indexOf(input.charAt(i++));
-
-         chr1 = (enc1 << 2) | (enc2 >> 4);
-         chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-         chr3 = ((enc3 & 3) << 6) | enc4;
-
-         output = output + String.fromCharCode(chr1);
-
-         if (enc3 != 64) {
-            output = output + String.fromCharCode(chr2);
-         }
-         if (enc4 != 64) {
-            output = output + String.fromCharCode(chr3);
-         }
-
-      }
-
-      return output;
-
-   }
-};
+   };
+}();

@@ -25,6 +25,7 @@ function similar(actual, expected, mistakes)
 
    var refZips = [];
    refZips["text"]=JSZipBase64.decode("UEsDBAoDAAAAAJx08Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsBAhQDCgMAAAAAnHTxOuPllbAMAAAADAAAAAkAAAAAAAAAAAAggKSBAAAAAEhlbGxvLnR4dFBLBQYAAAAAAQABADcAAAAzAAAAAAA=");
+   refZips["utf8"]=JSZipBase64.decode("UEsDBAoAAAAAAJp95Tx8M2u8CgAAAAoAAAAKAAAAYW1vdW50LnR4dMOi4oCawqwxNQpQSwECFAAKAAAAAACafeU8fDNrvAoAAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAYW1vdW50LnR4dFBLBQYAAAAAAQABADgAAAAyAAAAAAA=");
    refZips["image"]=JSZipBase64.decode("UEsDBAoDAAAAABVv6jo8P+uKKQAAACkAAAAJAAAAc21pbGUuZ2lmR0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADtQSwECFAMKAwAAAAAVb+o6PD/riikAAAApAAAACQAAAAAAAAAAACCApIEAAAAAc21pbGUuZ2lmUEsFBgAAAAABAAEANwAAAFAAAAAAAA==");
    refZips["folder"]=JSZipBase64.decode("UEsDBAoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAZm9sZGVyL1BLAQIUAwoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAAAAAAAAAEIDtQQAAAABmb2xkZXIvUEsFBgAAAAABAAEANQAAACUAAAAAAA==");
    refZips["all"]=JSZipBase64.decode("UEsDBAoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsDBAoDAAAAALFs8ToAAAAAAAAAAAAAAAAHAAAAaW1hZ2VzL1BLAwQKAwAAAAAVZ+o6PD/riikAAAApAAAAEAAAAGltYWdlcy9zbWlsZS5naWZHSUY4N2EFAAUAgAIAAAAA/94ALAAAAAAFAAUAAAIIjA+RZ6sKUgEAO1BLAQIUAwoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAAAAAAAAAAIICkgQAAAABIZWxsby50eHRQSwECFAMKAwAAAACxbPE6AAAAAAAAAAAAAAAABwAAAAAAAAAAABCA7UEzAAAAaW1hZ2VzL1BLAQIUAwoDAAAAABVn6jo8P+uKKQAAACkAAAAQAAAAAAAAAAAAIICkgVgAAABpbWFnZXMvc21pbGUuZ2lmUEsFBgAAAAADAAMAqgAAAK8AAAAAAA==");
@@ -62,6 +63,20 @@ function similar(actual, expected, mistakes)
 
       18 Total
       */
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+
+   });
+
+   test("Zip text file with UTF-8 characters", function()
+   {
+      var expected = refZips["utf8"];
+
+      var zip = new JSZip();
+      zip.add("amount.txt", "€15\n");
+      content = zip.generate();
+
+      var actual = JSZipBase64.decode(content);
+
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
    });
@@ -229,7 +244,7 @@ function similar(actual, expected, mistakes)
       content = zip.generate();
 
       actual = JSZipBase64.decode(content);
-      
+
 	  // no difference with the "Zip text file" test.
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
@@ -243,7 +258,7 @@ function similar(actual, expected, mistakes)
       content = zip.generate();
 
       actual = JSZipBase64.decode(content);
-      
+
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
@@ -257,7 +272,7 @@ function similar(actual, expected, mistakes)
       content = zip.generate();
 
       actual = JSZipBase64.decode(content);
-      
+
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
