@@ -54,7 +54,7 @@ JSZip.prototype.add = function(name, data, o)
    {
       o[opt] = o[opt] || this.d[opt];
    }
-   
+
    // date
    // @see http://www.delorie.com/djgpp/doc/rbinter/it/52/13.html
    // @see http://www.delorie.com/djgpp/doc/rbinter/it/65/16.html
@@ -222,7 +222,7 @@ JSZip.prototype.generate = function(asBytes)
    for (var name in this.files)
    {
       if( !this.files.hasOwnProperty(name) ) { continue; }
-       
+
       var fileRecord = "", dirRecord = "";
       fileRecord = "\x50\x4b\x03\x04" + this.files[name].header + name + this.files[name].data;
 
@@ -279,12 +279,12 @@ JSZip.prototype.generate = function(asBytes)
 
 /*
  * Compression methods
- * This object is filled in as follow : 
+ * This object is filled in as follow :
  * name : {
  *    magic // the 2 bytes indentifying the compression method
  *    compress // function, take the uncompressed content and return it compressed.
  * }
- * 
+ *
  * STORE is the default compression method, so it's included in this file.
  * Other methods should go to separated files : the user wants modularity.
  */
@@ -302,15 +302,10 @@ JSZip.compressions = {
 JSZip.prototype.decToHex = function(dec, bytes)
 {
    var hex = "";
-
-   for (var i = 0; i<bytes*2; i+=2)
-   {
-      var t = (dec >>> (i*4)) & 0xFF;
-      t = t.toString(16);
-      if (t.length != 2) t = "0"+t;
-      hex += eval("'\\x"+t+"'");
-   }
-
+	for(var i=0;i<bytes;i++) {
+      hex += String.fromCharCode(dec&0xff);
+      dec=dec>>>8;
+	}
    return hex;
 };
 
