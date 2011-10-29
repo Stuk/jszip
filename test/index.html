@@ -4,7 +4,9 @@
 <title>JavaScript Zip Testing</title>
 <link media="screen" href="qunit.css" type="text/css" rel="stylesheet">
 <script type="text/javascript" src="../jszip.js"></script>
+<script type="text/javascript" src="../jszip-load.js"></script>
 <script type="text/javascript" src="../jszip-deflate.js"></script>
+<script type="text/javascript" src="../jszip-inflate.js"></script>
 <script type="text/javascript" src="qunit.js"></script>
 <script type="text/javascript">
 
@@ -21,6 +23,13 @@ function similar(actual, expected, mistakes)
       return false;
    else
       return true;
+}
+
+function reload(bytesStream)
+{
+  var content = new JSZip().load(bytesStream, true).generate();
+  var actual = JSZipBase64.decode(content);
+  return actual;
 }
 
    var refZips = [];
@@ -64,7 +73,7 @@ function similar(actual, expected, mistakes)
       18 Total
       */
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-
+      equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
    test("Zip text file with UTF-8 characters", function()
@@ -78,7 +87,7 @@ function similar(actual, expected, mistakes)
       var actual = JSZipBase64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-
+      equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
    test("Zip text file with date", function()
@@ -100,7 +109,7 @@ function similar(actual, expected, mistakes)
       10 Total
       */
       ok(similar(actual, expected, 10) , "Generated ZIP matches reference ZIP");
-
+      equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
 
@@ -115,7 +124,7 @@ function similar(actual, expected, mistakes)
       actual = JSZipBase64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-
+      equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
    test("Zip empty folder", function()
@@ -129,7 +138,7 @@ function similar(actual, expected, mistakes)
       actual = JSZipBase64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-
+      equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
    test("Zip text, folder and image", function()
@@ -157,6 +166,7 @@ function similar(actual, expected, mistakes)
 
       //console.log("data:application/zip;base64,"+content);
       ok(similar(actual, expected, 54) , "Generated ZIP matches reference ZIP");
+      equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
    test("Finding a file", function()

@@ -39,6 +39,24 @@ function JSZip(compression)
    }
 }
 
+JSZip.signature = {
+  LOCAL_FILE_HEADER : "\x50\x4b\x03\x04",
+  CENTRAL_FILE_HEADER : "\x50\x4b\x01\x02",
+  CENTRAL_DIRECTORY_END : "\x50\x4b\x05\x06"
+};
+
+/**
+ * Load a zip stream into the current JSZip object.
+ * @param stream  The stream to load
+ * @param options Options for loading the stream.
+ *  options.base64 : is the stream in base64 ? default : false
+ * @return this JSZip object
+ */
+JSZip.prototype.load = function (stream, options)
+{
+  throw new Error("Load method is not defined. Is the file jszip-load.js included ?");
+};
+
 /**
  * Add a file to the zip file
  * @param   name  The name of the file
@@ -227,9 +245,9 @@ JSZip.prototype.generate = function(asBytes)
       if( !this.files.hasOwnProperty(name) ) { continue; }
 
       var fileRecord = "", dirRecord = "";
-      fileRecord = "\x50\x4b\x03\x04" + this.files[name].header + name + this.files[name].data;
+      fileRecord = JSZip.signature.LOCAL_FILE_HEADER + this.files[name].header + name + this.files[name].data;
 
-      dirRecord = "\x50\x4b\x01\x02" +
+      dirRecord = JSZip.signature.CENTRAL_FILE_HEADER +
       // version made by (00: DOS)
       "\x14\x00" +
       // file header (common to file and central directory)
@@ -259,7 +277,7 @@ JSZip.prototype.generate = function(asBytes)
    var dirEnd = "";
 
    // end of central dir signature
-   dirEnd = "\x50\x4b\x05\x06" +
+   dirEnd = JSZip.signature.CENTRAL_DIRECTORY_END +
    // number of this disk
    "\x00\x00" +
    // number of the disk with the start of the central directory
@@ -296,6 +314,9 @@ JSZip.compressions = {
       magic : "\x00\x00",
       compress : function (content) {
          return content; // no compression
+      },
+      uncompress : function (content) {
+        return content; // no compression
       }
    }
 };

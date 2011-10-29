@@ -5,7 +5,7 @@
  * main function to JSZip (DEFLATE compression method).
  * Everything else was written by M. Izumo.
  *
- * Original code can be found here: http://www.onicos.com/staff/iz/amuse/javascript/expert/inflate.txt
+ * Original code can be found here: http://www.onicos.com/staff/iz/amuse/javascript/expert/deflate.txt
  */
 
 if(!JSZip)
@@ -1683,11 +1683,13 @@ var zip_deflate = function(str, level) {
 //
 
 // we add the compression method for JSZip
-JSZip.compressions["DEFLATE"] = {
-   magic : "\x08\x00",
-   compress : function (content) {
-	  return zip_deflate(content);
-   }
+if(!JSZip.compressions["DEFLATE"]) {
+  JSZip.compressions["DEFLATE"] = {
+    magic : "\x08\x00",
+    compress : zip_deflate
+  }
+} else {
+  JSZip.compressions["DEFLATE"].compress = zip_deflate;
 }
 
 })();
