@@ -161,7 +161,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(zip, "Constructor works");
    });
 
-   module("Essential");
+   module("Essential"); // {{{
 
    testZipFile("Zip text file !", "ref/text.zip", function(expected)
    {
@@ -367,8 +367,9 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(root.folder(/^subsub1/).length, 1, "relative folder path is used");
       equals(root.folder(/root/).length, 0, "parent folder is not matched");
    });
+   // }}} module Essential
 
-   module("More advanced");
+   module("More advanced"); // {{{
 
    testZipFile("Delete file", "ref/text.zip", function(expected)
    {
@@ -563,11 +564,13 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
+   // }}} More advanced
 
-   module("Load file, not supported features");
+   module("Load file, not supported features"); // {{{
 
    // zip -0 -X -e encrypted.zip Hello.txt
-   testZipFile("basic encryption", "ref/encrypted.zip", function(file) {
+   testZipFile("basic encryption", "ref/encrypted.zip", function(file)
+   {
       try
       {
          var zip = new JSZip(file);
@@ -578,10 +581,12 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
          equal(e.message, "Encrypted zip are not supported", "the error message is useful");
       }
    });
+   // }}} Load file, not supported features
 
-   module("Load file, corrupted zip");
+   module("Load file, corrupted zip"); // {{{
 
-   testZipFile("bad compression method", "ref/invalid/compression.zip", function(file) {
+   testZipFile("bad compression method", "ref/invalid/compression.zip", function(file)
+   {
       try
       {
          var zip = new JSZip(file);
@@ -593,7 +598,8 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       }
    });
 
-   testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file) {
+   testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file)
+   {
       try
       {
          var zip = new JSZip(file);
@@ -604,39 +610,59 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
          ok(e.message.match("Corrupted zip"), "the error message is useful");
       }
    });
+   // }}} Load file, corrupted zip
 
+   module("Load file"); // {{{
 
-   module("Load file");
+   // zip -6 -X deflate.zip Hello.txt
+   testZipFile("zip with DEFLATE", "ref/deflate.zip", function(file)
+   {
+      var zip = new JSZip(file);
+      equal(zip.file("Hello.txt").data, "This a looong file : we need to see the difference between the different compression methods.\n", "the zip was correctly read.");
+   });
 
    // zip -0 -z -c archive_comment.zip Hello.txt
-   testZipFile("zip with comment", "ref/archive_comment.zip", function(file) {
+   testZipFile("zip with comment", "ref/archive_comment.zip", function(file)
+   {
       var zip = new JSZip(file);
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
 
    // zip -0 extra_attributes.zip Hello.txt
-   testZipFile("zip with extra attributes", "ref/extra_attributes.zip", function(file) {
+   testZipFile("zip with extra attributes", "ref/extra_attributes.zip", function(file)
+   {
       var zip = new JSZip(file);
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
 
+   // when zip doesn't know the size of the stream, it will be cautious and use
+   // the ZIP64 feature, just in case.
+   // cat file.txt|zip -X -0 > zip64.zip
+   testZipFile("zip 64", "ref/zip64.zip", function(file)
+   {
+      var zip = new JSZip(file);
+      equal(zip.file("-").data, "Hello World\n", "the zip was correctly read.");
+   });
+
    // jar produces zip with data descriptors
-   // jar c Hello.txt > data_descriptor.zip
-   testZipFile("zip with data descriptor", "ref/data_descriptor.zip", function(file) {
+   // jar c0Mvf data_descriptor.zip Hello.txt
+   testZipFile("zip with data descriptor", "ref/data_descriptor.zip", function(file)
+   {
       var zip = new JSZip(file);
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
 
    // zip -0 -X zip_within_zip.zip Hello.txt && zip -0 -X nested.zip Hello.txt zip_within_zip.zip
-   testZipFile("nested zip", "ref/nested.zip", function(file) {
+   testZipFile("nested zip", "ref/nested.zip", function(file)
+   {
       var zip = new JSZip(file);
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
-      console.log(zip);
       var nested = new JSZip(zip.file("zip_within_zip.zip").data);
       equal(nested.file("Hello.txt").data, "Hello World\n", "the inner zip was correctly read.");
    });
+   // }}} Load file
 
-   module("Load complex files");
+   module("Load complex files"); // {{{
 
    // http://www.feedbooks.com/book/8/the-metamorphosis
    testZipFile("an epub is fine too", "ref/complex_files/Franz Kafka - The Metamorphosis.epub", function(file) {
@@ -652,6 +678,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(zip.file("[Content_Types].xml").data.indexOf("application/vnd.ms-package.xps-fixeddocument+xml") !== -1, "the zip was correctly read.");
    });
 
+   // }}} Load complex files
 </script>
 </head>
 <body>
@@ -662,4 +689,5 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    <ol id="qunit-tests"></ol>
 </body>
 </html>
-<!-- vim: set shiftwidth=3 softtabstop=3: -->
+<!-- enforcing Stuk's coding style -->
+<!-- vim: set shiftwidth=3 softtabstop=3 foldmethod=marker: -->
