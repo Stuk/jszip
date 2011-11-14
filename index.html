@@ -197,7 +197,7 @@ location.href="data:application/zip;base64,"+content;
       <h3>Filename problems</h3>
 	  <p>The biggest issue with JSZip is that the filenames are very awkward, Firefox generates filenames such as <code>a5sZQRsx.zip.part</code> (see bugs <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=367231">367231</a> and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=532230">532230</a>), and Safari isn't much better with just <code>Unknown</code>. Sadly there is no pure Javascript solution to this. However...</p>
 
-      <h4>Solution-ish: <a href="http://www.downloadify.info/">Downloadify</a></h4>
+      <h4>Solution-ish: <a href="https://github.com/dcneiner/downloadify">Downloadify</a></h4>
       <p>Downloadify uses a small Flash SWF to download files to a user's computer with a filename that you can choose. Doug Neiner has added the <code>dataType</code> option to allow you to pass a zip for downloading. Follow the <a href="http://downloadify.info/downloadify/test.html">Downloadify demo</a> with the following changes:</p>
       <pre class="example">
 zip = new JSZip();
