@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>JavaScript Zip Testing</title>
 <link media="screen" href="qunit.css" type="text/css" rel="stylesheet">
 
@@ -213,13 +214,23 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
+   // zip -X -0 utf8.zip amount.txt
    testZipFile("Zip text file with UTF-8 characters", "ref/utf8.zip", function(expected)
    {
       var zip = new JSZip();
       zip.file("amount.txt", "€15\n");
-      var content = zip.generate();
+      var actual = zip.generate({base64:false});
 
-      var actual = JSZipBase64.decode(content);
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+      equals(reload(actual), actual, "Generated ZIP can be parsed");
+   });
+
+   // zip -X -0 utf8_in_name.zip €15.txt
+   testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(expected)
+   {
+      var zip = new JSZip();
+      zip.file("€15.txt", "€15\n");
+      var actual = zip.generate({base64:false});
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       equals(reload(actual), actual, "Generated ZIP can be parsed");
@@ -690,6 +701,14 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
       var nested = new JSZip(zip.file("zip_within_zip.zip").data);
       equal(nested.file("Hello.txt").data, "Hello World\n", "the inner zip was correctly read.");
+   });
+
+   // zip -X -0 utf8_in_name.zip €15.txt
+   testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(file)
+   {
+      var zip = new JSZip(file);
+      ok(zip.file("€15.txt") !== null, "the utf8 file is here.");
+      equal(zip.file("€15.txt").asText(), "€15\n", "the utf8 content was correctly read.");
    });
    // }}} Load file
 

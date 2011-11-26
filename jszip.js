@@ -59,6 +59,39 @@ JSZip.defaults = {
 JSZip.prototype = (function ()
 {
    /**
+    * A simple object representing a file in the zip file.
+    * @constructor
+    * @param {string} name the name of the file
+    * @param {string} data the data
+    * @param {Object} options the options of the file
+    */
+   var ZipObject = function (name, data, options)
+   {
+      this.name = name;
+      this.data = data;
+      this.options = options;
+   };
+
+   ZipObject.prototype = {
+      /**
+       * Return the content as UTF8 string.
+       * @return {string} the UTF8 string.
+       */
+      asText : function ()
+      {
+         return this.options.binary ? JSZip.prototype.utf8decode(this.data) : this.data;
+      },
+      /**
+       * Returns the binary content.
+       * @return {string} the content as binary.
+       */
+      asBinary : function ()
+      {
+         return this.options.binary ? this.data : JSZip.prototype.utf8encode(this.data);
+      }
+   };
+
+   /**
     * Transform an integer into a string in hexadecimal.
     * @private
     * @param {number} dec the number to convert.
@@ -179,12 +212,13 @@ JSZip.prototype = (function ()
     * Do not create it now, as some parts are re-used later.
     * @private
     * @param {Object} file the file to use.
+    * @param {string} utfEncodedFileName the file name, utf8 encoded.
     * @param {string} compressionType the compression to use.
     * @return {Object} an object containing header and compressedData.
     */
-   var prepareLocalHeaderData = function(file, compressionType)
+   var prepareLocalHeaderData = function(file, utfEncodedFileName, compressionType)
    {
-      var name = file.name,
+      var name = utfEncodedFileName,
       data = file.data,
       o = file.options,
       dosTime, dosDate;
@@ -273,11 +307,7 @@ JSZip.prototype = (function ()
          {
             file = this.files[filename];
             // return a new object, don't let the user mess with our internal objects :)
-            fileClone = {
-               name:file.name,
-               data:file.data,
-               options:extend(file.options)
-            };
+            fileClone = new ZipObject(file.name, file.data, extend(file.options));
             relativePath = filename.slice(this.root.length, filename.length);
             if (filename.slice(0, this.root.length) === this.root // the file is in the current root
                 && search(relativePath, fileClone)) // and the file matches the function
@@ -417,10 +447,14 @@ JSZip.prototype = (function ()
          {
             if( !this.files.hasOwnProperty(name) ) { continue; }
 
+            var file = this.files[name];
+
+            var utfEncodedFileName = this.utf8encode(file.name);
+
             var fileRecord = "",
             dirRecord = "",
-            data = prepareLocalHeaderData.call(this, this.files[name], compression);
-            fileRecord = JSZip.signature.LOCAL_FILE_HEADER + data.header + name + data.compressedData;
+            data = prepareLocalHeaderData.call(this, file, utfEncodedFileName, compression);
+            fileRecord = JSZip.signature.LOCAL_FILE_HEADER + data.header + utfEncodedFileName + data.compressedData;
 
             dirRecord = JSZip.signature.CENTRAL_FILE_HEADER +
             // version made by (00: DOS)
@@ -438,7 +472,7 @@ JSZip.prototype = (function ()
             // relative offset of local header
             decToHex(fileOffset, 4) +
             // file name
-            name;
+            utfEncodedFileName;
 
             fileOffset += fileRecord.length;
 
@@ -514,14 +548,67 @@ JSZip.prototype = (function ()
          return newObj;
       },
 
-      utf8encode : function(input)
-      {
-         input = encodeURIComponent(input);
-         input = input.replace(/%.{2,2}/g, function(m) {
-            var hex = m.substring(1);
-            return String.fromCharCode(parseInt(hex,16));
-         });
-         return input;
+
+      /**
+       * http://www.webtoolkit.info/javascript-utf8.html
+       */
+      utf8encode : function (string) {
+         string = string.replace(/\r\n/g,"\n");
+         var utftext = "";
+
+         for (var n = 0; n < string.length; n++) {
+
+            var c = string.charCodeAt(n);
+
+            if (c < 128) {
+               utftext += String.fromCharCode(c);
+            }
+            else if((c > 127) && (c < 2048)) {
+               utftext += String.fromCharCode((c >> 6) | 192);
+               utftext += String.fromCharCode((c & 63) | 128);
+            }
+            else {
+               utftext += String.fromCharCode((c >> 12) | 224);
+               utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+               utftext += String.fromCharCode((c & 63) | 128);
+            }
+
+         }
+
+         return utftext;
+      },
+
+      /**
+       * http://www.webtoolkit.info/javascript-utf8.html
+       */
+      utf8decode : function (utftext) {
+         var string = "";
+         var i = 0;
+         var c = c1 = c2 = 0;
+
+         while ( i < utftext.length ) {
+
+            c = utftext.charCodeAt(i);
+
+            if (c < 128) {
+               string += String.fromCharCode(c);
+               i++;
+            }
+            else if((c > 191) && (c < 224)) {
+               c2 = utftext.charCodeAt(i+1);
+               string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+               i += 2;
+            }
+            else {
+               c2 = utftext.charCodeAt(i+1);
+               c3 = utftext.charCodeAt(i+2);
+               string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+               i += 3;
+            }
+
+         }
+
+         return string;
       }
    };
 })();

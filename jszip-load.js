@@ -160,7 +160,7 @@ Licenced under the GPLv3 and the MIT licences
             (dostime >> 5) & 0x3f, // minute
             (dostime & 0x1f) << 1); // second
       }
-   }
+   };
    // }}} end of StreamReader
 
    // class ZipEntry {{{
@@ -233,6 +233,7 @@ Licenced under the GPLv3 and the MIT licences
          this.readLocalPartHeader(reader);
 
          this.fileName = reader.readString(this.fileNameLength);
+         this.fileName = JSZip.prototype.utf8decode(this.fileName);
          this.readExtraFields(reader);
 
          if (!this.hasDataDescriptor())
@@ -304,6 +305,7 @@ Licenced under the GPLv3 and the MIT licences
          this.localHeaderOffset      = reader.readInt(4);
 
          this.fileName = reader.readString(this.fileNameLength);
+         this.fileName = JSZip.prototype.utf8decode(this.fileName);
          this.readExtraFields(reader);
          this.fileComment = reader.readString(this.fileCommentLength);
 
@@ -366,7 +368,7 @@ Licenced under the GPLv3 and the MIT licences
             this.parseZIP64ExtraField(reader);
          }
       }
-   }
+   };
    // }}} end of ZipEntry
 
    //  class ZipEntries {{{
@@ -536,7 +538,7 @@ Licenced under the GPLv3 and the MIT licences
          this.readCentralDir();
          this.readLocalFiles();
       }
-   }
+   };
    // }}} end of ZipEntries
 
    /**
@@ -568,7 +570,7 @@ Licenced under the GPLv3 and the MIT licences
       }
 
       return this;
-   }
+   };
 
 })();
 // enforcing Stuk's coding style
