@@ -3,43 +3,156 @@
 <head>
 <title>JavaScript Zip Testing</title>
 <link media="screen" href="qunit.css" type="text/css" rel="stylesheet">
+
+<!--
+Only used to avoid cross browser xhr madness.
+-->
+<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+
 <script type="text/javascript" src="../jszip.js"></script>
 <script type="text/javascript" src="../jszip-load.js"></script>
 <script type="text/javascript" src="../jszip-deflate.js"></script>
 <script type="text/javascript" src="../jszip-inflate.js"></script>
 <script type="text/javascript" src="qunit.js"></script>
+
+<!--
+Mandatory in IE 6, 7, 8 and 9.
+I REALLY hope that IE will support the mimetype override trick one day...
+Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-image-data-using-javascript-and-xmlhttprequest
+-->
+<!--[if IE]>
+<script type='text/vbscript'>
+   Function IEBinaryToArray_ByteStr(Binary)
+      IEBinaryToArray_ByteStr = CStr(Binary)
+   End Function
+   Function IEBinaryToArray_ByteStr_Last(Binary)
+      Dim lastIndex
+      lastIndex = LenB(Binary)
+      if lastIndex mod 2 Then
+         IEBinaryToArray_ByteStr_Last = Chr( AscB( MidB( Binary, lastIndex, 1 ) ) )
+      Else
+         IEBinaryToArray_ByteStr_Last = ""
+      End If
+   End Function
+</script>
+
+<script type="text/javascript">
+   // IE-specific logic here
+   // helper to convert from responseBody to a "responseText" like thing
+   window.getBinaryFromXHR = function (responseText, xhr) {
+      var binary = xhr.responseBody;
+      var byteMapping = {};
+      for ( var i = 0; i < 256; i++ ) {
+         for ( var j = 0; j < 256; j++ ) {
+            byteMapping[ String.fromCharCode( i + (j << 8) ) ] =
+               String.fromCharCode(i) + String.fromCharCode(j);
+         }
+      }
+      var rawBytes = IEBinaryToArray_ByteStr(binary);
+      var lastChr = IEBinaryToArray_ByteStr_Last(binary);
+      return rawBytes.replace(/[\s\S]/g, function( match ) {
+            return byteMapping[match];
+      }) + lastChr;
+   };
+</script>
+<![endif]-->
+<script type="text/javascript">
+   // just use the responseText when not in IE
+   // The transformation throws away high-order byte, as documented at :
+   // https://developer.mozilla.org/En/Using_XMLHttpRequest#Handling_binary_data
+   // Note : if you just want to give it to JSZip.load, you can skip this part
+   // (this transformation is already done there) and just return responseText.
+   window.getBinaryFromXHR = window.getBinaryFromXHR || function (responseText, xhr) {
+      var result = "";
+      for (var i = 0; i < responseText.length; i++) {
+         var code = responseText.charCodeAt(i) & 0xff;
+         result += String.fromCharCode(code);
+      }
+      return result;
+   };
+</script>
+
 <script type="text/javascript">
 
-function similar(actual, expected, mistakes)
-{
-   if (actual.length !== expected.length) mistakes--;
-
-   for (var i = 0; i < Math.min(actual.length, expected.length); i++)
+   function similar(actual, expected, mistakes)
    {
-      if (actual[i] !== expected[i]) mistakes--;
+      if (actual.length !== expected.length)
+      {
+         mistakes -= Math.abs((actual.length||0) - (expected.length||0));
+      }
+
+      for (var i = 0; i < Math.min(actual.length, expected.length); i++)
+      {
+         if (actual.charAt(i) !== expected.charAt(i)) {
+            mistakes--;
+         }
+      }
+
+      if (mistakes < 0)
+         return false;
+      else
+         return true;
    }
 
-   if (mistakes < 0)
-      return false;
-   else
-      return true;
-}
+   /**
+    * bytes -> JSZip -> bytes
+    */
+   function reload(bytesStream)
+   {
+     return new JSZip(bytesStream).generate({base64:false});
+   }
 
-function reload(bytesStream)
-{
-  var content = new JSZip(bytesStream).generate();
-  var actual = JSZipBase64.decode(content);
-  return actual;
-}
-
+   // cache for files
    var refZips = [];
-   refZips["text"]=JSZipBase64.decode("UEsDBAoDAAAAAJx08Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsBAhQDCgMAAAAAnHTxOuPllbAMAAAADAAAAAkAAAAAAAAAAAAggKSBAAAAAEhlbGxvLnR4dFBLBQYAAAAAAQABADcAAAAzAAAAAAA=");
-   refZips["utf8"]=JSZipBase64.decode("UEsDBAoAAAAAAJp95Tx8M2u8CgAAAAoAAAAKAAAAYW1vdW50LnR4dMOi4oCawqwxNQpQSwECFAAKAAAAAACafeU8fDNrvAoAAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAYW1vdW50LnR4dFBLBQYAAAAAAQABADgAAAAyAAAAAAA=");
-   refZips["image"]=JSZipBase64.decode("UEsDBAoDAAAAABVv6jo8P+uKKQAAACkAAAAJAAAAc21pbGUuZ2lmR0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADtQSwECFAMKAwAAAAAVb+o6PD/riikAAAApAAAACQAAAAAAAAAAACCApIEAAAAAc21pbGUuZ2lmUEsFBgAAAAABAAEANwAAAFAAAAAAAA==");
-   refZips["folder"]=JSZipBase64.decode("UEsDBAoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAZm9sZGVyL1BLAQIUAwoDAAAAAANt8zoAAAAAAAAAAAAAAAAHAAAAAAAAAAAAEIDtQQAAAABmb2xkZXIvUEsFBgAAAAABAAEANQAAACUAAAAAAA==");
-   refZips["all"]=JSZipBase64.decode("UEsDBAoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsDBAoDAAAAALFs8ToAAAAAAAAAAAAAAAAHAAAAaW1hZ2VzL1BLAwQKAwAAAAAVZ+o6PD/riikAAAApAAAAEAAAAGltYWdlcy9zbWlsZS5naWZHSUY4N2EFAAUAgAIAAAAA/94ALAAAAAAFAAUAAAIIjA+RZ6sKUgEAO1BLAQIUAwoDAAAAAJxs8Trj5ZWwDAAAAAwAAAAJAAAAAAAAAAAAIICkgQAAAABIZWxsby50eHRQSwECFAMKAwAAAACxbPE6AAAAAAAAAAAAAAAABwAAAAAAAAAAABCA7UEzAAAAaW1hZ2VzL1BLAQIUAwoDAAAAABVn6jo8P+uKKQAAACkAAAAQAAAAAAAAAAAAIICkgVgAAABpbWFnZXMvc21pbGUuZ2lmUEsFBgAAAAADAAMAqgAAAK8AAAAAAA==");
-   refZips["STORE-text"]=JSZipBase64.decode("UEsDBAoAAAAAANRxmDyTTw7hXgAAAF4AAAAJAAAASGVsbG8udHh0VGhpcyBhIGxvb29uZyBmaWxlIDogd2UgbmVlZCB0byBzZWUgdGhlIGRpZmZlcmVuY2UgYmV0d2VlbiB0aGUgZGlmZmVyZW50IGNvbXByZXNzaW9uIG1ldGhvZHMuClBLAQIeAwoAAAAAANRxmDyTTw7hXgAAAF4AAAAJAAAAAAAAAAAAAACkgQAAAABIZWxsby50eHRQSwUGAAAAAAEAAQA3AAAAhQAAAAAA");
-   refZips["DEFLATE-text"]=JSZipBase64.decode("UEsDBBQAAAAIANRxmDyTTw7hSQAAAF4AAAAJAAAASGVsbG8udHh0VcixDYAwDATAnil+AgZgDhaA+EMsJTaKLWV9aq68s2ngQnd3e1C1EwcWYaQgHUEiGyFaKyetEDdzkfbrRPHxTkaoGwazucS+fVBLAQIeAxQAAAAIANRxmDyTTw7hSQAAAF4AAAAJAAAAAAAAAAEAAACkgQAAAABIZWxsby50eHRQSwUGAAAAAAEAAQA3AAAAcAAAAAAA");
+
+   function testZipFile(testName, zipName, testFunction)
+   {
+      test(testName, function ()
+      {
+         if (refZips[zipName]) {
+            testFunction.call(this, refZips[zipName]);
+         }
+         else
+         {
+            stop();
+            /*
+             * Here is the tricky part : getting the data.
+             * In firefox/chrome/opera/... setting the mimeType to 'text/plain; charset=x-user-defined'
+             * is enough, the result is in the standard xhr.responseText.
+             * cf https://developer.mozilla.org/En/XMLHttpRequest/Using_XMLHttpRequest#Receiving_binary_data_in_older_browsers
+             * In IE, we must use (the IE only) attribute responseBody
+             * (for binary data, its content is different from responseText).
+             * With jQuery 1.5+, we don't have access directly to the native xhr
+             * object in the callback.
+             * The workaround is to use the default method of jQuery to create it,
+             * put the xhr into a context accessible in the callbacks and define
+             * a custom method for getting the xhr object (will return the known xhr).
+             */
+            var context = {
+               xhr:jQuery.ajaxSettings.xhr()
+            };
+            $.ajax(zipName, {
+               context: context,
+               xhr:function(){return context.xhr},
+               mimeType:'text/plain; charset=x-user-defined',
+               complete: function(jqXHR, textStatus) {
+                  start();
+                  if (textStatus !== "success")
+                  {
+                     ok(false, "Ajax error for " + zipName + " : textStatus=" + textStatus);
+                  }
+                  try
+                  {
+                     // this.xhr comes from the context
+                     var file = getBinaryFromXHR(jqXHR.responseText, this.xhr);
+                     refZips[zipName] = file;
+                     testFunction.call(this, file);
+                  } catch(e) {ok(false, e.message||e)}
+               }
+            });
+         }
+      });
+   }
 
    test("JSZip", function(){
       ok(JSZip, "JSZip exists");
@@ -50,12 +163,8 @@ function reload(bytesStream)
 
    module("Essential");
 
-   test("Zip text file", function()
+   testZipFile("Zip text file !", "ref/text.zip", function(expected)
    {
-      // If anyone can work out how to get binary data over AJAX without it
-      // being mangled by UTF-8 transforms, I would be very grateful
-      var expected = refZips["text"];
-
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       var content = zip.generate();
@@ -76,10 +185,8 @@ function reload(bytesStream)
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   test("Add a file to overwrite", function()
+   testZipFile("Add a file to overwrite", "ref/text.zip", function(expected)
    {
-      var expected = refZips["text"];
-
       var zip = new JSZip();
       zip.file("Hello.txt", "hello ?");
       zip.file("Hello.txt", "Hello World\n");
@@ -101,10 +208,8 @@ function reload(bytesStream)
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   test("Zip text file with UTF-8 characters", function()
+   testZipFile("Zip text file with UTF-8 characters", "ref/utf8.zip", function(expected)
    {
-      var expected = refZips["utf8"];
-
       var zip = new JSZip();
       zip.file("amount.txt", "€15\n");
       var content = zip.generate();
@@ -115,10 +220,8 @@ function reload(bytesStream)
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   test("Zip text file with date", function()
+   testZipFile("Zip text file with date", "ref/text.zip", function(expected)
    {
-      var expected = refZips["text"];
-
       var zip = new JSZip();
 	  zip.file("Hello.txt", "Hello World\n", {date : new Date("July 17, 2009 14:36:57")});
       var content = zip.generate();
@@ -138,10 +241,8 @@ function reload(bytesStream)
    });
 
 
-   test("Zip image file", function()
+   testZipFile("Zip image file", "ref/image.zip", function(expected)
    {
-      var expected = refZips["image"];
-
       var zip = new JSZip();
       zip.file("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
       var content = zip.generate();
@@ -152,10 +253,8 @@ function reload(bytesStream)
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   test("Zip empty folder", function()
+   testZipFile("Zip empty folder", "ref/folder.zip", function(expected)
    {
-      var expected = refZips["folder"];
-
       var zip = new JSZip();
       zip.folder("folder");
       var content = zip.generate();
@@ -166,10 +265,8 @@ function reload(bytesStream)
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   test("Zip text, folder and image", function()
+   testZipFile("Zip text, folder and image", "ref/all.zip", function(expected)
    {
-      var expected = refZips["all"];
-
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       zip.folder("images").file("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
@@ -189,7 +286,6 @@ function reload(bytesStream)
       54 Total
       */
 
-      //console.log("data:application/zip;base64,"+content);
       ok(similar(actual, expected, 54) , "Generated ZIP matches reference ZIP");
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
@@ -207,10 +303,8 @@ function reload(bytesStream)
       equals(zip.file(/pirate/i).length, 1, "Match regex 1 result");
    });
 
-   test("Finding a file : modifying the result doesn't alter the zip", function()
+   testZipFile("Finding a file : modifying the result doesn't alter the zip", "ref/text.zip", function(expected)
    {
-      var expected = refZips["text"];
-
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       zip.file("Hello.txt").data = "new data";
@@ -276,10 +370,8 @@ function reload(bytesStream)
 
    module("More advanced");
 
-   test("Delete file", function()
+   testZipFile("Delete file", "ref/text.zip", function(expected)
    {
-      var expected = refZips["text"];
-
       var zip = new JSZip();
       zip.file("Remove.txt", "This file should be deleted\n");
       zip.file("Hello.txt", "Hello World\n");
@@ -292,10 +384,8 @@ function reload(bytesStream)
 
    });
 
-   test("Delete file in folder", function()
+   testZipFile("Delete file in folder", "ref/folder.zip", function(expected)
    {
-      var expected = refZips["folder"];
-
       var zip = new JSZip();
       zip.folder("folder").file("Remove.txt", "This folder and file should be deleted\n");
       zip.remove("folder/Remove.txt");
@@ -306,10 +396,8 @@ function reload(bytesStream)
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-   test("Delete file in folder, with a relative path", function()
+   testZipFile("Delete file in folder, with a relative path", "ref/folder.zip", function(expected)
    {
-      var expected = refZips["folder"];
-
       var zip = new JSZip();
       var folder = zip.folder("folder");
       folder.file("Remove.txt", "This folder and file should be deleted\n");
@@ -321,10 +409,8 @@ function reload(bytesStream)
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-   test("Delete folder", function()
+   testZipFile("Delete folder", "ref/text.zip", function(expected)
    {
-      var expected = refZips["text"];
-
       var zip = new JSZip();
       zip.folder("remove").file("Remove.txt", "This folder and file should be deleted\n");
       zip.file("Hello.txt", "Hello World\n");
@@ -337,10 +423,8 @@ function reload(bytesStream)
 
    });
 
-   test("Delete nested folders", function()
+   testZipFile("Delete nested folders", "ref/text.zip", function(expected)
    {
-      var expected = refZips["text"];
-
       var zip = new JSZip();
       zip.folder("remove").file("Remove.txt", "This folder and file should be deleted\n");
       zip.folder("remove/second").file("Sub.txt", "This should be removed");
@@ -355,10 +439,8 @@ function reload(bytesStream)
 
    });
 
-   test("Delete nested folders from relative path", function()
+   testZipFile("Delete nested folders from relative path", "ref/folder.zip", function(expected)
    {
-      var expected = refZips["folder"];
-
       var zip = new JSZip();
       zip.folder("folder");
       zip.folder("folder/1/2/3");
@@ -371,10 +453,8 @@ function reload(bytesStream)
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   test("Byte string output", function()
+   testZipFile("Byte string output", "ref/text.zip", function(expected)
    {
-      var expected = refZips["text"];
-
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       var content = zip.generate({base64:false});
@@ -385,63 +465,60 @@ function reload(bytesStream)
 
    test("Filtering a zip", function()
    {
-     var zip = new JSZip();
-     zip.file("1.txt", "1\n");
-     zip.file("2.txt", "2\n");
-     zip.file("3.log", "3\n");
-     var result = zip.filter(function (relativeFilename, file){
-       return relativeFilename.indexOf(".txt") != -1;
-     });
-     equals(result.length, 2, "filter has filtered");
-     ok(result[0].name.indexOf(".txt") != -1, "filter has filtered the good file");
-     ok(result[1].name.indexOf(".txt") != -1, "filter has filtered the good file");
+      var zip = new JSZip();
+      zip.file("1.txt", "1\n");
+      zip.file("2.txt", "2\n");
+      zip.file("3.log", "3\n");
+      var result = zip.filter(function (relativeFilename, file){
+         return relativeFilename.indexOf(".txt") != -1;
+      });
+      equals(result.length, 2, "filter has filtered");
+      ok(result[0].name.indexOf(".txt") != -1, "filter has filtered the good file");
+      ok(result[1].name.indexOf(".txt") != -1, "filter has filtered the good file");
    });
 
    test("Filtering a zip from a relative path", function()
    {
-     var zip = new JSZip();
-     zip.file("foo/1.txt", "1\n");
-     zip.file("foo/2.txt", "2\n");
-     zip.file("foo/3.log", "3\n");
-     zip.file("1.txt", "1\n");
-     zip.file("2.txt", "2\n");
-     zip.file("3.log", "3\n");
+      var zip = new JSZip();
+      zip.file("foo/1.txt", "1\n");
+      zip.file("foo/2.txt", "2\n");
+      zip.file("foo/3.log", "3\n");
+      zip.file("1.txt", "1\n");
+      zip.file("2.txt", "2\n");
+      zip.file("3.log", "3\n");
 
-     var result = zip.folder("foo").filter(function (relativeFilename, file){
-       return relativeFilename.indexOf("3") != -1;
-     });
-     equals(result.length, 1, "filter has filtered");
-     equals(result[0].name, "foo/3.log", "filter has filtered the good file");
+      var result = zip.folder("foo").filter(function (relativeFilename, file) {
+         return relativeFilename.indexOf("3") != -1;
+      });
+      equals(result.length, 1, "filter has filtered");
+      equals(result[0].name, "foo/3.log", "filter has filtered the good file");
    });
 
    test("Filtering a zip : the full path is still accessible", function()
    {
-     var zip = new JSZip();
-     zip.file("foo/1.txt", "1\n");
-     zip.file("foo/2.txt", "2\n");
-     zip.file("foo/3.log", "3\n");
-     zip.file("1.txt", "1\n");
-     zip.file("2.txt", "2\n");
-     zip.file("3.log", "3\n");
+      var zip = new JSZip();
+      zip.file("foo/1.txt", "1\n");
+      zip.file("foo/2.txt", "2\n");
+      zip.file("foo/3.log", "3\n");
+      zip.file("1.txt", "1\n");
+      zip.file("2.txt", "2\n");
+      zip.file("3.log", "3\n");
 
-     var result = zip.folder("foo").filter(function (relativeFilename, file){
-       return file.name.indexOf("3") != -1;
-       return file.name.indexOf("3") != -1 && file.name.indexOf("foo") != -1;
-     });
-     equals(result.length, 1, "the filter only match files/folders in the current folder");
-     equals(result[0].name, "foo/3.log", "filter has filtered the good file");
+      var result = zip.folder("foo").filter(function (relativeFilename, file) {
+        return file.name.indexOf("3") != -1;
+      });
+      equals(result.length, 1, "the filter only match files/folders in the current folder");
+      equals(result[0].name, "foo/3.log", "filter has filtered the good file");
    });
 
-   test("Filtering a zip : the filter function can't alter the data", function()
+   testZipFile("Filtering a zip : the filter function can't alter the data", "ref/text.zip", function(expected)
    {
-      var expected = refZips["text"];
-
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       zip.filter(function (relativeFilename, file) {
-        file.name = "bye.txt";
-        file.data = "good bye";
-        file.options.dir = true;
+         file.name = "bye.txt";
+         file.data = "good bye";
+         file.options.dir = true;
       });
       var content = zip.generate();
 
@@ -451,24 +528,21 @@ function reload(bytesStream)
 
    });
 
-   test("STORE is the default method", function()
+   testZipFile("STORE is the default method", "ref/text.zip", function(expected)
    {
-      var expected = refZips["text"];
-
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       var content = zip.generate({compression:'STORE'});
 
       var actual = JSZipBase64.decode(content);
 
-	  // no difference with the "Zip text file" test.
+      // no difference with the "Zip text file" test.
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-   test("STORE doesn't compress", function()
+   // zip -0 -X store.zip Hello.txt
+   testZipFile("STORE doesn't compress", "ref/store.zip", function(expected)
    {
-      var expected = refZips["STORE-text"]; // zip -0 -X store.zip Hello.txt
-
       var zip = new JSZip();
       zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
       var content = zip.generate({compression:'STORE'});
@@ -478,11 +552,9 @@ function reload(bytesStream)
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-
-   test("DEFLATE compress", function()
+   // zip -6 -X deflate.zip Hello.txt
+   testZipFile("DEFLATE compress", "ref/deflate.zip", function(expected)
    {
-      var expected = refZips["DEFLATE-text"]; // zip -6 -X deflate.zip Hello.txt
-
       var zip = new JSZip();
       zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
       var content = zip.generate({compression:'DEFLATE'});
@@ -492,16 +564,102 @@ function reload(bytesStream)
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
+   module("Load file, not supported features");
 
+   // zip -0 -X -e encrypted.zip Hello.txt
+   testZipFile("basic encryption", "ref/encrypted.zip", function(file) {
+      try
+      {
+         var zip = new JSZip(file);
+         ok(false, "Encryption is not supported, but no exception were thrown");
+      }
+      catch(e)
+      {
+         equal(e.message, "Encrypted zip are not supported", "the error message is useful");
+      }
+   });
+
+   module("Load file, corrupted zip");
+
+   testZipFile("bad compression method", "ref/invalid/compression.zip", function(file) {
+      try
+      {
+         var zip = new JSZip(file);
+         ok(false, "no exception were thrown");
+      }
+      catch(e)
+      {
+         ok(e.message.match("Corrupted zip"), "the error message is useful");
+      }
+   });
+
+   testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file) {
+      try
+      {
+         var zip = new JSZip(file);
+         ok(false, "no exception were thrown");
+      }
+      catch(e)
+      {
+         ok(e.message.match("Corrupted zip"), "the error message is useful");
+      }
+   });
+
+
+   module("Load file");
+
+   // zip -0 -z -c archive_comment.zip Hello.txt
+   testZipFile("zip with comment", "ref/archive_comment.zip", function(file) {
+      var zip = new JSZip(file);
+      equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+   });
+
+   // zip -0 extra_attributes.zip Hello.txt
+   testZipFile("zip with extra attributes", "ref/extra_attributes.zip", function(file) {
+      var zip = new JSZip(file);
+      equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+   });
+
+   // jar produces zip with data descriptors
+   // jar c Hello.txt > data_descriptor.zip
+   testZipFile("zip with data descriptor", "ref/data_descriptor.zip", function(file) {
+      var zip = new JSZip(file);
+      equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+   });
+
+   // zip -0 -X zip_within_zip.zip Hello.txt && zip -0 -X nested.zip Hello.txt zip_within_zip.zip
+   testZipFile("nested zip", "ref/nested.zip", function(file) {
+      var zip = new JSZip(file);
+      equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+      console.log(zip);
+      var nested = new JSZip(zip.file("zip_within_zip.zip").data);
+      equal(nested.file("Hello.txt").data, "Hello World\n", "the inner zip was correctly read.");
+   });
+
+   module("Load complex files");
+
+   // http://www.feedbooks.com/book/8/the-metamorphosis
+   testZipFile("an epub is fine too", "ref/complex_files/Franz Kafka - The Metamorphosis.epub", function(file) {
+      var zip = new JSZip(file);
+      equal(zip.file("mimetype").data, "application/epub+zip\r\n", "the zip was correctly read.");
+      // the .ncx file tells us that the first chapter is in the main0.xml file.
+      ok(zip.file("OPS/main0.xml").data.indexOf("One morning, as Gregor Samsa was waking up from anxious dreams") !== -1, "the zip was correctly read.");
+   });
+
+   // a showcase in http://msdn.microsoft.com/en-us/windows/hardware/gg463429
+   testZipFile("xps file", "ref/complex_files/Outlook2007_Calendar.xps", function(file) {
+      var zip = new JSZip(file);
+      ok(zip.file("[Content_Types].xml").data.indexOf("application/vnd.ms-package.xps-fixeddocument+xml") !== -1, "the zip was correctly read.");
+   });
 
 </script>
 </head>
 <body>
-
-	<h1 id="qunit-header">JSZip Testing</h1>
-	<h2 id="qunit-banner"></h2>
-	<div id="qunit-testrunner-toolbar"></div>
-	<h2 id="qunit-userAgent"></h2>
-	<ol id="qunit-tests"></ol>
+   <h1 id="qunit-header">JSZip Testing</h1>
+   <h2 id="qunit-banner"></h2>
+   <div id="qunit-testrunner-toolbar"></div>
+   <h2 id="qunit-userAgent"></h2>
+   <ol id="qunit-tests"></ol>
 </body>
 </html>
+<!-- vim: set shiftwidth=3 softtabstop=3: -->
