@@ -19,6 +19,9 @@ if(!JSZip)
  */
 
 (function(){
+  // the original implementation leaks a global variable.
+  // Defining the variable here doesn't break anything.
+  var zip_fixed_bd;
 
 /* Copyright (C) 1999 Masanao Izumo <iz@onicos.co.jp>
  * Version: 1.0.0.1

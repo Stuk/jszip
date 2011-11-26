@@ -383,7 +383,7 @@ Licenced under the GPLv3 and the MIT licences
     for (i in files)
     {
       input = files[i];
-      this.add(input.fileName, input.uncompressedFileData, {
+      this.file(input.fileName, input.uncompressedFileData, {
         binary:true,
         date:input.date,
         dir:input.dir
