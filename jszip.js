@@ -19,7 +19,12 @@ Usage:
 
 var JSZip = function(data, options)
 {
-   this.files = [];
+   // object containing the files :
+   // {
+   //   "folder/" : {...},
+   //   "folder/data.txt" : {...}
+   // }
+   this.files = {};
 
    // Where we are in the hierarchy
    this.root = "";

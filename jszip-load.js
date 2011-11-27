@@ -150,7 +150,7 @@ Licenced under the GPLv3 and the MIT licences
    */
   ZipEntry.prototype.isEncrypted = function ()
   {
-    return this.bitFlag & 0x0001 === 0x0001;
+    return (this.bitFlag & 0x0001) === 0x0001;
   },
   /**
    * say if the file has a data decriptor.
@@ -158,7 +158,7 @@ Licenced under the GPLv3 and the MIT licences
    */
   ZipEntry.prototype.hasDataDescriptor = function ()
   {
-    return this.bitFlag & 0x0008 === 0x0008;
+    return (this.bitFlag & 0x0008) === 0x0008;
   },
   /**
    * Read the local part header of a zip file and add the info in this object.
@@ -181,10 +181,6 @@ Licenced under the GPLv3 and the MIT licences
     {
       throw new Error("Encrypted zip are not supported");
     }
-    if (this.hasDataDescriptor())
-    {
-      throw new Error("Data descriptor not supported");
-    }
   };
   /**
    * Read the local part of a zip file and add the info in this object.
@@ -198,15 +194,52 @@ Licenced under the GPLv3 and the MIT licences
 
     this.fileName = reader.string(this.fileNameLength);
     this.readExtraFields(reader, this.extraFieldsLength);
-    this.compressedFileData = reader.string(this.compressedSize);
+    if (!this.hasDataDescriptor())
+    {
+      // easy : we know the file length
+      this.compressedFileData = reader.string(this.compressedSize);
+    }
+    else
+    {
+      // hard way : find the data descriptor manually
+      this.compressedFileData = this.findDataUntilDataDescriptor(reader);
+      this.crc32              = reader.int(4);
+      this.compressedSize     = reader.int(4);
+      this.uncompressedSize   = reader.int(4);
+
+      if (this.compressedFileData.length !== this.compressedSize)
+      {
+        throw new Error("Bug : data descriptor incorrectly read (size mismatch)");
+      }
+    }
     this.uncompressedFileData = null;
 
     compression = findCompression(this.compressionMethod);
     if (compression === null) // no compression found
     {
-      throw new Error("compression " + this.compressionMethod + " unknown");
+      throw new Error("Corrupted zip : compression " + pretty(this.compressionMethod) +
+                      " unknown (inner file : " + this.fileName + ")");
     }
     this.uncompressedFileData = compression.uncompress(this.compressedFileData);
+  };
+
+  /**
+   * Read data until a data descriptor signature is found.
+   * @param reader the reader to use.
+   */
+  ZipEntry.prototype.findDataUntilDataDescriptor = function(reader)
+  {
+    var data = "",
+        buffer = reader.string(4),
+        byte;
+
+    while(buffer !== "\x50\x4b\x07\x08")
+    {
+      byte = reader.string(1);
+      data += buffer.slice(0, 1);
+      buffer = (buffer + byte).slice(-4);
+    }
+    return data;
   };
   /**
    * Read the central part of a zip file and add the info in this object.
@@ -288,6 +321,10 @@ Licenced under the GPLv3 and the MIT licences
     var file, i;
     // if we have a central directory recort, the local file header must be already here.
     file = this.files['disk0-offset' + zipEntry.localHeaderOffset];
+    if (!file)
+    {
+      throw new Error("Corrupted zip file : wrong local header offset (" + zipEntry.localHeaderOffset + ")");
+    }
     // they contain similiar informations, merging
     for(i in zipEntry)
     {
@@ -349,14 +386,11 @@ Licenced under the GPLv3 and the MIT licences
         case "\x50\x4b\x06\x07": // zip64 end of central directory locator
           throw new Error("ZIP64 Feature not supported");
         case "\x50\x4b\x07\x08": // data descriptor record
-          // the spec says that the signature is recommended but optional.
-          // I hope everyone follow this recommendation :D
-          // This data is only useful when reading on a non-seekable device.
-          reader.string(12);
-          // TODO 4+2*8 bytes for zip64
+          throw new Error("Data descriptor : unexpected signature");
           break;
         default:
-          throw new Error("signature " + pretty(signature) + " unknown");
+          throw new Error("Corrupted or unsupported zip : " +
+                          "signature " + pretty(signature) + " unknown");
       }
       hasMoreFiles = !reader.eof();
     }

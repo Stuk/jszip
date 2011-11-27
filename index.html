@@ -226,7 +226,7 @@ Downloadify.create('downloadify',{
 
       <h2 style="margin-top: 2em;">Documentation</h2>
 
-      <h4 id="JSZip()">new JSZip()</h4>
+      <h4 id="doc_new_JSZip">new JSZip()</h4>
       <dl>
         <dt>Description : </dt>
         <dd>The default constructor.</dd>
@@ -234,13 +234,13 @@ Downloadify.create('downloadify',{
         <dd>A new JSZip.</dd>
       </dl>
 
-      <h4 id="new JSZip(data [,options])">new JSZip(data [,options])</h4>
+      <h4 id="doc_new_JSZip_data_options">new JSZip(data [,options])</h4>
       <dl>
         <dt>Description : </dt>
-        <dd>Create a new JSZip file and load an existing zip file. See the documentation of <a href="#load(data, options)"><code>load()</code></a> for more details.</dd>
+        <dd>Create a new JSZip file and load an existing zip file. See the documentation of <a href="doc_load_data_options"><code>load()</code></a> for more details and <a href="#zip_load_limits">this</a> for the limitations.</dd>
         <dt>Parameters : </dt>
         <dd><code>data</code> (String/binary) the content of the zip file to load.</dd>
-        <dd><code>options</code> (Object) options to pass to the <a href="#load(data, options)"><code>load()</code></a> method..</dd>
+        <dd><code>options</code> (Object) options to pass to the <a href="#doc_load_data_options"><code>load()</code></a> method..</dd>
         <dt>Returns : </dt>
         <dd>A new JSZip.</dd>
       </dl>
@@ -250,7 +250,7 @@ new JSZip(zipDataFromXHR, {base64:false});
 var zip = new JSZip();
 zip.load(zipDataFromXHR, {base64:false});</pre>
 
-      <h4 id="file(name)">file(name)</h4>
+      <h4 id="doc_file_name">file(name)</h4>
       <dl>
         <dt>Description : </dt>
         <dd>Get a file with the specified name.</dd>
@@ -263,10 +263,10 @@ zip.load(zipDataFromXHR, {base64:false});</pre>
             <li><code>data</code> the data contained in the file</li>
             <li><code>options</code> the options of the file. The available options are :
               <ul>
-                <li><code>base64</code>, boolean, cf <a href="#file(name, data [,options])">file(name, data [,options])</a></li>
-                <li><code>binary</code>, boolean, cf <a href="#file(name, data [,options])">file(name, data [,options])</a></li>
+                <li><code>base64</code>, boolean, cf <a href="#doc_file_name_data_options">file(name, data [,options])</a></li>
+                <li><code>binary</code>, boolean, cf <a href="#doc_file_name_data_options">file(name, data [,options])</a></li>
                 <li><code>dir</code>, boolean, true if this is a directory</li>
-                <li><code>date</code>, date, <a href="#file(name, data [,options])">file(name, data [,options])</a></li>
+                <li><code>date</code>, date, <a href="#doc_file_name_data_options">file(name, data [,options])</a></li>
               </ul>
             </li>
           </ul>
@@ -280,7 +280,7 @@ zip.file("file.txt").name // "file.txt"
 zip.file("file.txt").data // "content"
 zip.file("file.txt").options.dir // false</pre>
 
-      <h4 id="file(regex)">file(regex)</h4>
+      <h4 id="doc_file_regex">file(regex)</h4>
       <dl>
         <dt>Description : </dt>
         <dd>Search a file in the current folder and subfolders with a <a href="http://www.javascriptkit.com/javatutors/redev.shtml">regular expression</a>. The regex is tested against the relative filename.</dd>
@@ -308,7 +308,7 @@ folder.file(/^file/); // array of size 2, the relative paths start with file
 // arrays contain objects in the form:
 // {name: "file2.txt", data: "content", dir: false}</pre>
 
-      <h4 id="file(name, data [,options])">file(name, data [,options])</h4>
+      <h4 id="doc_file_name_data_options">file(name, data [,options])</h4>
       <dl>
         <dt>Description : </dt>
         <dd>Add a file to the zip file.</dd>
@@ -342,7 +342,7 @@ zip.add("animals.txt", "dog,platypus\n").add("people.txt", "james,sebastian\n");
 // result : Hello.txt, smile.gif, magic.txt, Xmas.txt, animals.txt, people.txt,
 // folder/, folder/file.txt</pre>
 
-      <h4 id="folder(name)">folder(name)</h4>
+      <h4 id="doc_folder_name">folder(name)</h4>
       <dl>
         <dt>Description : </dt>
         <dd>Add a directory to the zip file.</dd>
@@ -359,7 +359,7 @@ zip.add("css/font.css", "body {font-family: sans-serif}")
 
 // result : images/, css/, css/style.css, css/font.css</pre>
 
-      <h4 id="folder(regex)">folder(regex)</h4>
+      <h4 id="doc_folder_regex">folder(regex)</h4>
       <dl>
         <dt>Description : </dt>
         <dd>Search a subdirectory.</dd>
@@ -380,7 +380,7 @@ zip.folder(/videos/); // array of size 2
 
 zip.folder("home/Jean").folder(/^vid/); // array of 1</pre>
 
-      <h4 id="remove(name)">remove(name)</h4>
+      <h4 id="doc_remove_name">remove(name)</h4>
       <p>Delete a file or folder.</p>
       <dl>
         <dt>Description : </dt>
@@ -400,7 +400,7 @@ zip.folder("css").add("style.css", "body {background: #FF0000}");
 zip.remove("Hello.txt").remove("css");
 //result : empty zip</pre>
 
-      <h4 id="generate(options)">generate(options)</h4>
+      <h4 id="doc_generate_options">generate(options)</h4>
       <dl>
         <dt>Description : </dt>
         <dd>Generates the complete zip file.</dd>
@@ -428,10 +428,10 @@ for (var c = 0; c &lt; content.length; c++)
     // do other things
 }</pre>
 
-      <h4 id="load(data, options)">load(data, options)</h4>
+      <h4 id="doc_load_data_options">load(data, options)</h4>
       <dl>
         <dt>Description : </dt>
-        <dd>Read an existing zip and merge the data in the current JSZip object. The implementation is in jszip-load.js, don't forget to include it.</dd>
+        <dd>Read an existing zip and merge the data in the current JSZip object. The implementation is in jszip-load.js, don't forget to include it. This technique has some limitations, see <a href="#zip_load_limits">below</a>.</dd>
         <dt>Parameters : </dt>
         <dd><code>data</code> (binary) the zip file</dd>
         <dd><code>options</code> (Object) the options to load the zip file :
@@ -446,7 +446,19 @@ for (var c = 0; c &lt; content.length; c++)
 var zip = new JSZip();
 zip.load(zipDataFromXHR);</pre>
 
-      <h4 id="filter(predicate)">filter(predicate)</h4>
+      <h5>Zip features supported by this method</h5>
+      <ul>
+         <li>Compression (<code>DEFLATE</code> with jszip-deflate.js)</li>
+         <li>zip with data descriptor</li>
+      </ul>
+      <h5>Zip features not (yet) supported</h5>
+      <ul>
+         <li>password protected zip</li>
+         <li>ZIP64</li>
+         <li>multi-volume zip</li>
+      </ul>
+
+      <h4 id="doc_filter_predicate">filter(predicate)</h4>
       <dl>
         <dt>Description : </dt>
         <dd>Filter nested files/folders with the specified function.</dd>
@@ -454,7 +466,7 @@ zip.load(zipDataFromXHR);</pre>
         <dd><code>predicate</code> (function) the predicate to use : <code>function (relativePath, file) {...}</code> It takes 2 arguments : the relative path and the file.
           <ul>
             <li><code>relativePath</code> (String) The filename and its path, reliatively to the current folder.</li>
-            <li><code>file</code> (Object) The file being tested. Like the result of <a href="#file(name)"><code>file(name)</code></a>, the file has the form <code>{name:"...", data:"...", options:{...}}</code>.</li>
+            <li><code>file</code> (Object) The file being tested. Like the result of <a href="#doc_file_name"><code>file(name)</code></a>, the file has the form <code>{name:"...", data:"...", options:{...}}</code>.</li>
             <li>Return true if the file should be included, false otherwise.</li>
           </ul>
         </dd>
@@ -468,9 +480,28 @@ zip.filter(function (relativePath, file){
   // relativePath == "readme.txt"
   // file = {name:"dir/readme.txt",data:"content",options:{...}}
   return true/false;
-});
-</pre>
+});</pre>
 
+      <h3 id="zip_load_limits">Loading zip files, limitations</h3>
+      <p>
+      The first limitation comes from the limited subset of supported zip features.
+      Classic zip files will work but ZIP64, encrypted zip, etc are not supported
+      and the load() method will throw an <code>Error</code>.
+      </p>
+      <p>
+      The second limitation comes from the browser (and the machine running the browser).
+      A compressed zip file of 10M is common and easily opened by desktop application,
+      but not in a browser. The processing of such a beast is likely to be painful :
+      the browser will eat hundreds of megabytes while using CPU like never.<br/>
+      If you use an old browser, things will be worse. For example, IE6 and IE7 are
+      quite slow to to execute the unit tests, and they completely freeze as soon as
+      they try to handle larger files.<br />
+      Conclusion : reading small files is OK, reading others is not.
+      </p>
+      <p>
+      Third limitation : reading and generating a zip file won't give you back the same file.
+      Some data are discarded (file metadata) and other are added (subfolders).
+      </p>
    </div>
 
    <div id="who" class="grid_3">
@@ -511,3 +542,4 @@ zip.filter(function (relativePath, file){
 
 </body>
 </html>
+<!-- vim: set shiftwidth=3 softtabstop=3: -->
