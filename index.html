@@ -224,6 +224,11 @@ Downloadify.create('downloadify',{
       <p>
       <a href="http://www.picurl.org/blog/author/franz/">Franz Buchinger</a> has written a brilliant tutorial on <a href="http://www.picurl.org/blog/2009/11/22/creating-zip-archives-with-gears/">using JSZip with Google Gears</a> (<a href="http://www.picurl.org/blog/2009/11/29/gearszipper-part2-adding-support-for-real-files-and-canvas-elements/">part 2</a>). If you want to let your Gears users download several files at once I really recommend having a look at some of his <a href="http://picurl.org/gears/zipper/">examples</a>.</p>
 
+      <h3>Reading a zip file from an ajax call</h3>
+      <p>
+      When doing an ajax call to get the binary data, the browser will try to interpret the binary as text, corrupting it. The solution is to <a href="https://developer.mozilla.org/En/XMLHttpRequest/Using_XMLHttpRequest#Receiving_binary_data_in_older_browsers">set the mimetype to 'text/plain; charset=x-user-defined'</a>. This solution works well in all browsers but IE. If you need IE support, please see what is done in the file test/index.html.
+      </p>
+
       <h2 style="margin-top: 2em;">Documentation</h2>
 
       <h4 id="doc_new_JSZip">new JSZip()</h4>
