@@ -15,6 +15,11 @@ Only used to avoid cross browser xhr madness.
 <script type="text/javascript" src="../jszip-inflate.js"></script>
 <script type="text/javascript" src="qunit.js"></script>
 
+<script type="text/javascript">
+   // add our custom complexfiles (test them on demand)
+   QUnit.config.urlConfig.push("complexfiles");
+</script>
+
 <!--
 Mandatory in IE 6, 7, 8 and 9.
 I REALLY hope that IE will support the mimetype override trick one day...
@@ -664,21 +669,47 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    module("Load complex files"); // {{{
 
-   // http://www.feedbooks.com/book/8/the-metamorphosis
-   testZipFile("an epub is fine too", "ref/complex_files/Franz Kafka - The Metamorphosis.epub", function(file) {
-      var zip = new JSZip(file);
-      equal(zip.file("mimetype").data, "application/epub+zip\r\n", "the zip was correctly read.");
-      // the .ncx file tells us that the first chapter is in the main0.xml file.
-      ok(zip.file("OPS/main0.xml").data.indexOf("One morning, as Gregor Samsa was waking up from anxious dreams") !== -1, "the zip was correctly read.");
-   });
+   if (QUnit.urlParams.complexfiles)
+   {
 
-   // a showcase in http://msdn.microsoft.com/en-us/windows/hardware/gg463429
-   testZipFile("xps file", "ref/complex_files/Outlook2007_Calendar.xps", function(file) {
-      var zip = new JSZip(file);
-      ok(zip.file("[Content_Types].xml").data.indexOf("application/vnd.ms-package.xps-fixeddocument+xml") !== -1, "the zip was correctly read.");
-   });
+      // http://www.feedbooks.com/book/8/the-metamorphosis
+      testZipFile("Franz Kafka - The Metamorphosis.epub", "ref/complex_files/Franz Kafka - The Metamorphosis.epub", function(file) {
+         var zip = new JSZip(file);
+         equal(zip.filter(function(){return true;}).length, 26, "the zip contains the good number of elements.");
+         equal(zip.file("mimetype").data, "application/epub+zip\r\n", "the zip was correctly read.");
+         // the .ncx file tells us that the first chapter is in the main0.xml file.
+         ok(zip.file("OPS/main0.xml").data.indexOf("One morning, as Gregor Samsa was waking up from anxious dreams") !== -1, "the zip was correctly read.");
+      });
 
+      // a showcase in http://msdn.microsoft.com/en-us/windows/hardware/gg463429
+      testZipFile("Outlook2007_Calendar.xps", "ref/complex_files/Outlook2007_Calendar.xps", function(file) {
+         var zip = new JSZip(file);
+         // the zip file contains 15 entries, but we get 23 when creating all the sub-folders.
+         equal(zip.filter(function(){return true;}).length, 23, "the zip contains the good number of elements.");
+         ok(zip.file("[Content_Types].xml").data.indexOf("application/vnd.ms-package.xps-fixeddocument+xml") !== -1, "the zip was correctly read.");
+      });
+
+      // an example file in http://cheeso.members.winisp.net/srcview.aspx?dir=js-unzip
+      // the data come from http://www.antarctica.ac.uk/met/READER/upper_air/
+      testZipFile("AntarcticaTemps.xlsx", "ref/complex_files/AntarcticaTemps.xlsx", function(file) {
+         var zip = new JSZip(file);
+         console.log(zip);
+         // the zip file contains 16 entries, but we get 27 when creating all the sub-folders.
+         equal(zip.filter(function(){return true;}).length, 27, "the zip contains the good number of elements.");
+         ok(zip.file("[Content_Types].xml").data.indexOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml") !== -1, "the zip was correctly read.");
+      });
+
+      // same as above, but in the Open Document format
+      testZipFile("AntarcticaTemps.ods", "ref/complex_files/AntarcticaTemps.ods", function(file) {
+         var zip = new JSZip(file);
+         console.log(zip);
+         // the zip file contains 19 entries, but we get 27 when creating all the sub-folders.
+         equal(zip.filter(function(){return true;}).length, 27, "the zip contains the good number of elements.");
+         ok(zip.file("META-INF/manifest.xml").data.indexOf("application/vnd.oasis.opendocument.spreadsheet") !== -1, "the zip was correctly read.");
+      });
+   }
    // }}} Load complex files
+
 </script>
 </head>
 <body>
