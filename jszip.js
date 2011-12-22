@@ -17,6 +17,12 @@ Usage:
 
 **/
 
+/**
+ * Representation a of zip file in js
+ * @constructor
+ * @param {String=} data the data to load, if any (optional).
+ * @param {Object=} options the options for creating this objects (optional).
+ */
 var JSZip = function(data, options)
 {
    // object containing the files :
@@ -38,7 +44,7 @@ JSZip.signature = {
    CENTRAL_DIRECTORY_END : "\x50\x4b\x05\x06",
    ZIP64_CENTRAL_DIRECTORY_LOCATOR : "\x50\x4b\x06\x07",
    ZIP64_CENTRAL_DIRECTORY_END : "\x50\x4b\x06\x06",
-   DATA_DESCRIPTOR : "\x50\x4b\x07\x08",
+   DATA_DESCRIPTOR : "\x50\x4b\x07\x08"
 };
 
 // Default properties for a new file
@@ -55,9 +61,9 @@ JSZip.prototype = (function ()
    /**
     * Transform an integer into a string in hexadecimal.
     * @private
-    * @param {Number} dec the number to convert.
-    * @param {Number} bytes the number of bytes to generate.
-    * @returns {String} the result.
+    * @param {number} dec the number to convert.
+    * @param {number} bytes the number of bytes to generate.
+    * @returns {string} the result.
     */
    var decToHex = function(dec, bytes)
    {
@@ -73,6 +79,7 @@ JSZip.prototype = (function ()
    /**
     * Merge the objects passed as parameters into a new one.
     * @private
+    * @param {...Object} var_args All objects to merge.
     * @return {Object} a new object with the data of the others.
     */
    var extend = function ()
@@ -111,8 +118,8 @@ JSZip.prototype = (function ()
   /**
    * Add a file in the current folder.
    * @private
-   * @param {String} name the name of the file
-   * @param {String} data the data of the file
+   * @param {string} name the name of the file
+   * @param {string} data the data of the file
    * @param {Object} o the options of the file
    * @return {Object} the new file.
    */
@@ -131,8 +138,8 @@ JSZip.prototype = (function ()
    /**
     * Find the parent folder of the path.
     * @private
-    * @param {String} path the path to use
-    * @return {String} the parent folder, or ""
+    * @param {string} path the path to use
+    * @return {string} the parent folder, or ""
     */
    var parentFolder = function (path)
    {
@@ -147,7 +154,7 @@ JSZip.prototype = (function ()
    /**
     * Add a (sub) folder in the current folder.
     * @private
-    * @param {String} name the folder's name
+    * @param {string} name the folder's name
     * @return {Object} the new folder.
     */
    var folderAdd = function (name)
@@ -172,7 +179,7 @@ JSZip.prototype = (function ()
     * Do not create it now, as some parts are re-used later.
     * @private
     * @param {Object} file the file to use.
-    * @param {String} compressionType the compression to use.
+    * @param {string} compressionType the compression to use.
     * @return {Object} an object containing header and compressedData.
     */
    var prepareLocalHeaderData = function(file, compressionType)
@@ -242,7 +249,7 @@ JSZip.prototype = (function ()
       /**
        * Read an existing zip and merge the data in the current JSZip object.
        * The implementation is in jszip-load.js, don't forget to include it.
-       * @param {Binary} stream  The stream to load
+       * @param {string} stream  The stream to load
        * @param {Object} options Options for loading the stream.
        *  options.base64 : is the stream in base64 ? default : false
        * @return {JSZip} the current JSZip object
@@ -283,9 +290,9 @@ JSZip.prototype = (function ()
 
       /**
        * Add a file to the zip file, or search a file.
-       * @param   {String|Regexp} name The name of the file to add (if data is defined),
+       * @param   {string|RegExp} name The name of the file to add (if data is defined),
        * the name of the file to find (if no data) or a regex to match files.
-       * @param   {binary} data  The file data, either raw or base64 encoded
+       * @param   {string} data  The file data, either raw or base64 encoded
        * @param   {Object} o     File options
        * @return  {JSZip|Object|Array} this JSZip object (when adding a file),
        * a file (when searching by string) or an array of files (when searching by regex).
@@ -318,7 +325,7 @@ JSZip.prototype = (function ()
 
       /**
        * Add a directory to the zip file, or search.
-       * @param   {String|Regexp} arg The name of the directory to add, or a regex to search folders.
+       * @param   {String|RegExp} arg The name of the directory to add, or a regex to search folders.
        * @return  {JSZip} an object with the new directory as the root, or an array containing matching folders.
        */
       folder : function(arg)
@@ -347,7 +354,7 @@ JSZip.prototype = (function ()
 
       /**
        * Delete a file, or a directory and all sub-files, from the zip
-       * @param {String} name the name of the file to delete
+       * @param {string} name the name of the file to delete
        * @return {JSZip} this JSZip object
        */
       remove : function(name)
@@ -389,7 +396,7 @@ JSZip.prototype = (function ()
        * @param {Object} options the options to generate the zip file :
        * - base64, true to generate base64.
        * - compression, "STORE" by default.
-       * @return {String} the zip file
+       * @return {string} the zip file
        */
       generate : function(options)
       {

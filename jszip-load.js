@@ -11,8 +11,8 @@ Licenced under the GPLv3 and the MIT licences
 
    /**
     * Prettify a string read as binary.
-    * @param {String} str the string to prettify.
-    * @return {String} a pretty string.
+    * @param {string} str the string to prettify.
+    * @return {string} a pretty string.
     */
    var pretty = function (str)
    {
@@ -27,8 +27,8 @@ Licenced under the GPLv3 and the MIT licences
 
    /**
     * Find a compression registered in JSZip.
-    * @param {String} compressionMethod the method magic to find.
-    * @return {String} the JSZip compression object, null if none found.
+    * @param {string} compressionMethod the method magic to find.
+    * @return {Object|null} the JSZip compression object, null if none found.
     */
    var findCompression = function (compressionMethod)
    {
@@ -42,11 +42,11 @@ Licenced under the GPLv3 and the MIT licences
       return null;
    };
 
-   // StreamReader {{{
+   // class StreamReader {{{
    /**
-    * @Class StreamReader
     * Read bytes from a stream.
-    * @param {String} stream the stream to read.
+    * @constructor
+    * @param {string} stream the stream to read.
     */
    function StreamReader(stream) {
       this.stream = stream;
@@ -55,32 +55,36 @@ Licenced under the GPLv3 and the MIT licences
    StreamReader.prototype = {
       /**
        * Check that the offset will not go too far.
-       * @param {String} offset the additional offset to check.
+       * @param {string} offset the additional offset to check.
        * @throws {Error} an Error if the offset is out of bounds.
        */
-      checkRange : function (offset)
+      checkOffset : function (offset)
       {
-         if (this.index + offset > this.stream.length)
+         this.checkIndex(this.index + offset);
+      },
+      /**
+       * Check that the specifed index will not be too far.
+       * @param {string} newIndex the index to check.
+       * @throws {Error} an Error if the index is out of bounds.
+       */
+      checkIndex : function (newIndex)
+      {
+         if (this.stream.length < newIndex || newIndex < 0)
          {
             throw new Error("End of stream reached (stream length = " +
                             this.stream.length + ", asked index = " +
-                            (this.index + offset) + ")");
+                            (newIndex) + "). Corrupted zip ?");
          }
       },
       /**
        * Change the index.
-       * @param {integer} newIndex The new index.
+       * @param {number} newIndex The new index.
        * @throws {Error} if the new index is out of the stream.
        */
       setIndex : function (newIndex)
       {
-         if (this.stream.length < newIndex || newIndex < 0)
-            {
-               throw new Error("Corrupted zip : " +
-                               "new index (" + newIndex + ") is out of range " +
-                               "(stream length = " + this.stream.length + ")");
-            }
-            this.index = newIndex;
+         this.checkIndex(newIndex);
+         this.index = newIndex;
       },
       /**
        * Check if the end of the file has been reached.
@@ -92,8 +96,8 @@ Licenced under the GPLv3 and the MIT licences
       },
       /**
        * Get the byte at the specified index.
-       * @param {integer} i the index to use.
-       * @return {character} a byte.
+       * @param {number} i the index to use.
+       * @return {number} a byte.
        */
       byteAt : function(i)
       {
@@ -101,22 +105,22 @@ Licenced under the GPLv3 and the MIT licences
       },
       /**
        * Get the next byte of this stream.
-       * @return {character} the next byte.
+       * @return {string} the next byte.
        */
-      byte : function ()
+      readByte : function ()
       {
-         this.checkRange(1);
-         return this.byteAt(this.index++ + 1);
+         this.checkOffset(1);
+         return this.byteAt(1 + this.index++);
       },
       /**
        * Get the next number with a given byte size.
-       * @param {integer} size the number of bytes to read.
-       * @return {integer} the corresponding number.
+       * @param {number} size the number of bytes to read.
+       * @return {number} the corresponding number.
        */
-      int : function (size)
+      readInt : function (size)
       {
          var result = 0, i;
-         this.checkRange(size);
+         this.checkOffset(size);
          for(i = size - 1; i >= 0; i--)
          {
             result = (result << 8) + this.byteAt(this.index + i);
@@ -126,13 +130,13 @@ Licenced under the GPLv3 and the MIT licences
       },
       /**
        * Get the next string with a given byte size.
-       * @param {integer} size the number of bytes to read.
-       * @return {String} the corresponding string.
+       * @param {number} size the number of bytes to read.
+       * @return {string} the corresponding string.
        */
-      string : function (size)
+      readString : function (size)
       {
          var result = "", i, code;
-         this.checkRange(size);
+         this.checkOffset(size);
          for(i = 0; i < size; i++)
          {
             code = this.byteAt(this.index + i);
@@ -145,9 +149,9 @@ Licenced under the GPLv3 and the MIT licences
        * Get the next date.
        * @return {Date} the date.
        */
-      date : function ()
+      readDate : function ()
       {
-         var dostime = this.int(4);
+         var dostime = this.readInt(4);
          return new Date(
             ((dostime >> 25) & 0x7f) + 1980, // year
             ((dostime >> 21) & 0x0f) - 1, // month
@@ -159,10 +163,10 @@ Licenced under the GPLv3 and the MIT licences
    }
    // }}} end of StreamReader
 
-   // ZipEntry {{{
+   // class ZipEntry {{{
    /**
-    * @Class ZipEntry
     * An entry in the zip file.
+    * @constructor
     */
    function ZipEntry(options)
    {
@@ -200,15 +204,15 @@ Licenced under the GPLv3 and the MIT licences
       readLocalPartHeader : function(reader)
       {
          // the signature has already been consumed
-         this.versionNeeded     = reader.int(2);
-         this.bitFlag           = reader.int(2);
-         this.compressionMethod = reader.string(2);
-         this.date              = reader.date();
-         this.crc32             = reader.int(4);
-         this.compressedSize    = reader.int(4);
-         this.uncompressedSize  = reader.int(4);
-         this.fileNameLength    = reader.int(2);
-         this.extraFieldsLength = reader.int(2);
+         this.versionNeeded     = reader.readInt(2);
+         this.bitFlag           = reader.readInt(2);
+         this.compressionMethod = reader.readString(2);
+         this.date              = reader.readDate();
+         this.crc32             = reader.readInt(4);
+         this.compressedSize    = reader.readInt(4);
+         this.uncompressedSize  = reader.readInt(4);
+         this.fileNameLength    = reader.readInt(2);
+         this.extraFieldsLength = reader.readInt(2);
 
          if (this.isEncrypted())
          {
@@ -225,21 +229,21 @@ Licenced under the GPLv3 and the MIT licences
 
          this.readLocalPartHeader(reader);
 
-         this.fileName = reader.string(this.fileNameLength);
-         this.readExtraFields(reader, this.extraFieldsLength);
+         this.fileName = reader.readString(this.fileNameLength);
+         this.readExtraFields(reader);
 
          if (!this.hasDataDescriptor())
          {
             // easy : we know the file length
-            this.compressedFileData = reader.string(this.compressedSize);
+            this.compressedFileData = reader.readString(this.compressedSize);
          }
          else
          {
             // hard way : find the data descriptor manually
             this.compressedFileData = this.findDataUntilDataDescriptor(reader);
-            this.crc32              = reader.int(4);
-            this.compressedSize     = reader.int(this.isZIP64() ? 8 : 4);
-            this.uncompressedSize   = reader.int(this.isZIP64() ? 8 : 4);
+            this.crc32              = reader.readInt(4);
+            this.compressedSize     = reader.readInt(this.isZIP64() ? 8 : 4);
+            this.uncompressedSize   = reader.readInt(this.isZIP64() ? 8 : 4);
 
             if (this.compressedFileData.length !== this.compressedSize)
             {
@@ -264,14 +268,14 @@ Licenced under the GPLv3 and the MIT licences
       findDataUntilDataDescriptor : function(reader)
       {
          var data = "",
-         buffer = reader.string(4),
-         byte;
+         buffer = reader.readString(4),
+         aByte;
 
          while(buffer !== JSZip.signature.DATA_DESCRIPTOR)
          {
-            byte = reader.string(1);
+            aByte = reader.readString(1);
             data += buffer.slice(0, 1);
-            buffer = (buffer + byte).slice(-4);
+            buffer = (buffer + aByte).slice(-4);
          }
          return data;
       },
@@ -281,19 +285,19 @@ Licenced under the GPLv3 and the MIT licences
        */
       readCentralPart : function(reader)
       {
-         this.versionMadeBy = reader.string(2);
+         this.versionMadeBy = reader.readString(2);
 
          this.readLocalPartHeader(reader);
 
-         this.fileCommentLength      = reader.int(2);
-         this.diskNumberStart        = reader.int(2);
-         this.internalFileAttributes = reader.int(2);
-         this.externalFileAttributes = reader.int(4);
-         this.localHeaderOffset      = reader.int(4);
+         this.fileCommentLength      = reader.readInt(2);
+         this.diskNumberStart        = reader.readInt(2);
+         this.internalFileAttributes = reader.readInt(2);
+         this.externalFileAttributes = reader.readInt(4);
+         this.localHeaderOffset      = reader.readInt(4);
 
-         this.fileName = reader.string(this.fileNameLength);
-         this.readExtraFields(reader, this.extraFieldsLength);
-         this.fileComment = reader.string(this.fileCommentLength);
+         this.fileName = reader.readString(this.fileNameLength);
+         this.readExtraFields(reader);
+         this.fileComment = reader.readString(this.fileCommentLength);
 
          // warning, this is true only for zip with madeBy == DOS (plateform dependent feature)
          this.dir = this.externalFileAttributes & 0x00000010 ? true : false;
@@ -308,39 +312,39 @@ Licenced under the GPLv3 and the MIT licences
          var extraReader = new StreamReader(this.extraFields[0x0001].value);
          if(this.uncompressedSize === -1)
          {
-            this.uncompressedSize = extraReader.int(8);
+            this.uncompressedSize = extraReader.readInt(8);
          }
          if(this.compressedSize === -1)
          {
-            this.compressedSize = extraReader.int(8);
+            this.compressedSize = extraReader.readInt(8);
          }
          if(this.localHeaderOffset === -1)
          {
-            this.localHeaderOffset = extraReader.int(8);
+            this.localHeaderOffset = extraReader.readInt(8);
          }
          if(this.diskNumberStart === -1)
          {
-            this.diskNumberStart = extraReader.int(4);
+            this.diskNumberStart = extraReader.readInt(4);
          }
       },
       /**
        * Read the central part of a zip file and add the info in this object.
        * @param {StreamReader} reader the reader to use.
        */
-      readExtraFields : function(reader, extraFieldsLength)
+      readExtraFields : function(reader)
       {
          var start = reader.index,
-         extraFieldId,
-         extraFieldLength,
-         extraFieldValue;
+             extraFieldId,
+             extraFieldLength,
+             extraFieldValue;
 
          this.extraFields = this.extraFields || {};
 
-         while (reader.index < start + extraFieldsLength)
+         while (reader.index < start + this.extraFieldsLength)
          {
-            extraFieldId     = reader.int(2);
-            extraFieldLength = reader.int(2);
-            extraFieldValue  = reader.string(extraFieldLength);
+            extraFieldId     = reader.readInt(2);
+            extraFieldLength = reader.readInt(2);
+            extraFieldValue  = reader.readString(extraFieldLength);
 
             this.extraFields[extraFieldId] = {
                id:     extraFieldId,
@@ -350,18 +354,18 @@ Licenced under the GPLv3 and the MIT licences
          }
 
          if(this.isZIP64() && this.extraFields[0x0001])
-            {
-               this.parseZIP64ExtraField(reader);
-            }
+         {
+            this.parseZIP64ExtraField(reader);
+         }
       }
    }
    // }}} end of ZipEntry
 
-   // ZipEntries {{{
+   //  class ZipEntries {{{
    /**
-    * @Class ZipEntries
     * All the entries in the zip file.
-    * @param data the binary stream to load.
+    * @constructor
+    * @param {string} data the binary stream to load.
     */
    function ZipEntries(data)
    {
@@ -371,12 +375,12 @@ Licenced under the GPLv3 and the MIT licences
    ZipEntries.prototype = {
       /**
        * Check that the reader is on the speficied signature.
-       * @param {String} expectedSignature the expected signature.
+       * @param {string} expectedSignature the expected signature.
        * @throws {Error} if it is an other signature.
        */
       checkSignature : function(expectedSignature)
       {
-         var signature = this.reader.string(4);
+         var signature = this.reader.readString(4);
          if (signature !== expectedSignature)
          {
             throw new Error("Corrupted zip or bug : unexpected signature " +
@@ -388,15 +392,15 @@ Licenced under the GPLv3 and the MIT licences
        */
       readBlockEndOfCentral : function ()
       {
-         this.diskNumber                  = this.reader.int(2);
-         this.diskWithCentralDirStart     = this.reader.int(2);
-         this.centralDirRecordsOnThisDisk = this.reader.int(2);
-         this.centralDirRecords           = this.reader.int(2);
-         this.centralDirSize              = this.reader.int(4);
-         this.centralDirOffset            = this.reader.int(4);
+         this.diskNumber                  = this.reader.readInt(2);
+         this.diskWithCentralDirStart     = this.reader.readInt(2);
+         this.centralDirRecordsOnThisDisk = this.reader.readInt(2);
+         this.centralDirRecords           = this.reader.readInt(2);
+         this.centralDirSize              = this.reader.readInt(4);
+         this.centralDirOffset            = this.reader.readInt(4);
 
-         this.zipCommentLength            = this.reader.int(2);
-         this.zipComment                  = this.reader.string(this.zipCommentLength);
+         this.zipCommentLength            = this.reader.readInt(2);
+         this.zipComment                  = this.reader.readString(this.zipCommentLength);
       },
       /**
        * Read the end of the Zip 64 central directory.
@@ -406,15 +410,15 @@ Licenced under the GPLv3 and the MIT licences
        */
       readBlockZip64EndOfCentral : function ()
       {
-         this.zip64EndOfCentralSize       = this.reader.int(8);
-         this.versionMadeBy               = this.reader.string(2);
-         this.versionNeeded               = this.reader.int(2);
-         this.diskNumber                  = this.reader.int(4);
-         this.diskWithCentralDirStart     = this.reader.int(4);
-         this.centralDirRecordsOnThisDisk = this.reader.int(8);
-         this.centralDirRecords           = this.reader.int(8);
-         this.centralDirSize              = this.reader.int(8);
-         this.centralDirOffset            = this.reader.int(8);
+         this.zip64EndOfCentralSize       = this.reader.readInt(8);
+         this.versionMadeBy               = this.reader.readString(2);
+         this.versionNeeded               = this.reader.readInt(2);
+         this.diskNumber                  = this.reader.readInt(4);
+         this.diskWithCentralDirStart     = this.reader.readInt(4);
+         this.centralDirRecordsOnThisDisk = this.reader.readInt(8);
+         this.centralDirRecords           = this.reader.readInt(8);
+         this.centralDirSize              = this.reader.readInt(8);
+         this.centralDirOffset            = this.reader.readInt(8);
 
          this.zip64ExtensibleData = {};
          var extraDataSize = this.zip64EndOfCentralSize - 44,
@@ -424,13 +428,13 @@ Licenced under the GPLv3 and the MIT licences
          extraFieldValue;
          while(index < extraDataSize)
          {
-            extraFieldId     = this.reader.int(2);
-            extraFieldLength = this.reader.int(4);
-            extraFieldValue  = this.reader.string(extraFieldLength);
+            extraFieldId     = this.reader.readInt(2);
+            extraFieldLength = this.reader.readInt(4);
+            extraFieldValue  = this.reader.readString(extraFieldLength);
             this.zip64ExtensibleData[extraFieldId] = {
-               id: extraFieldId,
+               id:     extraFieldId,
                length: extraFieldLength,
-               value: extraFieldValue
+               value:  extraFieldValue
             };
          }
       },
@@ -439,9 +443,9 @@ Licenced under the GPLv3 and the MIT licences
        */
       readBlockZip64EndOfCentralLocator : function ()
       {
-         this.diskWithZip64CentralDirStart = this.reader.int(4);
-         this.relativeOffsetEndOfZip64CentralDir = this.reader.int(8);
-         this.disksCount = this.reader.int(4);
+         this.diskWithZip64CentralDirStart       = this.reader.readInt(4);
+         this.relativeOffsetEndOfZip64CentralDir = this.reader.readInt(8);
+         this.disksCount                         = this.reader.readInt(4);
          if (this.disksCount > 1)
          {
             throw new Error("Multi-volumes zip are not supported");
@@ -452,9 +456,10 @@ Licenced under the GPLv3 and the MIT licences
        */
       readLocalFiles : function()
       {
-         for(var i = 0; i < this.files.length; i++)
+         var i, file;
+         for(i = 0; i < this.files.length; i++)
          {
-            var file = this.files[i];
+            file = this.files[i];
             this.reader.setIndex(file.localHeaderOffset);
             this.checkSignature(JSZip.signature.LOCAL_FILE_HEADER);
             file.readLocalPart(this.reader);
@@ -465,10 +470,12 @@ Licenced under the GPLv3 and the MIT licences
        */
       readCentralDir : function()
       {
+         var file;
+
          this.reader.setIndex(this.centralDirOffset);
-         while(this.reader.string(4) === JSZip.signature.CENTRAL_FILE_HEADER)
+         while(this.reader.readString(4) === JSZip.signature.CENTRAL_FILE_HEADER)
          {
-            var file = new ZipEntry({
+            file = new ZipEntry({
                zip64: this.zip64
             });
             file.readCentralPart(this.reader);
@@ -482,11 +489,11 @@ Licenced under the GPLv3 and the MIT licences
       {
          // zip 64 ?
          var offset = this.reader.stream.lastIndexOf(JSZip.signature.ZIP64_CENTRAL_DIRECTORY_LOCATOR);
-         if (offset == -1) // nope
+         if (offset === -1) // nope
          {
             this.zip64 = false;
             offset = this.reader.stream.lastIndexOf(JSZip.signature.CENTRAL_DIRECTORY_END);
-            if (offset == -1)
+            if (offset === -1)
             {
                throw new Error("Corrupted zip : can't find end of central directory");
             }
@@ -509,19 +516,15 @@ Licenced under the GPLv3 and the MIT licences
       },
       /**
        * Read a zip file and create ZipEntries.
-       * @param {String} data the binary string representing a zip file.
+       * @param {string} data the binary string representing a zip file.
        */
       load : function(data)
       {
-         var hasMoreFiles = true,
-         offset, signature, file, size;
-
          this.reader = new StreamReader(data);
 
          this.readEndOfCentral();
          this.readCentralDir();
          this.readLocalFiles();
-
       }
    }
    // }}} end of ZipEntries
@@ -529,7 +532,7 @@ Licenced under the GPLv3 and the MIT licences
    /**
     * Implementation of the load method of JSZip.
     * It uses the above classes to decode a zip file, and load every files.
-    * @param {String} data the data to load.
+    * @param {string} data the data to load.
     * @param {Object} options Options for loading the stream.
     *  options.base64 : is the stream in base64 ? default : false
     */
