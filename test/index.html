@@ -104,7 +104,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
     */
    function reload(bytesStream)
    {
-     return new JSZip(bytesStream).generate({base64:false});
+      return new JSZip(bytesStream, {checkCRC32:true}).generate({base64:false});
    }
 
    // cache for files
@@ -595,6 +595,32 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       try
       {
          var zip = new JSZip(file);
+         ok(false, "no exception were thrown");
+      }
+      catch(e)
+      {
+         ok(e.message.match("Corrupted zip"), "the error message is useful");
+      }
+   });
+
+   testZipFile("invalid crc32 but no check", "ref/invalid/crc32.zip", function(file)
+   {
+      try
+      {
+         var zip = new JSZip(file, {checkCRC32:false});
+         ok(true, "no exception were thrown");
+      }
+      catch(e)
+      {
+         ok(false, "An exception were thrown but the check should have been disabled.");
+      }
+   });
+
+   testZipFile("invalid crc32", "ref/invalid/crc32.zip", function(file)
+   {
+      try
+      {
+         var zip = new JSZip(file, {checkCRC32:true});
          ok(false, "no exception were thrown");
       }
       catch(e)

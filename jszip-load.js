@@ -167,10 +167,13 @@ Licenced under the GPLv3 and the MIT licences
    /**
     * An entry in the zip file.
     * @constructor
+    * @param {Object} options Options of the current file.
+    * @param {Object} loadOptions Options for loading the stream.
     */
-   function ZipEntry(options)
+   function ZipEntry(options, loadOptions)
    {
       this.options = options;
+      this.loadOptions = loadOptions;
    }
    ZipEntry.prototype = {
       /**
@@ -259,6 +262,11 @@ Licenced under the GPLv3 and the MIT licences
                             " unknown (inner file : " + this.fileName + ")");
          }
          this.uncompressedFileData = compression.uncompress(this.compressedFileData);
+
+         if (this.loadOptions.checkCRC32 && JSZip.prototype.crc32(this.uncompressedFileData) !== this.crc32)
+         {
+            throw new Error("Corrupted zip : CRC32 mismatch");
+         }
       },
 
       /**
@@ -366,10 +374,12 @@ Licenced under the GPLv3 and the MIT licences
     * All the entries in the zip file.
     * @constructor
     * @param {string} data the binary stream to load.
+    * @param {Object} loadOptions Options for loading the stream.
     */
-   function ZipEntries(data)
+   function ZipEntries(data, loadOptions)
    {
       this.files = [];
+      this.loadOptions = loadOptions;
       if (data) this.load(data);
    }
    ZipEntries.prototype = {
@@ -477,7 +487,7 @@ Licenced under the GPLv3 and the MIT licences
          {
             file = new ZipEntry({
                zip64: this.zip64
-            });
+            }, this.loadOptions);
             file.readCentralPart(this.reader);
             this.files.push(file);
          }
@@ -545,7 +555,7 @@ Licenced under the GPLv3 and the MIT licences
          data = JSZipBase64.decode(data);
       }
 
-      zipEntries = new ZipEntries(data);
+      zipEntries = new ZipEntries(data, options);
       files = zipEntries.files;
       for (i in files)
       {
