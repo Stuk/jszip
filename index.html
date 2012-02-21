@@ -60,6 +60,8 @@ th, td
 }
 
 th {border-width: 0 0 2px 0;border-style: solid;}
+table.browser_support {width:100%;}
+table.browser_support th {width:20%;}
 
 .ie {border-color: #0275BA;}
 .ff {border-color: #DF7215;}
@@ -185,10 +187,23 @@ location.href="data:application/zip;base64,"+content;
    <div class="grid_9 border">
       <h2>Tell me more!</h2>
 
+      <h3>Browser support</h3>
+      <table cellspacing="0" class="browser_support">
+         <tr><th class="op">Opera</th> <th class="ff">Firefox</th> <th class="sf">Safari</th> <th class="cr">Chrome</th> <th class="ie">Internet Explorer</th> </tr>
+         <tr><td>Yes</td> <td>Yes</td> <td>Yes</td> <td>Yes</td> <td>Yes</td></tr>
+         <tr>
+          <td>Tested with the latest version</td>
+          <td>Tested with 3.0 / 3.6 / latest version</td>
+          <td>Tested with the latest version</td>
+          <td>Tested with the latest version</td>
+          <td>Tested with IE 6 / 7 / 8 / 9</td>
+         </tr>
+      </table>
+
       <p>While JSZip should work everywhere, the tricky part is to give the zip file to the user.</p>
 
       <h3>Browser support for <a href="https://en.wikipedia.org/wiki/Data_URI_scheme">data URI scheme</a> with zip</h3>
-      <table cellspacing="0">
+      <table cellspacing="0" class="browser_support">
          <tr><th class="op">Opera</th> <th class="ff">Firefox</th> <th class="sf">Safari</th> <th class="cr">Chrome</th> <th class="ie">Internet Explorer</th> </tr>
          <tr><td>7.5+</td> <td>3.0+</td> <td>Yes</td> <td>Yes</td> <td>No</td></tr>
          <tr>
@@ -199,8 +214,6 @@ location.href="data:application/zip;base64,"+content;
           <td><a href="http://msdn.microsoft.com/en-us/library/cc848897(VS.85).aspx">Only supports data URLs for some content</a>. (May be able to use <a href="http://www.phpied.com/mhtml-when-you-need-data-uris-in-ie7-and-under/">MHTML</a>?)</td>
          </tr>
       </table>
-
-      <p>Tests still need to be run on historical browsers to check which versions are supported.</p>
 
       <h3>Filename problems</h3>
 	  <p>The biggest issue with JSZip is that the filenames are very awkward, Firefox generates filenames such as <code>a5sZQRsx.zip.part</code> (see bugs <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=367231">367231</a> and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=532230">532230</a>), and Safari isn't much better with just <code>Unknown</code>. Sadly there is no pure Javascript solution to this. However...</p>
@@ -242,7 +255,7 @@ Downloadify.create('downloadify',{
       <h4 id="doc_new_JSZip_data_options">new JSZip(data [,options])</h4>
       <dl>
         <dt>Description : </dt>
-        <dd>Create a new JSZip file and load an existing zip file. See the documentation of <a href="doc_load_data_options"><code>load()</code></a> for more details and <a href="#zip_load_limits">this</a> for the limitations.</dd>
+        <dd>Create a new JSZip file and load an existing zip file. See the documentation of <a href="#doc_load_data_options"><code>load()</code></a> for more details and <a href="#zip_load_limits">this</a> for the limitations.</dd>
         <dt>Parameters : </dt>
         <dd><code>data</code> (String/binary) the content of the zip file to load.</dd>
         <dd><code>options</code> (Object) options to pass to the <a href="#doc_load_data_options"><code>load()</code></a> method..</dd>
