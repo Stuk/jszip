@@ -584,7 +584,7 @@ JSZip.prototype = (function ()
       utf8decode : function (utftext) {
          var string = "";
          var i = 0;
-         var c = c1 = c2 = 0;
+         var c = 0, c1 = 0, c2 = 0, c3 = 0;
 
          while ( i < utftext.length ) {
 

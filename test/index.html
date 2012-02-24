@@ -738,7 +738,6 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       // the data come from http://www.antarctica.ac.uk/met/READER/upper_air/
       testZipFile("AntarcticaTemps.xlsx", "ref/complex_files/AntarcticaTemps.xlsx", function(file) {
          var zip = new JSZip(file);
-         console.log(zip);
          // the zip file contains 16 entries, but we get 27 when creating all the sub-folders.
          equal(zip.filter(function(){return true;}).length, 27, "the zip contains the good number of elements.");
          ok(zip.file("[Content_Types].xml").data.indexOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml") !== -1, "the zip was correctly read.");
@@ -747,7 +746,6 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       // same as above, but in the Open Document format
       testZipFile("AntarcticaTemps.ods", "ref/complex_files/AntarcticaTemps.ods", function(file) {
          var zip = new JSZip(file);
-         console.log(zip);
          // the zip file contains 19 entries, but we get 27 when creating all the sub-folders.
          equal(zip.filter(function(){return true;}).length, 27, "the zip contains the good number of elements.");
          ok(zip.file("META-INF/manifest.xml").data.indexOf("application/vnd.oasis.opendocument.spreadsheet") !== -1, "the zip was correctly read.");
