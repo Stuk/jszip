@@ -182,6 +182,7 @@ Licenced under the GPLv3 and the MIT licences
        */
       isEncrypted : function ()
       {
+         // bit 1 is set
          return (this.bitFlag & 0x0001) === 0x0001;
       },
       /**
@@ -190,7 +191,17 @@ Licenced under the GPLv3 and the MIT licences
        */
       hasDataDescriptor : function ()
       {
+         // bit 3 is set
          return (this.bitFlag & 0x0008) === 0x0008;
+      },
+      /**
+       * say if the file has utf-8 filename/comment.
+       * @return {boolean} true if the filename/comment is in utf-8, false otherwise.
+       */
+      useUTF8 : function ()
+      {
+         // bit 11 is set
+         return (this.bitFlag & 0x0800) === 0x0800;
       },
       /**
        * say if the file is a zip64 file.
@@ -233,7 +244,6 @@ Licenced under the GPLv3 and the MIT licences
          this.readLocalPartHeader(reader);
 
          this.fileName = reader.readString(this.fileNameLength);
-         this.fileName = JSZip.prototype.utf8decode(this.fileName);
          this.readExtraFields(reader);
 
          if (!this.hasDataDescriptor())
@@ -267,6 +277,11 @@ Licenced under the GPLv3 and the MIT licences
          if (this.loadOptions.checkCRC32 && JSZip.prototype.crc32(this.uncompressedFileData) !== this.crc32)
          {
             throw new Error("Corrupted zip : CRC32 mismatch");
+         }
+
+         if (this.useUTF8())
+         {
+            this.fileName = JSZip.prototype.utf8decode(this.fileName);
          }
       },
 
@@ -305,9 +320,13 @@ Licenced under the GPLv3 and the MIT licences
          this.localHeaderOffset      = reader.readInt(4);
 
          this.fileName = reader.readString(this.fileNameLength);
-         this.fileName = JSZip.prototype.utf8decode(this.fileName);
          this.readExtraFields(reader);
          this.fileComment = reader.readString(this.fileCommentLength);
+         if (this.useUTF8())
+         {
+            this.fileName    = JSZip.prototype.utf8decode(this.fileName);
+            this.fileComment = JSZip.prototype.utf8decode(this.fileComment);
+         }
 
          // warning, this is true only for zip with madeBy == DOS (plateform dependent feature)
          this.dir = this.externalFileAttributes & 0x00000010 ? true : false;

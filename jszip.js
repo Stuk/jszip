@@ -218,10 +218,11 @@ JSZip.prototype = (function ()
     */
    var prepareLocalHeaderData = function(file, utfEncodedFileName, compressionType)
    {
-      var name = utfEncodedFileName,
-      data = file.data,
-      o = file.options,
-      dosTime, dosDate;
+      var useUTF8 = utfEncodedFileName !== file.name,
+          data    = file.data,
+          o       = file.options,
+          dosTime,
+          dosDate;
 
       // date
       // @see http://www.delorie.com/djgpp/doc/rbinter/it/52/13.html
@@ -253,7 +254,8 @@ JSZip.prototype = (function ()
       // version needed to extract
       header += "\x0A\x00";
       // general purpose bit flag
-      header += "\x00\x00";
+      // set bit 11 if utf8
+      header += useUTF8 ? "\x00\x08" : "\x00\x00";
       // compression method
       header += compression.magic;
       // last mod file time
@@ -267,7 +269,7 @@ JSZip.prototype = (function ()
       // uncompressed size
       header += decToHex(data.length, 4);
       // file name length
-      header += decToHex(name.length, 2);
+      header += decToHex(utfEncodedFileName.length, 2);
       // extra field length
       header += "\x00\x00";
 
