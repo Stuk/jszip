@@ -1,9 +1,9 @@
 /**
 
 JSZip - A Javascript class for generating Zip files
-<http://jszip.stuartk.co.uk>
+<http://stuartk.com/jszip>
 
-(c) 2009 Stuart Knightley <stuart [at] stuartk.co.uk>
+(c) 2009 Stuart Knightley <stuart [at] stuartk.com>
 Licenced under the GPLv3 and the MIT licences
 
 Usage:
