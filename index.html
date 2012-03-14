@@ -60,6 +60,8 @@ th, td
 }
 
 th {border-width: 0 0 2px 0;border-style: solid;}
+table.browser_support {width:100%;}
+table.browser_support th {width:20%;}
 
 .ie {border-color: #0275BA;}
 .ff {border-color: #DF7215;}
@@ -72,6 +74,12 @@ hr
    clear: both;
    border: none;
    border-top: 1px solid #CCCCCC;
+}
+
+dt
+{
+  /*font-weight:bold;*/
+  text-decoration:underline;
 }
 
 #where p
@@ -138,7 +146,7 @@ window.onload = function()
    <div id="header" class="grid_12">
    <div class="alpha grid_5">
     <h1>JS<span style="font-weight:100">Zip</span></h1>
-    Create .zip files with Javascript
+    Create, read and edit .zip files with Javascript
    </div>
    </div>
 
@@ -146,9 +154,9 @@ window.onload = function()
       <h2>How?</h2>
       <textarea id="demo-code" rows="7" class="grid_5 alpha omega" spellcheck="false">
 var zip = new JSZip();
-zip.add("Hello.txt", "Hello World\n");
+zip.file("Hello.txt", "Hello World\n");
 img = zip.folder("images");
-img.add("smile.gif", imgData, {base64: true});
+img.file("smile.gif", imgData, {base64: true});
 content = zip.generate();
 location.href="data:application/zip;base64,"+content;
       </textarea>
@@ -180,7 +188,22 @@ location.href="data:application/zip;base64,"+content;
       <h2>Tell me more!</h2>
 
       <h3>Browser support</h3>
-      <table cellspacing="0">
+      <table cellspacing="0" class="browser_support">
+         <tr><th class="op">Opera</th> <th class="ff">Firefox</th> <th class="sf">Safari</th> <th class="cr">Chrome</th> <th class="ie">Internet Explorer</th> </tr>
+         <tr><td>Yes</td> <td>Yes</td> <td>Yes</td> <td>Yes</td> <td>Yes</td></tr>
+         <tr>
+          <td>Tested with the latest version</td>
+          <td>Tested with 3.0 / 3.6 / latest version</td>
+          <td>Tested with the latest version</td>
+          <td>Tested with the latest version</td>
+          <td>Tested with IE 6 / 7 / 8 / 9</td>
+         </tr>
+      </table>
+
+      <p>While JSZip should work everywhere, the tricky part is to give the zip file to the user.</p>
+
+      <h3>Browser support for <a href="https://en.wikipedia.org/wiki/Data_URI_scheme">data URI scheme</a> with zip</h3>
+      <table cellspacing="0" class="browser_support">
          <tr><th class="op">Opera</th> <th class="ff">Firefox</th> <th class="sf">Safari</th> <th class="cr">Chrome</th> <th class="ie">Internet Explorer</th> </tr>
          <tr><td>7.5+</td> <td>3.0+</td> <td>Yes</td> <td>Yes</td> <td>No</td></tr>
          <tr>
@@ -191,8 +214,6 @@ location.href="data:application/zip;base64,"+content;
           <td><a href="http://msdn.microsoft.com/en-us/library/cc848897(VS.85).aspx">Only supports data URLs for some content</a>. (May be able to use <a href="http://www.phpied.com/mhtml-when-you-need-data-uris-in-ie7-and-under/">MHTML</a>?)</td>
          </tr>
       </table>
-
-      <p>Tests still need to be run on historical browsers to check which versions are supported.</p>
 
       <h3>Filename problems</h3>
 	  <p>The biggest issue with JSZip is that the filenames are very awkward, Firefox generates filenames such as <code>a5sZQRsx.zip.part</code> (see bugs <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=367231">367231</a> and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=532230">532230</a>), and Safari isn't much better with just <code>Unknown</code>. Sadly there is no pure Javascript solution to this. However...</p>
@@ -216,101 +237,299 @@ Downloadify.create('downloadify',{
       <p>
       <a href="http://www.picurl.org/blog/author/franz/">Franz Buchinger</a> has written a brilliant tutorial on <a href="http://www.picurl.org/blog/2009/11/22/creating-zip-archives-with-gears/">using JSZip with Google Gears</a> (<a href="http://www.picurl.org/blog/2009/11/29/gearszipper-part2-adding-support-for-real-files-and-canvas-elements/">part 2</a>). If you want to let your Gears users download several files at once I really recommend having a look at some of his <a href="http://picurl.org/gears/zipper/">examples</a>.</p>
 
+      <h3>Reading a zip file from an ajax call</h3>
+      <p>
+      When doing an ajax call to get the binary data, the browser will try to interpret the binary as text, corrupting it. The solution is to <a href="https://developer.mozilla.org/En/XMLHttpRequest/Using_XMLHttpRequest#Receiving_binary_data_in_older_browsers">set the mimetype to 'text/plain; charset=x-user-defined'</a>. This solution works well in all browsers but IE. If you need IE support, please see what is done in the file test/index.html.
+      </p>
+
       <h2 style="margin-top: 2em;">Documentation</h2>
 
-      <h4>new JSZip([compressionMethod])</h4>
-      <p>The constructor</p>
-	  <p><code>compressionMethod</code>, string. The compression method to use for the zip file.</p>
-      <p>
-      Available methods :
-      <ul>
-         <li><code>"STORE"</code> no compression, the default.</li>
-         <li><code>"DEFLATE"</code> default zip compression, need the file jszip-deflate.js</li>
-      </ul>
-      </p>
-      <pre class="example">
-var zip = new JSZip(); // same as new JSZip("STORE");
-var zip = new JSZip("DEFLATE");</pre>
+      <h4 id="doc_new_JSZip">new JSZip()</h4>
+      <dl>
+        <dt>Description : </dt>
+        <dd>The default constructor.</dd>
+        <dt>Returns : </dt>
+        <dd>A new JSZip.</dd>
+      </dl>
 
-      <h4>add(name, data [,options])</h4>
-      <p>Add a file to the zip file. Supports chaining.</p>
-      <p>Options:</p>
-      <ul>
-         <li><code>base64</code>, boolean. Set to <code>true</code> if the data
-         is base64 encoded. For example image data from a <code>&lt;canvas&gt;</code> element.
-         Plain text and HTML do not need this option.</li>
-         <li><code>binary</code>, boolean. Defaults to <code>true</code> if the data
-         is base64 encoded, <code>false</code> otherwise. If set to false then
-         UTF-8 characters will be encoded.</li>
-         <li><code>date</code>, Date. Use it to specify the last modification date.
-         If not set the current date is used.</li>
-      </ul>
+      <h4 id="doc_new_JSZip_data_options">new JSZip(data [,options])</h4>
+      <dl>
+        <dt>Description : </dt>
+        <dd>Create a new JSZip file and load an existing zip file. See the documentation of <a href="#doc_load_data_options"><code>load()</code></a> for more details and <a href="#zip_load_limits">this</a> for the limitations.</dd>
+        <dt>Parameters : </dt>
+        <dd><code>data</code> (String/binary) the content of the zip file to load.</dd>
+        <dd><code>options</code> (Object) options to pass to the <a href="#doc_load_data_options"><code>load()</code></a> method..</dd>
+        <dt>Returns : </dt>
+        <dd>A new JSZip.</dd>
+      </dl>
+      <pre class="example">
+new JSZip(zipDataFromXHR, {base64:false});
+// same as
+var zip = new JSZip();
+zip.load(zipDataFromXHR, {base64:false});</pre>
+
+      <h4 id="doc_file_name">file(name)</h4>
+      <dl>
+        <dt>Description : </dt>
+        <dd>Get a file with the specified name.</dd>
+        <dt>Parameters : </dt>
+        <dd><code>name</code> (String) the name of the file.</dd>
+        <dt>Returns : </dt>
+        <dd>The file if any, <code>null</code> otherwise. The file has the following structure :
+          <ul>
+            <li><code>name</code> the absolute path of the file</li>
+            <li><code>data</code> the data contained in the file</li>
+            <li><code>options</code> the options of the file. The available options are :
+              <ul>
+                <li><code>base64</code>, boolean, cf <a href="#doc_file_name_data_options">file(name, data [,options])</a></li>
+                <li><code>binary</code>, boolean, cf <a href="#doc_file_name_data_options">file(name, data [,options])</a></li>
+                <li><code>dir</code>, boolean, true if this is a directory</li>
+                <li><code>date</code>, date, cf <a href="#doc_file_name_data_options">file(name, data [,options])</a></li>
+              </ul>
+            </li>
+            <li><code>asText()</code>, string, the content as an utf8 string (utf8 encoded if necessary).</li>
+            <li><code>asBinary()</code>, string, the content as binary (utf8 decoded if necessary).</li>
+          </ul>
+        </dd>
+      </dl>
+      <pre class="example">
+var zip = new JSZip();
+zip.file("file.txt", "content");
+
+zip.file("file.txt").name // "file.txt"
+zip.file("file.txt").data // "content"
+zip.file("file.txt").options.dir // false
+
+// utf8 example
+var zip = new JSZip(zipFromAjaxWithUTF8);
+zip.file("amount.txt").data // "&#226;&#130;&#172;15" <!-- something like that -->
+zip.file("amount.txt").asText() // "&euro;15"
+</pre>
+
+      <h4 id="doc_file_regex">file(regex)</h4>
+      <dl>
+        <dt>Description : </dt>
+        <dd>Search a file in the current folder and subfolders with a <a href="http://www.javascriptkit.com/javatutors/redev.shtml">regular expression</a>. The regex is tested against the relative filename.</dd>
+        <dt>Parameters : </dt>
+        <dd><code>regex</code> (RegExp) the regex to use.</dd>
+        <dt>Returns : </dt>
+        <dd>An array of matching files (an empty array if none matched).</dd>
+      </dl>
+      <pre class="example">
+var zip = new JSZip();
+zip.file("file1.txt", "content");
+zip.file("file2.txt", "content");
+
+zip.file(/file/); // array of size 2
+
+// example with a relative path :
+var folder = zip.folder("sub");
+folder
+  .file("file3.txt", "content")  // relative path from folder : file3.txt
+  .file("file4.txt", "content"); // relative path from folder : file4.txt
+
+folder.file(/file/);  // array of size 2
+folder.file(/^file/); // array of size 2, the relative paths start with file
+
+// arrays contain objects in the form:
+// {name: "file2.txt", data: "content", dir: false}</pre>
+
+      <h4 id="doc_file_name_data_options">file(name, data [,options])</h4>
+      <dl>
+        <dt>Description : </dt>
+        <dd>Add a file to the zip file.</dd>
+        <dt>Parameters : </dt>
+        <dd><code>name</code> (String) the name of the file.</dd>
+        <dd><code>data</code> (binary) the content of the file.</dd>
+        <dd><code>options</code> (Object) the options :
+          <ul>
+             <li><code>base64</code> (boolean) set to <code>true</code> if the data
+             is base64 encoded. For example image data from a <code>&lt;canvas&gt;</code> element.
+             Plain text and HTML do not need this option.</li>
+             <li><code>binary</code> (boolean) defaults to <code>true</code> if the data
+             is base64 encoded, <code>false</code> otherwise. If set to false then
+             UTF-8 characters will be encoded.</li>
+             <li><code>date</code> (Date) use it to specify the last modification date.
+             If not set the current date is used.</li>
+          </ul>
+        </dd>
+        <dt>Returns : </dt>
+        <dd>A JSZip object, for chaining.</dd>
+      </dl>
       <pre class="example">
 zip.add("Hello.txt", "Hello World\n");
 zip.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
 zip.add("magic.txt", "U2VjcmV0IGNvZGU=", {base64: true, binary: false});
 zip.add("Xmas.txt", "Ho ho ho !", {date : new Date("December 25, 2007 00:00:01")});
+zip.add("folder/file.txt", "file in folder");
 
-zip.add("animals.txt", "dog,platypus\n").add("people.txt", "james,sebastian\n");</pre>
-      <p>
-      Result: <code>Hello.txt, smile.gif, magic.txt, Xmas.txt, animals.txt, people.txt</code>
-      </p>
+zip.add("animals.txt", "dog,platypus\n").add("people.txt", "james,sebastian\n");
 
-      <h4>folder(name)</h4>
-      <p>Add a directory to the zip file. Supports chaining.</p>
+// result : Hello.txt, smile.gif, magic.txt, Xmas.txt, animals.txt, people.txt,
+// folder/, folder/file.txt</pre>
+
+      <h4 id="doc_folder_name">folder(name)</h4>
+      <dl>
+        <dt>Description : </dt>
+        <dd>Add a directory to the zip file.</dd>
+        <dt>Parameters : </dt>
+        <dd><code>name</code> (String) the name of the directory.</dd>
+        <dt>Returns : </dt>
+        <dd>a new JSZip (for chaining), with the new folder as root.</dd>
+      </dl>
       <pre class="example">
 zip.folder("images");
 zip.folder("css").add("style.css", "body {background: #FF0000}");
 // or specify an absolute path (using forward slashes)
-zip.add("css/font.css", "body {font-family: sans-serif}")</pre>
-      <p>
-      Result: <code>images/, css/, css/style.css, css/font.css</code>
-      </p>
+zip.add("css/font.css", "body {font-family: sans-serif}")
 
-      <h4>find(needle)</h4>
-      <p>Compare a string or <a href="http://www.javascriptkit.com/javatutors/redev.shtml">regular expression</a>
-      against all of the filenames and returns an informational object for each that matches.</p>
+// result : images/, css/, css/style.css, css/font.css</pre>
+
+      <h4 id="doc_folder_regex">folder(regex)</h4>
+      <dl>
+        <dt>Description : </dt>
+        <dd>Search a subdirectory.</dd>
+        <dd>Search a subdirectory in the current directory with a <a href="http://www.javascriptkit.com/javatutors/redev.shtml">regular expression</a>. The regex is tested against the relative path.</dd>
+        <dt>Parameters : </dt>
+        <dd><code>regex</code> (RegExp) the regex to use.</dd>
+        <dt>Returns : </dt>
+        <dd>An array of matching folders (an empty array if none matched).</dd>
+      </dl>
       <pre class="example">
-zip.add("Readme", "Hello World!\n");
-zip.add("Readme.French", "Bonjour tout le monde!\n");
-zip.add("Readme.Pirate", "Ahoy m'hearty!\n");
+var zip = new JSZip();
+zip.folder("home/Pierre/videos");
+zip.folder("home/Pierre/photos");
+zip.folder("home/Jean/videos");
+zip.folder("home/Jean/photos");
 
-zip.find("Readme"); // only finds "Readme"
-zip.find(/^Readme/); // Regular expression finds all three</pre>
-      <p>
-      Result: Array of matched file objects in the form:
-      <code>{name: "Readme", data: "Hello World!", dir: false}</code>
-      </p>
+zip.folder(/videos/); // array of size 2
 
-      <h4>remove(name)</h4>
+zip.folder("home/Jean").folder(/^vid/); // array of 1</pre>
+
+      <h4 id="doc_remove_name">remove(name)</h4>
       <p>Delete a file or folder.</p>
+      <dl>
+        <dt>Description : </dt>
+        <dd>Delete a file or folder (recursively).</dd>
+        <dt>Parameters : </dt>
+        <dd><code>name</code> (String) the name of the file/folder to delete.</dd>
+        <dt>Returns : </dt>
+        <dd>The current JSZip object.</dd>
+      </dl>
       <pre class="example">
+var zip = new JSZip();
 zip.add("Hello.txt", "Hello World\n");
-zip.add("temp.txt", "nothing").remove("temp.txt");</pre>
-      <p>
-      Result: <code>Hello.txt</code>
-      </p>
-      <pre class="example">
-zip.add("Hello.txt", "Hello World\n");
-zip.folder("css").add("style.css", "body {background: #FF0000}");
-zip.remove("Hello.txt").remove("css");</pre>
-      <p>
-      Result: Empty zip.
-      </p>
+zip.add("temp.txt", "nothing").remove("temp.txt");
+// result : Hello.txt
 
-      <h4>generate(asBytes = false)</h4>
-      <p>Generates the complete zip file. By default encoded as base64, pass <code>true</code> to get the raw byte string</p>
+zip.folder("css").add("style.css", "body {background: #FF0000}");
+zip.remove("Hello.txt").remove("css");
+//result : empty zip</pre>
+
+      <h4 id="doc_generate_options">generate(options)</h4>
+      <dl>
+        <dt>Description : </dt>
+        <dd>Generates the complete zip file.</dd>
+        <dt>Parameters : </dt>
+        <dd><code>options</code> (Object) the options to generate the zip file :
+          <ul>
+             <li><code>base64</code> (boolean) <code>false</code> to get the result as a raw byte string.
+             Default : <code>true</code>, encode as base64.</li>
+             <li><code>compression</code> (String) the compression method to use. <code>"STORE"</code> (no compression) by default,
+             you can use <code>"DEFLATE"</code> (include the file jszip-deflate.js) or write your own.</li>
+          </ul>
+        </dd>
+        <dt>Returns : </dt>
+        <dd>The generated zip file.</dd>
+      </dl>
       <pre class="example">
 content = zip.generate();
 location.href="data:application/zip;base64,"+content;</pre>
 
       <pre class="example">
-content = zip.generate(true);
+content = zip.generate({base64:false});
 for (var c = 0; c &lt; content.length; c++)
 {
     console.log(content.charCodeAt(c));
     // do other things
 }</pre>
+
+      <h4 id="doc_load_data_options">load(data, options)</h4>
+      <dl>
+        <dt>Description : </dt>
+        <dd>Read an existing zip and merge the data in the current JSZip object. The implementation is in jszip-load.js, don't forget to include it. This technique has some limitations, see <a href="#zip_load_limits">below</a>.</dd>
+        <dt>Parameters : </dt>
+        <dd><code>data</code> (binary) the zip file</dd>
+        <dd><code>options</code> (Object) the options to load the zip file :
+          <ul>
+            <li><code>base64</code> (boolean) <code>true</code> if the data is base64 encoded, <code>false</code> for binary. Default : <code>false</code>.</li>
+            <li><code>checkCRC32</code> (boolean) <code>true</code> if the read data should be checked against its CRC32. Default : <code>false</code>.</li>
+          </ul>
+        </dd>
+        <dt>Returns : </dt>
+        <dd>The current JSZip object.</dd>
+      </dl>
+      <pre class="example">
+var zip = new JSZip();
+zip.load(zipDataFromXHR);</pre>
+
+      <h5>Zip features supported by this method</h5>
+      <ul>
+         <li>Compression (<code>DEFLATE</code> with jszip-deflate.js)</li>
+         <li>zip with data descriptor</li>
+         <li>ZIP64</li>
+         <li>UTF8 in file name, UTF8 in file content</li>
+      </ul>
+      <h5>Zip features not (yet) supported</h5>
+      <ul>
+         <li>password protected zip</li>
+         <li>multi-volume zip</li>
+      </ul>
+
+      <h4 id="doc_filter_predicate">filter(predicate)</h4>
+      <dl>
+        <dt>Description : </dt>
+        <dd>Filter nested files/folders with the specified function.</dd>
+        <dt>Parameters : </dt>
+        <dd><code>predicate</code> (function) the predicate to use : <code>function (relativePath, file) {...}</code> It takes 2 arguments : the relative path and the file.
+          <ul>
+            <li><code>relativePath</code> (String) The filename and its path, reliatively to the current folder.</li>
+            <li><code>file</code> (Object) The file being tested. Like the result of <a href="#doc_file_name"><code>file(name)</code></a>, the file has the form <code>{name:"...", data:"...", options:{...}}</code>.</li>
+            <li>Return true if the file should be included, false otherwise.</li>
+          </ul>
+        </dd>
+        <dt>Returns : </dt>
+        <dd>An array of matching elements.</dd>
+      </dl>
+      <pre class="example">
+var zip = new JSZip().folder("dir");
+zip.file("readme.txt", "content");
+zip.filter(function (relativePath, file){
+  // relativePath == "readme.txt"
+  // file = {name:"dir/readme.txt",data:"content",options:{...}}
+  return true/false;
+});</pre>
+
+      <h3 id="zip_load_limits">Loading zip files, limitations</h3>
+      <p>
+      The first limitation comes from the limited subset of supported zip features.
+      Classic zip files will work but encrypted zip, multi-volume, etc are not supported
+      and the load() method will throw an <code>Error</code>.
+      </p>
+      <p>
+      The second limitation comes from the browser (and the machine running the browser).
+      A compressed zip file of 10M is common and easily opened by desktop application,
+      but not in a browser. The processing of such a beast is likely to be painful :
+      the browser will eat hundreds of megabytes while using CPU like never.<br/>
+      If you use an old browser, things will be worse. For example, IE6 and IE7 are
+      quite slow to to execute the unit tests, and they completely freeze as soon as
+      they try to handle larger files.<br />
+      Conclusion : reading small files is OK, reading others is not.
+      </p>
+      <p>
+      Third limitation : reading and generating a zip file won't give you back the same file.
+      Some data are discarded (file metadata) and other are added (subfolders).
+      </p>
    </div>
 
    <div id="who" class="grid_3">
@@ -351,3 +570,4 @@ for (var c = 0; c &lt; content.length; c++)
 
 </body>
 </html>
+<!-- vim: set shiftwidth=3 softtabstop=3: -->
