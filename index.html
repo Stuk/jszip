@@ -155,9 +155,9 @@ window.onload = function()
       <textarea id="demo-code" rows="7" class="grid_5 alpha omega" spellcheck="false">
 var zip = new JSZip();
 zip.file("Hello.txt", "Hello World\n");
-img = zip.folder("images");
+var img = zip.folder("images");
 img.file("smile.gif", imgData, {base64: true});
-content = zip.generate();
+var content = zip.generate();
 location.href="data:application/zip;base64,"+content;
       </textarea>
       <button id="demo">Run!</button>
