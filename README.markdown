@@ -24,3 +24,9 @@ images/
     smile.gif
 */
 ```
+
+License
+=======
+
+JSZip is dual-licensed. You may use it under the MIT license *or* the GPLv3
+license. See LICENSE.markdown.
