@@ -121,13 +121,11 @@ window.onload = function()
    d.onclick = runDemo;
    if (d.captureEvents) d.captureEvents(Event.CLICK);
 
-   document.getElementById("demo-code").onkeypress = function()
-   {
+   document.getElementById("demo-code").onkeypress = function() {
       document.getElementById("status").innerHTML = "";
    }
 
-   function runDemo()
-   {
+   function runDemo() {
       var err = false;
       try { eval(document.getElementById("demo-code").value); }
       catch (e) {

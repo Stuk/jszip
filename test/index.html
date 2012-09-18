@@ -80,8 +80,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
 <script type="text/javascript">
 
-   function similar(actual, expected, mistakes)
-   {
+   function similar(actual, expected, mistakes) {
       if (actual.length !== expected.length)
       {
          mistakes -= Math.abs((actual.length||0) - (expected.length||0));
@@ -103,16 +102,14 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    /**
     * bytes -> JSZip -> bytes
     */
-   function reload(bytesStream)
-   {
+   function reload(bytesStream) {
       return new JSZip(bytesStream, {checkCRC32:true}).generate({base64:false});
    }
 
    // cache for files
    var refZips = [];
 
-   function testZipFile(testName, zipName, testFunction)
-   {
+   function testZipFile(testName, zipName, testFunction) {
       test(testName, function ()
       {
          if (refZips[zipName]) {
@@ -169,8 +166,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    module("Essential"); // {{{
 
-   testZipFile("Zip text file !", "ref/text.zip", function(expected)
-   {
+   testZipFile("Zip text file !", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       var content = zip.generate();
@@ -191,8 +187,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   testZipFile("Add a file to overwrite", "ref/text.zip", function(expected)
-   {
+   testZipFile("Add a file to overwrite", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "hello ?");
       zip.file("Hello.txt", "Hello World\n");
@@ -215,8 +210,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    });
 
    // zip -X -0 utf8.zip amount.txt
-   testZipFile("Zip text file with UTF-8 characters", "ref/utf8.zip", function(expected)
-   {
+   testZipFile("Zip text file with UTF-8 characters", "ref/utf8.zip", function(expected) {
       var zip = new JSZip();
       zip.file("amount.txt", "€15\n");
       var actual = zip.generate({base64:false});
@@ -226,8 +220,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    });
 
    // zip -X -0 utf8_in_name.zip €15.txt
-   testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(expected)
-   {
+   testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(expected) {
       var zip = new JSZip();
       zip.file("€15.txt", "€15\n");
       var actual = zip.generate({base64:false});
@@ -236,8 +229,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   testZipFile("Zip text file with date", "ref/text.zip", function(expected)
-   {
+   testZipFile("Zip text file with date", "ref/text.zip", function(expected) {
       var zip = new JSZip();
 	  zip.file("Hello.txt", "Hello World\n", {date : new Date("July 17, 2009 14:36:57")});
       var content = zip.generate();
@@ -257,8 +249,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    });
 
 
-   testZipFile("Zip image file", "ref/image.zip", function(expected)
-   {
+   testZipFile("Zip image file", "ref/image.zip", function(expected) {
       var zip = new JSZip();
       zip.file("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
       var content = zip.generate();
@@ -269,8 +260,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   testZipFile("Zip empty folder", "ref/folder.zip", function(expected)
-   {
+   testZipFile("Zip empty folder", "ref/folder.zip", function(expected) {
       var zip = new JSZip();
       zip.folder("folder");
       var content = zip.generate();
@@ -281,8 +271,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   testZipFile("Zip text, folder and image", "ref/all.zip", function(expected)
-   {
+   testZipFile("Zip text, folder and image", "ref/all.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       zip.folder("images").file("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
@@ -306,8 +295,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   test("Finding a file", function()
-   {
+   test("Finding a file", function() {
       var zip = new JSZip();
       zip.file("Readme", "Hello World!\n");
       zip.file("Readme.French", "Bonjour tout le monde!\n");
@@ -319,8 +307,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(zip.file(/pirate/i).length, 1, "Match regex 1 result");
    });
 
-   testZipFile("Finding a file : modifying the result doesn't alter the zip", "ref/text.zip", function(expected)
-   {
+   testZipFile("Finding a file : modifying the result doesn't alter the zip", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       zip.file("Hello.txt").data = "new data";
@@ -334,8 +321,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-   test("Finding a file (text search) with a relative folder", function()
-   {
+   test("Finding a file (text search) with a relative folder", function() {
       var zip = new JSZip();
       zip.folder("files/default").file("Readme", "Hello World!\n");
       zip.folder("files/translation").file("Readme.French", "Bonjour tout le monde!\n");
@@ -346,8 +332,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(zip.folder("files/translation").file("Readme.French").data, "Bonjour tout le monde!\n", "finding file with a relative path");
    });
 
-   test("Finding files (regex) with a relative folder", function()
-   {
+   test("Finding files (regex) with a relative folder", function() {
       var zip = new JSZip();
       zip.folder("files/default").file("Readme", "Hello World!\n");
       zip.folder("files/translation").file("Readme.French", "Bonjour tout le monde!\n");
@@ -361,8 +346,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(zip.folder("files/default").file(/pirate/i).length, 0, "regex match only in subfolders");
    });
 
-   test("Finding folders", function ()
-   {
+   test("Finding folders", function () {
       var zip = new JSZip();
       zip.folder("root/").folder("sub1/");
       zip.folder("root/sub2/subsub1");
@@ -387,8 +371,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    module("More advanced"); // {{{
 
-   testZipFile("Delete file", "ref/text.zip", function(expected)
-   {
+   testZipFile("Delete file", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Remove.txt", "This file should be deleted\n");
       zip.file("Hello.txt", "Hello World\n");
@@ -401,8 +384,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    });
 
-   testZipFile("Delete file in folder", "ref/folder.zip", function(expected)
-   {
+   testZipFile("Delete file in folder", "ref/folder.zip", function(expected) {
       var zip = new JSZip();
       zip.folder("folder").file("Remove.txt", "This folder and file should be deleted\n");
       zip.remove("folder/Remove.txt");
@@ -413,8 +395,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-   testZipFile("Delete file in folder, with a relative path", "ref/folder.zip", function(expected)
-   {
+   testZipFile("Delete file in folder, with a relative path", "ref/folder.zip", function(expected) {
       var zip = new JSZip();
       var folder = zip.folder("folder");
       folder.file("Remove.txt", "This folder and file should be deleted\n");
@@ -426,8 +407,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-   testZipFile("Delete folder", "ref/text.zip", function(expected)
-   {
+   testZipFile("Delete folder", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.folder("remove").file("Remove.txt", "This folder and file should be deleted\n");
       zip.file("Hello.txt", "Hello World\n");
@@ -440,8 +420,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    });
 
-   testZipFile("Delete nested folders", "ref/text.zip", function(expected)
-   {
+   testZipFile("Delete nested folders", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.folder("remove").file("Remove.txt", "This folder and file should be deleted\n");
       zip.folder("remove/second").file("Sub.txt", "This should be removed");
@@ -456,8 +435,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    });
 
-   testZipFile("Delete nested folders from relative path", "ref/folder.zip", function(expected)
-   {
+   testZipFile("Delete nested folders from relative path", "ref/folder.zip", function(expected) {
       var zip = new JSZip();
       zip.folder("folder");
       zip.folder("folder/1/2/3");
@@ -470,8 +448,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   testZipFile("Byte string output", "ref/text.zip", function(expected)
-   {
+   testZipFile("Byte string output", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       var content = zip.generate({base64:false});
@@ -480,8 +457,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-   test("Filtering a zip", function()
-   {
+   test("Filtering a zip", function() {
       var zip = new JSZip();
       zip.file("1.txt", "1\n");
       zip.file("2.txt", "2\n");
@@ -494,8 +470,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(result[1].name.indexOf(".txt") != -1, "filter has filtered the good file");
    });
 
-   test("Filtering a zip from a relative path", function()
-   {
+   test("Filtering a zip from a relative path", function() {
       var zip = new JSZip();
       zip.file("foo/1.txt", "1\n");
       zip.file("foo/2.txt", "2\n");
@@ -511,8 +486,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(result[0].name, "foo/3.log", "filter has filtered the good file");
    });
 
-   test("Filtering a zip : the full path is still accessible", function()
-   {
+   test("Filtering a zip : the full path is still accessible", function() {
       var zip = new JSZip();
       zip.file("foo/1.txt", "1\n");
       zip.file("foo/2.txt", "2\n");
@@ -528,8 +502,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(result[0].name, "foo/3.log", "filter has filtered the good file");
    });
 
-   testZipFile("Filtering a zip : the filter function can't alter the data", "ref/text.zip", function(expected)
-   {
+   testZipFile("Filtering a zip : the filter function can't alter the data", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       zip.filter(function (relativeFilename, file) {
@@ -545,8 +518,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    });
 
-   testZipFile("STORE is the default method", "ref/text.zip", function(expected)
-   {
+   testZipFile("STORE is the default method", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       var content = zip.generate({compression:'STORE'});
@@ -558,8 +530,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    });
 
    // zip -0 -X store.zip Hello.txt
-   testZipFile("STORE doesn't compress", "ref/store.zip", function(expected)
-   {
+   testZipFile("STORE doesn't compress", "ref/store.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
       var content = zip.generate({compression:'STORE'});
@@ -570,8 +541,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    });
 
    // zip -6 -X deflate.zip Hello.txt
-   testZipFile("DEFLATE compress", "ref/deflate.zip", function(expected)
-   {
+   testZipFile("DEFLATE compress", "ref/deflate.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
       var content = zip.generate({compression:'DEFLATE'});
@@ -585,8 +555,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    module("Load file, not supported features"); // {{{
 
    // zip -0 -X -e encrypted.zip Hello.txt
-   testZipFile("basic encryption", "ref/encrypted.zip", function(file)
-   {
+   testZipFile("basic encryption", "ref/encrypted.zip", function(file) {
       try
       {
          var zip = new JSZip(file);
@@ -601,8 +570,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    module("Load file, corrupted zip"); // {{{
 
-   testZipFile("bad compression method", "ref/invalid/compression.zip", function(file)
-   {
+   testZipFile("bad compression method", "ref/invalid/compression.zip", function(file) {
       try
       {
          var zip = new JSZip(file);
@@ -614,8 +582,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       }
    });
 
-   testZipFile("invalid crc32 but no check", "ref/invalid/crc32.zip", function(file)
-   {
+   testZipFile("invalid crc32 but no check", "ref/invalid/crc32.zip", function(file) {
       try
       {
          var zip = new JSZip(file, {checkCRC32:false});
@@ -627,8 +594,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       }
    });
 
-   testZipFile("invalid crc32", "ref/invalid/crc32.zip", function(file)
-   {
+   testZipFile("invalid crc32", "ref/invalid/crc32.zip", function(file) {
       try
       {
          var zip = new JSZip(file, {checkCRC32:true});
@@ -640,8 +606,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       }
    });
 
-   testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file)
-   {
+   testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file) {
       try
       {
          var zip = new JSZip(file);
@@ -657,22 +622,19 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    module("Load file"); // {{{
 
    // zip -6 -X deflate.zip Hello.txt
-   testZipFile("zip with DEFLATE", "ref/deflate.zip", function(file)
-   {
+   testZipFile("zip with DEFLATE", "ref/deflate.zip", function(file) {
       var zip = new JSZip(file);
       equal(zip.file("Hello.txt").data, "This a looong file : we need to see the difference between the different compression methods.\n", "the zip was correctly read.");
    });
 
    // zip -0 -z -c archive_comment.zip Hello.txt
-   testZipFile("zip with comment", "ref/archive_comment.zip", function(file)
-   {
+   testZipFile("zip with comment", "ref/archive_comment.zip", function(file) {
       var zip = new JSZip(file);
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
 
    // zip -0 extra_attributes.zip Hello.txt
-   testZipFile("zip with extra attributes", "ref/extra_attributes.zip", function(file)
-   {
+   testZipFile("zip with extra attributes", "ref/extra_attributes.zip", function(file) {
       var zip = new JSZip(file);
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
@@ -680,23 +642,20 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    // when zip doesn't know the size of the stream, it will be cautious and use
    // the ZIP64 feature, just in case.
    // cat file.txt|zip -X -0 > zip64.zip
-   testZipFile("zip 64", "ref/zip64.zip", function(file)
-   {
+   testZipFile("zip 64", "ref/zip64.zip", function(file) {
       var zip = new JSZip(file);
       equal(zip.file("-").data, "Hello World\n", "the zip was correctly read.");
    });
 
    // jar produces zip with data descriptors
    // jar c0Mvf data_descriptor.zip Hello.txt
-   testZipFile("zip with data descriptor", "ref/data_descriptor.zip", function(file)
-   {
+   testZipFile("zip with data descriptor", "ref/data_descriptor.zip", function(file) {
       var zip = new JSZip(file);
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
 
    // zip -0 -X zip_within_zip.zip Hello.txt && zip -0 -X nested.zip Hello.txt zip_within_zip.zip
-   testZipFile("nested zip", "ref/nested.zip", function(file)
-   {
+   testZipFile("nested zip", "ref/nested.zip", function(file) {
       var zip = new JSZip(file);
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
       var nested = new JSZip(zip.file("zip_within_zip.zip").data);
@@ -704,8 +663,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    });
 
    // zip -X -0 utf8_in_name.zip €15.txt
-   testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(file)
-   {
+   testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(file) {
       var zip = new JSZip(file);
       ok(zip.file("€15.txt") !== null, "the utf8 file is here.");
       equal(zip.file("€15.txt").asText(), "€15\n", "the utf8 content was correctly read.");
@@ -714,8 +672,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    module("Load complex files"); // {{{
 
-   if (QUnit.urlParams.complexfiles)
-   {
+   if (QUnit.urlParams.complexfiles) {
 
       // http://www.feedbooks.com/book/8/the-metamorphosis
       testZipFile("Franz Kafka - The Metamorphosis.epub", "ref/complex_files/Franz Kafka - The Metamorphosis.epub", function(file) {
