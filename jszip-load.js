@@ -1,6 +1,6 @@
 /**
 
-JSZip - A Javascript class for generating Zip files
+JSZip - A Javascript class for generating and reading zip files
 <http://stuartk.com/jszip>
 
 (c) 2011 David Duponchel <d.duponchel@gmail.com>
