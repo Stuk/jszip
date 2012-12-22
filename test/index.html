@@ -666,7 +666,8 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(file) {
       var zip = new JSZip(file);
       ok(zip.file("€15.txt") !== null, "the utf8 file is here.");
-      equal(zip.file("€15.txt").asText(), "€15\n", "the utf8 content was correctly read.");
+      equal(zip.file("€15.txt").asText(), "€15\n", "the utf8 content was correctly read (with file().asText).");
+      equal(zip.files["€15.txt"].asText(), "€15\n", "the utf8 content was correctly read (with files[].astext).");
    });
    // }}} Load file
 

@@ -164,7 +164,7 @@ JSZip.prototype = (function ()
 
       o = prepareFileAttrs(o);
 
-      return this.files[name] = {name: name, data: data, options:o};
+      return this.files[name] = new ZipObject(name, data, o);
    };
 
 
