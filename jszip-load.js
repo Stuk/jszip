@@ -17,10 +17,10 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
     */
    var pretty = function (str) {
       var res = '', code, i;
-      for (i = 0; i < str.length; i++)
+      for (i = 0; i < (str||"").length; i++)
       {
          code = str.charCodeAt(i);
-         res += '\\x' + (code < 10 ? "0" : "") + code.toString(16);
+         res += '\\x' + (code < 16 ? "0" : "") + code.toString(16).toUpperCase();
       }
       return res;
    };
