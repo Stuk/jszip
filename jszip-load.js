@@ -45,10 +45,32 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
    /**
     * Read bytes from a stream.
     * @constructor
-    * @param {string} stream the stream to read.
+    * @param {String|ArrayBuffer|Uint8Array} stream the stream to read.
     */
    function StreamReader(stream) {
-      this.stream = stream;
+      if (typeof Uint8Array !== "undefined" && stream instanceof Uint8Array)
+      {
+         // might have a "arguments array passed to Function.prototype.apply is too large"
+         // this.stream = String.fromCharCode.apply(null, stream);
+         this.stream = "";
+         for( var i = 0; i < stream.length; ++i ) {
+              this.stream += String.fromCharCode(stream[i]);
+         }
+      }
+      else if (typeof ArrayBuffer !== "undefined" && stream instanceof ArrayBuffer)
+      {
+         var bufferView = new Uint8Array(stream);
+         // might have a "arguments array passed to Function.prototype.apply is too large"
+         // this.stream = String.fromCharCode.apply(null, bufferView);
+         this.stream = "";
+         for( var i = 0; i < bufferView.length; ++i ) {
+              this.stream += String.fromCharCode(bufferView[i]);
+         }
+      }
+      else
+      {
+         this.stream = stream;
+      }
       this.index = 0;
    }
    StreamReader.prototype = {
@@ -392,7 +414,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
    /**
     * All the entries in the zip file.
     * @constructor
-    * @param {string} data the binary stream to load.
+    * @param {String|ArrayBuffer|Uint8Array} data the binary stream to load.
     * @param {Object} loadOptions Options for loading the stream.
     */
    function ZipEntries(data, loadOptions) {
@@ -546,7 +568,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
       },
       /**
        * Read a zip file and create ZipEntries.
-       * @param {string} data the binary string representing a zip file.
+       * @param {String|ArrayBuffer|Uint8Array} data the binary string representing a zip file.
        */
       load : function(data)
       {
@@ -562,7 +584,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
    /**
     * Implementation of the load method of JSZip.
     * It uses the above classes to decode a zip file, and load every files.
-    * @param {string} data the data to load.
+    * @param {String|ArrayBuffer|Uint8Array} data the data to load.
     * @param {Object} options Options for loading the stream.
     *  options.base64 : is the stream in base64 ? default : false
     */
@@ -589,6 +611,6 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
       return this;
    };
 
-}());
+}(this));
 // enforcing Stuk's coding style
 // vim: set shiftwidth=3 softtabstop=3 foldmethod=marker:

@@ -255,7 +255,7 @@ Downloadify.create('downloadify',{
         <dt>Description : </dt>
         <dd>Create a new JSZip file and load an existing zip file. See the documentation of <a href="#doc_load_data_options"><code>load()</code></a> for more details and <a href="#zip_load_limits">this</a> for the limitations.</dd>
         <dt>Parameters : </dt>
-        <dd><code>data</code> (String/binary) the content of the zip file to load.</dd>
+        <dd><code>data</code> (same types as <a href="#doc_load_data_options"><code>load()</code></a>) the content of the zip file to load.</dd>
         <dd><code>options</code> (Object) options to pass to the <a href="#doc_load_data_options"><code>load()</code></a> method..</dd>
         <dt>Returns : </dt>
         <dd>A new JSZip.</dd>
@@ -457,7 +457,7 @@ for (var c = 0; c &lt; content.length; c++)
         <dt>Description : </dt>
         <dd>Read an existing zip and merge the data in the current JSZip object. The implementation is in jszip-load.js, don't forget to include it. This technique has some limitations, see <a href="#zip_load_limits">below</a>.</dd>
         <dt>Parameters : </dt>
-        <dd><code>data</code> (binary) the zip file</dd>
+        <dd><code>data</code> (string,binary/ArrayBuffer/Uint8Array) the zip file</dd>
         <dd><code>options</code> (Object) the options to load the zip file :
           <ul>
             <li><code>base64</code> (boolean) <code>true</code> if the data is base64 encoded, <code>false</code> for binary. Default : <code>false</code>.</li>

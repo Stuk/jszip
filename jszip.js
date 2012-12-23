@@ -20,7 +20,7 @@ Usage:
 /**
  * Representation a of zip file in js
  * @constructor
- * @param {String=} data the data to load, if any (optional).
+ * @param {String=|ArrayBuffer=|Uint8Array=} data the data to load, if any (optional).
  * @param {Object=} options the options for creating this objects (optional).
  */
 var JSZip = function(data, options) {
@@ -290,7 +290,7 @@ JSZip.prototype = (function ()
       /**
        * Read an existing zip and merge the data in the current JSZip object.
        * The implementation is in jszip-load.js, don't forget to include it.
-       * @param {string} stream  The stream to load
+       * @param {String|ArrayBuffer|Uint8Array} stream  The stream to load
        * @param {Object} options Options for loading the stream.
        *  options.base64 : is the stream in base64 ? default : false
        * @return {JSZip} the current JSZip object

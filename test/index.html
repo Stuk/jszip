@@ -621,6 +621,42 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    module("Load file"); // {{{
 
+   testZipFile("load(string) works", "ref/all.zip", function(file) {
+      ok(typeof file === "string");
+      var zip = new JSZip(file);
+      zip.file("Hello.txt", "Hello World\n");
+      equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+   });
+
+   if (window.ArrayBuffer) {
+      testZipFile("load(ArrayBuffer) works", "ref/all.zip", function(fileAsString) {
+         var file = new ArrayBuffer(fileAsString.length);
+         var bufferView = new Uint8Array(file);
+         for( var i = 0; i < fileAsString.length; ++i ) {
+              bufferView[i] = fileAsString.charCodeAt(i);
+         }
+
+         ok(file instanceof ArrayBuffer);
+         var zip = new JSZip(file);
+         zip.file("Hello.txt", "Hello World\n");
+         equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+      });
+   }
+
+   if (window.Uint8Array) {
+      testZipFile("load(Uint8Array) works", "ref/all.zip", function(fileAsString) {
+         var file = new Uint8Array(fileAsString.length);
+         for( var i = 0; i < fileAsString.length; ++i ) {
+              file[i] = fileAsString.charCodeAt(i);
+         }
+
+         ok(file instanceof Uint8Array);
+         var zip = new JSZip(file);
+         zip.file("Hello.txt", "Hello World\n");
+         equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+      });
+   }
+
    // zip -6 -X deflate.zip Hello.txt
    testZipFile("zip with DEFLATE", "ref/deflate.zip", function(file) {
       var zip = new JSZip(file);
