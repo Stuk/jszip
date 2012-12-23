@@ -214,7 +214,7 @@ location.href="data:application/zip;base64,"+content;
       </table>
 
       <h3>Filename problems</h3>
-	  <p>The biggest issue with JSZip is that the filenames are very awkward, Firefox generates filenames such as <code>a5sZQRsx.zip.part</code> (see bugs <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=367231">367231</a> and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=532230">532230</a>), and Safari isn't much better with just <code>Unknown</code>. Sadly there is no pure Javascript solution to this. However...</p>
+	  <p>The biggest issue with JSZip is that the filenames are very awkward, Firefox generates filenames such as <code>a5sZQRsx.zip.part</code> (see bugs <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=367231">367231</a> and <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=532230">532230</a>), and Safari isn't much better with just <code>Unknown</code>. Sadly there is no pure Javascript solution (and working in every browsers) to this. However...</p>
 
       <h4>Solution-ish: <a href="https://github.com/dcneiner/downloadify">Downloadify</a></h4>
       <p>Downloadify uses a small Flash SWF to download files to a user's computer with a filename that you can choose. Doug Neiner has added the <code>dataType</code> option to allow you to pass a zip for downloading. Follow the <a href="http://downloadify.info/downloadify/test.html">Downloadify demo</a> with the following changes:</p>
@@ -230,6 +230,12 @@ Downloadify.create('downloadify',{
   dataType: 'base64'
 });</pre>
 
+      <h4>Other solution-ish: Blob URL</h4>
+      <p>With <a href="http://caniuse.com/bloburls">some recent browsers</a> come a new way to download Blobs (a zip file for example) : blob urls. The <a href="http://updates.html5rocks.com/2011/08/Downloading-resources-in-HTML5-a-download">download attribute on &lt;a&gt;</a> allows you to give the name of the file. Blob urls start to be widely supported but this attribute is currently only supported in Chrome. See <a href="examples/download-zip-file.html">the example</a>.</p>
+      <pre class="example">
+var blob = zip.generate({responseType:"blob"});
+myLink.href = window.URL.createObjectURL(blob);
+myLink.download = "myFile.zip";</pre>
 
       <h3>Usage with Google Gears</h3>
       <p>
@@ -238,6 +244,12 @@ Downloadify.create('downloadify',{
       <h3>Reading a zip file from an ajax call</h3>
       <p>
       When doing an ajax call to get the binary data, the browser will try to interpret the binary as text, corrupting it. The solution is to <a href="https://developer.mozilla.org/En/XMLHttpRequest/Using_XMLHttpRequest#Receiving_binary_data_in_older_browsers">set the mimetype to 'text/plain; charset=x-user-defined'</a>. This solution works well in all browsers but IE. If you need IE support, please see what is done in the file test/index.html.
+      </p>
+      <p>An other solution is to use a modern browser (supporting <a href="http://caniuse.com/xhr2">xhr2</a>) : setting <code>xhr.responseType = 'arraybuffer';</code> will do the trick, JSZip supports ArrayBuffers. Please see <a href="examples/get-binary-files-xhr2.html">the example</a>.
+
+      <h3>Reading a local zip file (File API)</h3>
+      <p>
+      JSZip supports (if available in the browser) the File API : reading a local zip file is simple : <code>new JSZip(readerEvent.target.result);</code>. Please see the <a href="examples/read-local-file-api.html">complete example</a> for more details.
       </p>
 
       <h2 style="margin-top: 2em;">Documentation</h2>
