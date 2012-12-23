@@ -435,11 +435,20 @@ zip.remove("Hello.txt").remove("css");
              Default : <code>true</code>, encode as base64.</li>
              <li><code>compression</code> (String) the compression method to use. <code>"STORE"</code> (no compression) by default,
              you can use <code>"DEFLATE"</code> (include the file jszip-deflate.js) or write your own.</li>
+             <li><code>responseType</code> (String) the type of zip to return. The possible values are :
+               <ul>
+                  <li><code>string</code> (default) : the result will be a string in "binary" form, or in a "base64" form (see the base64 option).</li>
+                  <li><code>uint8array</code> : the result will be a Uint8Array containing the zip. This requires a compatible browser.</li>
+                  <li><code>arraybuffer</code> : the result will be a ArrayBuffer containing the zip. This requires a compatible browser.</li>
+                  <li><code>blob</code> : the result will be a Blob containing the zip. This requires a compatible browser.</li>
+               </ul>
+             </li>
           </ul>
         </dd>
         <dt>Returns : </dt>
         <dd>The generated zip file.</dd>
       </dl>
+      HTML5 note : when using responseType = "uint8array", "arraybuffer" or "blob", be sure to check if the browser supports it. This method will throw an exception otherwise.
       <pre class="example">
 content = zip.generate();
 location.href="data:application/zip;base64,"+content;</pre>
@@ -457,7 +466,7 @@ for (var c = 0; c &lt; content.length; c++)
         <dt>Description : </dt>
         <dd>Read an existing zip and merge the data in the current JSZip object. The implementation is in jszip-load.js, don't forget to include it. This technique has some limitations, see <a href="#zip_load_limits">below</a>.</dd>
         <dt>Parameters : </dt>
-        <dd><code>data</code> (string,binary/ArrayBuffer/Uint8Array) the zip file</dd>
+        <dd><code>data</code> (String/ArrayBuffer/Uint8Array) the zip file</dd>
         <dd><code>options</code> (Object) the options to load the zip file :
           <ul>
             <li><code>base64</code> (boolean) <code>true</code> if the data is base64 encoded, <code>false</code> for binary. Default : <code>false</code>.</li>

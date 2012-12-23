@@ -448,14 +448,69 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   testZipFile("Byte string output", "ref/text.zip", function(expected) {
+   testZipFile("output : base64:false", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
-      var content = zip.generate({base64:false});
+      var actual = zip.generate({base64:false});
 
-      var actual = content;
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
+
+   testZipFile("output : responseType:string,base64:false", "ref/text.zip", function(expected) {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "Hello World\n");
+      var actual = zip.generate({responseType:"string",base64:false});
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+
+   testZipFile("output : responseType:string‚base64:true", "ref/text.zip", function(expected) {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "Hello World\n");
+      var content = zip.generate({responseType:"string",base64:true});
+
+      var actual = JSZipBase64.decode(content);
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+
+   if (window.Uint8Array) {
+      testZipFile("output : responseType:uint8array", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         var array = zip.generate({responseType:"uint8array"});
+         ok(array instanceof Uint8Array, "The result is a instance of Uint8Array");
+         equals(array.length, expected.length);
+
+         var actual = String.fromCharCode.apply(null, array);
+
+         ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+      });
+   }
+
+   if (window.ArrayBuffer) {
+      testZipFile("output : responseType:arraybuffer", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         var buffer = zip.generate({responseType:"arraybuffer"});
+         ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
+
+         var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
+
+         ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+      });
+   }
+
+   if (window.Blob) {
+      testZipFile("output : responseType:blob", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         var blob = zip.generate({responseType:"blob"});
+         ok(blob instanceof Blob, "The result is a instance of Blob");
+         equals(blob.type, "application/zip");
+         equals(blob.size, expected.length);
+      });
+   }
 
    test("Filtering a zip", function() {
       var zip = new JSZip();

@@ -284,6 +284,29 @@ JSZip.prototype = (function ()
       };
    };
 
+   /**
+    * Create a Uint8Array from the string.
+    * @private
+    * @param {string} str the string to transform.
+    * @return {Uint8Array} the typed array.
+    * @throws {Error} an Error if the browser doesn't support the requested feature.
+    */
+   var string2Uint8Array = function (str)
+   {
+      if (typeof Uint8Array === "undefined")
+      {
+         throw new Error("Uint8Array is not supported by this browser");
+      }
+      var buffer = new ArrayBuffer(str.length);
+      var bufferView = new Uint8Array(buffer);
+      for(var i = 0; i < str.length; i++)
+      {
+           bufferView[i] = str.charCodeAt(i);
+      }
+
+      return bufferView;
+   }
+
 
    // return the actual prototype of JSZip
    return {
@@ -435,13 +458,15 @@ JSZip.prototype = (function ()
        * @param {Object} options the options to generate the zip file :
        * - base64, true to generate base64.
        * - compression, "STORE" by default.
-       * @return {string} the zip file
+       * - responseType, "string" by default.
+       * @return {String|Uint8Array|ArrayBuffer|Blob} the zip file
        */
       generate : function(options)
       {
          options = extend(options || {}, {
             base64 : true,
-            compression : "STORE"
+            compression : "STORE",
+            responseType : "string"
          });
          var compression = options.compression.toUpperCase();
 
@@ -512,7 +537,36 @@ JSZip.prototype = (function ()
          "\x00\x00";
 
          var zip = fileData + dirData + dirEnd;
-         return (options.base64) ? JSZipBase64.encode(zip) : zip;
+
+
+         switch(options.responseType.toLowerCase())
+         {
+            case "uint8array" :
+               return string2Uint8Array(zip);
+            case "arraybuffer" :
+               return string2Uint8Array(zip).buffer;
+            case "blob" :
+               if (typeof Blob === "undefined")
+               {
+                  throw new Error("Blob is not supported by this browser");
+               }
+               var zipArray = string2Uint8Array(zip);
+               try
+               {
+                  // Blob constructor
+                  return new Blob([zipArray], { type: "application/zip" });
+               }
+               catch(e)
+               {
+                  // deprecated, browser only, old way
+                  var builder = new (window.BlobBuilder || window.WebKitBlobBuilder ||
+                     window.MozBlobBuilder || window.MSBlobBuilder)();
+                  builder.append(zipArray.buffer);
+                  return builder.getBlob('application/zip');
+               }
+            default : // case "string" :
+               return (options.base64) ? JSZipBase64.encode(zip) : zip;
+         }
       },
 
       /**
