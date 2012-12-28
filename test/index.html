@@ -679,7 +679,6 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    testZipFile("load(string) works", "ref/all.zip", function(file) {
       ok(typeof file === "string");
       var zip = new JSZip(file);
-      zip.file("Hello.txt", "Hello World\n");
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
 
@@ -693,7 +692,6 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
          ok(file instanceof ArrayBuffer);
          var zip = new JSZip(file);
-         zip.file("Hello.txt", "Hello World\n");
          equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
       });
    }
@@ -707,7 +705,6 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
          ok(file instanceof Uint8Array);
          var zip = new JSZip(file);
-         zip.file("Hello.txt", "Hello World\n");
          equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
       });
    }
