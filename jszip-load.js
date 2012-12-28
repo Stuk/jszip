@@ -48,11 +48,11 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
     * @param {String|ArrayBuffer|Uint8Array} stream the stream to read.
     */
    function StreamReader(stream) {
+      this.stream = "";
       if (typeof Uint8Array !== "undefined" && stream instanceof Uint8Array)
       {
          // might have a "arguments array passed to Function.prototype.apply is too large"
          // this.stream = String.fromCharCode.apply(null, stream);
-         this.stream = "";
          for( var i = 0; i < stream.length; ++i ) {
               this.stream += String.fromCharCode(stream[i]);
          }
@@ -62,14 +62,16 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
          var bufferView = new Uint8Array(stream);
          // might have a "arguments array passed to Function.prototype.apply is too large"
          // this.stream = String.fromCharCode.apply(null, bufferView);
-         this.stream = "";
          for( var i = 0; i < bufferView.length; ++i ) {
               this.stream += String.fromCharCode(bufferView[i]);
          }
       }
       else
       {
-         this.stream = stream;
+         for (var i = 0; i < stream.length; i++)
+         {
+            this.stream += String.fromCharCode(stream.charCodeAt(i) & 0xff);
+         }
       }
       this.index = 0;
    }
@@ -122,7 +124,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
        */
       byteAt : function(i)
       {
-         return this.stream.charCodeAt(i) & 0xff;
+         return this.stream.charCodeAt(i);
       },
       /**
        * Get the next byte of this stream.
@@ -156,13 +158,9 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
        */
       readString : function (size)
       {
-         var result = "", i, code;
          this.checkOffset(size);
-         for(i = 0; i < size; i++)
-         {
-            code = this.byteAt(this.index + i);
-            result += String.fromCharCode(code);
-         }
+         // this will work because the constructor applied the "& 0xff" mask.
+         var result = this.stream.slice(this.index, this.index + size);
          this.index += size;
          return result;
       },

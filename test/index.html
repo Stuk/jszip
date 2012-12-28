@@ -682,6 +682,18 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
 
+   testZipFile("load(string) handles bytes > 255", "ref/all.zip", function(file) {
+      // the method used to load zip with ajax will remove the extra bits.
+      // adding extra bits :)
+      var updatedFile = "";
+      for (var i = 0; i < file.length; i++) {
+         updatedFile += String.fromCharCode((file.charCodeAt(i) & 0xff) + 0x4200);
+      }
+      var zip = new JSZip(updatedFile);
+
+      equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+   });
+
    if (window.ArrayBuffer) {
       testZipFile("load(ArrayBuffer) works", "ref/all.zip", function(fileAsString) {
          var file = new ArrayBuffer(fileAsString.length);
