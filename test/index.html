@@ -486,6 +486,12 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       testFileDataGetters(zip);
    });
 
+   test("add file: file(name, base64)", function() {
+      var zip = new JSZip();
+      zip.file("amount.txt", "4oKsMTUK", {base64:true});
+      testFileDataGetters(zip);
+   });
+
    if (window.Uint8Array) {
       test("add file: file(name, Uint8Array)", function() {
          var zip = new JSZip();

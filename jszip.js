@@ -79,7 +79,16 @@ JSZip.prototype = (function ()
        */
       asText : function ()
       {
-         return this.options.binary ? JSZip.prototype.utf8decode(this.data) : this.data;
+         var result = this.data;
+         if (this.options.base64)
+         {
+            result = JSZipBase64.decode(result);
+         }
+         if (this.options.binary)
+         {
+            result = JSZip.prototype.utf8decode(result);
+         }
+         return result;
       },
       /**
        * Returns the binary content.
@@ -87,7 +96,16 @@ JSZip.prototype = (function ()
        */
       asBinary : function ()
       {
-         return this.options.binary ? this.data : JSZip.prototype.utf8encode(this.data);
+         var result = this.data;
+         if (this.options.base64)
+         {
+            result = JSZipBase64.decode(result);
+         }
+         if (!this.options.binary)
+         {
+            result = JSZip.prototype.utf8encode(result);
+         }
+         return result;
       },
       /**
        * Returns the content as an Uint8Array.
