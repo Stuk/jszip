@@ -33,6 +33,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
    var findCompression = function (compressionMethod) {
       for (var method in JSZip.compressions)
       {
+         if( !JSZip.compressions.hasOwnProperty(method) ) { continue; }
          if (JSZip.compressions[method].magic === compressionMethod)
          {
             return JSZip.compressions[method];
@@ -588,7 +589,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
 
       zipEntries = new ZipEntries(data, options);
       files = zipEntries.files;
-      for (i in files)
+      for (i = 0; i < files.length; i++)
       {
          input = files[i];
          this.file(input.fileName, input.uncompressedFileData, {

@@ -155,6 +155,8 @@ JSZip.prototype = (function ()
       {
          for (attr in arguments[i])
          {
+            if( !arguments[i].hasOwnProperty(attr) ) { continue; }
+
             if(typeof result[attr] === "undefined")
             {
                result[attr] = arguments[i][attr];
@@ -361,6 +363,7 @@ JSZip.prototype = (function ()
          var result = [], filename, relativePath, file, fileClone;
          for (filename in this.files)
          {
+            if( !this.files.hasOwnProperty(filename) ) { continue; }
             file = this.files[filename];
             // return a new object, don't let the user mess with our internal objects :)
             fileClone = new ZipObject(file.name, file.data, extend(file.options));
