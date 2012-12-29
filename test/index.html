@@ -448,7 +448,71 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   testZipFile("output : base64:false", "ref/text.zip", function(expected) {
+   function testFileDataGetters (zip) {
+      equals(zip.file("amount.txt").asText(), "€15\n");
+      // http://www.fileformat.info/info/unicode/char/20ac/index.htm
+      equals(zip.file("amount.txt").asBinary(), "\xE2\x82\xAC15\n");
+      if (window.ArrayBuffer) {
+         var buffer = zip.file("amount.txt").asArrayBuffer();
+         ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
+         var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
+         equals(actual, "\xE2\x82\xAC15\n");
+      } else {
+         try {
+            zip.file("amount.txt").asArrayBuffer();
+            ok(false, "no exception thrown");
+         } catch (e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      }
+      if (window.Uint8Array) {
+         var bufferView = zip.file("amount.txt").asUint8Array();
+         ok(bufferView instanceof Uint8Array, "The result is a instance of Uint8Array");
+         var actual = String.fromCharCode.apply(null, bufferView);
+         equals(actual, "\xE2\x82\xAC15\n");
+      } else {
+         try {
+            zip.file("amount.txt").asUint8Array();
+            ok(false, "no exception thrown");
+         } catch (e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      }
+   }
+
+   test("add file: file(name, string)", function() {
+      var zip = new JSZip();
+      zip.file("amount.txt", "€15\n");
+      testFileDataGetters(zip);
+   });
+
+   if (window.Uint8Array) {
+      test("add file: file(name, Uint8Array)", function() {
+         var zip = new JSZip();
+         var string = "\xE2\x82\xAC15\n";
+         var array = new Uint8Array(string.length);
+         for(var i = 0; i < string.length; i++) {
+            array[i] = string.charCodeAt(i);
+         }
+         zip.file("amount.txt", array);
+         testFileDataGetters(zip);
+      });
+   }
+
+   if (window.ArrayBuffer) {
+      test("add file: file(name, ArrayBuffer)", function() {
+         var zip = new JSZip();
+         var string = "\xE2\x82\xAC15\n";
+         var array = new Uint8Array(string.length);
+         for(var i = 0; i < string.length; i++) {
+            array[i] = string.charCodeAt(i);
+         }
+         zip.file("amount.txt", array.buffer);
+         testFileDataGetters(zip);
+      });
+   }
+
+   testZipFile("generate : base64:false", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       var actual = zip.generate({base64:false});
@@ -456,7 +520,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-   testZipFile("output : responseType:string,base64:false", "ref/text.zip", function(expected) {
+   testZipFile("generate : responseType:string,base64:false", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       var actual = zip.generate({responseType:"string",base64:false});
@@ -464,7 +528,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-   testZipFile("output : responseType:string‚base64:true", "ref/text.zip", function(expected) {
+   testZipFile("generate : responseType:string‚base64:true", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
       var content = zip.generate({responseType:"string",base64:true});
@@ -475,7 +539,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    });
 
    if (window.Uint8Array) {
-      testZipFile("output : responseType:uint8array", "ref/text.zip", function(expected) {
+      testZipFile("generate : responseType:uint8array", "ref/text.zip", function(expected) {
          var zip = new JSZip();
          zip.file("Hello.txt", "Hello World\n");
          var array = zip.generate({responseType:"uint8array"});
@@ -486,10 +550,21 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
          ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       });
+   } else {
+      testZipFile("generate : responseType:uint8array", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         try {
+            var blob = zip.generate({responseType:"uint8array"});
+            ok(false, "Uint8Array is not supported, but no exception thrown");
+         } catch(e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      });
    }
 
    if (window.ArrayBuffer) {
-      testZipFile("output : responseType:arraybuffer", "ref/text.zip", function(expected) {
+      testZipFile("generate : responseType:arraybuffer", "ref/text.zip", function(expected) {
          var zip = new JSZip();
          zip.file("Hello.txt", "Hello World\n");
          var buffer = zip.generate({responseType:"arraybuffer"});
@@ -499,16 +574,38 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
          ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       });
+   } else {
+      testZipFile("generate : responseType:arraybuffer", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         try {
+            var blob = zip.generate({responseType:"arraybuffer"});
+            ok(false, "ArrayBuffer is not supported, but no exception thrown");
+         } catch(e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      });
    }
 
    if (window.Blob) {
-      testZipFile("output : responseType:blob", "ref/text.zip", function(expected) {
+      testZipFile("generate : responseType:blob", "ref/text.zip", function(expected) {
          var zip = new JSZip();
          zip.file("Hello.txt", "Hello World\n");
          var blob = zip.generate({responseType:"blob"});
          ok(blob instanceof Blob, "The result is a instance of Blob");
          equals(blob.type, "application/zip");
          equals(blob.size, expected.length);
+      });
+   } else {
+      testZipFile("generate : responseType:blob", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         try {
+            var blob = zip.generate({responseType:"blob"});
+            ok(false, "Blob is not supported, but no exception thrown");
+         } catch(e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
       });
    }
 

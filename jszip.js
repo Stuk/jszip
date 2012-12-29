@@ -88,7 +88,24 @@ JSZip.prototype = (function ()
       asBinary : function ()
       {
          return this.options.binary ? this.data : JSZip.prototype.utf8encode(this.data);
-      }
+      },
+      /**
+       * Returns the content as an Uint8Array.
+       * @return {Uint8Array} the content as an Uint8Array.
+       */
+      asUint8Array : function ()
+      {
+         return JSZip.utils.string2Uint8Array(this.asBinary());
+      },
+      /**
+       * Returns the content as an ArrayBuffer.
+       * @return {ArrayBuffer} the content as an ArrayBufer.
+       */
+      asArrayBuffer : function ()
+      {
+         return JSZip.utils.string2Uint8Array(this.asBinary()).buffer;
+      },
+
    };
 
    /**
@@ -151,7 +168,7 @@ JSZip.prototype = (function ()
    * Add a file in the current folder.
    * @private
    * @param {string} name the name of the file
-   * @param {string} data the data of the file
+   * @param {String|ArrayBuffer|Uint8Array} data the data of the file
    * @param {Object} o the options of the file
    * @return {Object} the new file.
    */
@@ -163,6 +180,20 @@ JSZip.prototype = (function ()
       }
 
       o = prepareFileAttrs(o);
+
+      if (typeof Uint8Array !== "undefined" && data instanceof Uint8Array)
+      {
+         o.base64 = false;
+         o.binary = true;
+         data = JSZip.utils.uint8Array2String(data);
+      }
+      else if (typeof ArrayBuffer !== "undefined" && data instanceof ArrayBuffer)
+      {
+         o.base64 = false;
+         o.binary = true;
+         var bufferView = new Uint8Array(data);
+         data = JSZip.utils.uint8Array2String(bufferView);
+      }
 
       return this.files[name] = new ZipObject(name, data, o);
    };
@@ -284,29 +315,6 @@ JSZip.prototype = (function ()
       };
    };
 
-   /**
-    * Create a Uint8Array from the string.
-    * @private
-    * @param {string} str the string to transform.
-    * @return {Uint8Array} the typed array.
-    * @throws {Error} an Error if the browser doesn't support the requested feature.
-    */
-   var string2Uint8Array = function (str)
-   {
-      if (typeof Uint8Array === "undefined")
-      {
-         throw new Error("Uint8Array is not supported by this browser");
-      }
-      var buffer = new ArrayBuffer(str.length);
-      var bufferView = new Uint8Array(buffer);
-      for(var i = 0; i < str.length; i++)
-      {
-           bufferView[i] = str.charCodeAt(i);
-      }
-
-      return bufferView;
-   }
-
 
    // return the actual prototype of JSZip
    return {
@@ -352,7 +360,7 @@ JSZip.prototype = (function ()
        * Add a file to the zip file, or search a file.
        * @param   {string|RegExp} name The name of the file to add (if data is defined),
        * the name of the file to find (if no data) or a regex to match files.
-       * @param   {string} data  The file data, either raw or base64 encoded
+       * @param   {String|ArrayBuffer|Uint8Array} data  The file data, either raw or base64 encoded
        * @param   {Object} o     File options
        * @return  {JSZip|Object|Array} this JSZip object (when adding a file),
        * a file (when searching by string) or an array of files (when searching by regex).
@@ -542,15 +550,15 @@ JSZip.prototype = (function ()
          switch(options.responseType.toLowerCase())
          {
             case "uint8array" :
-               return string2Uint8Array(zip);
+               return JSZip.utils.string2Uint8Array(zip);
             case "arraybuffer" :
-               return string2Uint8Array(zip).buffer;
+               return JSZip.utils.string2Uint8Array(zip).buffer;
             case "blob" :
                if (typeof Blob === "undefined")
                {
                   throw new Error("Blob is not supported by this browser");
                }
-               var zipArray = string2Uint8Array(zip);
+               var zipArray = JSZip.utils.string2Uint8Array(zip);
                try
                {
                   // Blob constructor
@@ -765,6 +773,51 @@ JSZip.compressions = {
       {
          return content; // no compression
       }
+   }
+};
+
+JSZip.utils = {
+   /**
+    * Create a Uint8Array from the string.
+    * @param {string} str the string to transform.
+    * @return {Uint8Array} the typed array.
+    * @throws {Error} an Error if the browser doesn't support the requested feature.
+    */
+   string2Uint8Array : function (str)
+   {
+      if (typeof Uint8Array === "undefined")
+      {
+         throw new Error("Uint8Array is not supported by this browser");
+      }
+      var buffer = new ArrayBuffer(str.length);
+      var bufferView = new Uint8Array(buffer);
+      for(var i = 0; i < str.length; i++)
+      {
+         bufferView[i] = str.charCodeAt(i);
+      }
+
+      return bufferView;
+   },
+
+   /**
+    * Create a string from the Uint8Array.
+    * @param {Uint8Array} array the array to transform.
+    * @return {string} the string.
+    * @throws {Error} an Error if the browser doesn't support the requested feature.
+    */
+   uint8Array2String : function (array)
+   {
+      if (typeof Uint8Array === "undefined")
+      {
+         throw new Error("Uint8Array is not supported by this browser");
+      }
+      var result = "";
+      for(var i = 0; i < array.length; i++)
+      {
+         result += String.fromCharCode(array[i]);
+      }
+
+      return result;
    }
 };
 

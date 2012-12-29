@@ -51,20 +51,12 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
       this.stream = "";
       if (typeof Uint8Array !== "undefined" && stream instanceof Uint8Array)
       {
-         // might have a "arguments array passed to Function.prototype.apply is too large"
-         // this.stream = String.fromCharCode.apply(null, stream);
-         for( var i = 0; i < stream.length; ++i ) {
-              this.stream += String.fromCharCode(stream[i]);
-         }
+         this.stream = JSZip.utils.uint8Array2String(stream);
       }
       else if (typeof ArrayBuffer !== "undefined" && stream instanceof ArrayBuffer)
       {
          var bufferView = new Uint8Array(stream);
-         // might have a "arguments array passed to Function.prototype.apply is too large"
-         // this.stream = String.fromCharCode.apply(null, bufferView);
-         for( var i = 0; i < bufferView.length; ++i ) {
-              this.stream += String.fromCharCode(bufferView[i]);
-         }
+         this.stream = JSZip.utils.uint8Array2String(bufferView);
       }
       else
       {

@@ -299,6 +299,8 @@ zip.load(zipDataFromXHR, {base64:false});</pre>
             </li>
             <li><code>asText()</code>, string, the content as an utf8 string (utf8 encoded if necessary).</li>
             <li><code>asBinary()</code>, string, the content as binary (utf8 decoded if necessary).</li>
+            <li><code>asArrayBuffer()</code>, ArrayBuffer, need a compatible browser.</li>
+            <li><code>asUint8Array()</code>, Uint8Array, need a compatible browser.</li>
           </ul>
         </dd>
       </dl>
@@ -314,6 +316,8 @@ zip.file("file.txt").options.dir // false
 var zip = new JSZip(zipFromAjaxWithUTF8);
 zip.file("amount.txt").data // "&#226;&#130;&#172;15" <!-- something like that -->
 zip.file("amount.txt").asText() // "&euro;15"
+zip.file("amount.txt").asArrayBuffer() // an ArrayBuffer containing &euro;15
+zip.file("amount.txt").asnt8ArrayArrayBuffer() // an Uint8Array containing &euro;15
 </pre>
 
       <h4 id="doc_file_regex">file(regex)</h4>
@@ -350,7 +354,7 @@ folder.file(/^file/); // array of size 2, the relative paths start with file
         <dd>Add a file to the zip file.</dd>
         <dt>Parameters : </dt>
         <dd><code>name</code> (String) the name of the file.</dd>
-        <dd><code>data</code> (binary) the content of the file.</dd>
+        <dd><code>data</code> (String/ArrayBuffer/Uint8Array) the content of the file.</dd>
         <dd><code>options</code> (Object) the options :
           <ul>
              <li><code>base64</code> (boolean) set to <code>true</code> if the data
@@ -358,7 +362,7 @@ folder.file(/^file/); // array of size 2, the relative paths start with file
              Plain text and HTML do not need this option.</li>
              <li><code>binary</code> (boolean) defaults to <code>true</code> if the data
              is base64 encoded, <code>false</code> otherwise. If set to false then
-             UTF-8 characters will be encoded.</li>
+             UTF-8 characters will be encoded. If the data is an ArrayBuffer or an Uint8Array, this will be set to true.</li>
              <li><code>date</code> (Date) use it to specify the last modification date.
              If not set the current date is used.</li>
           </ul>
