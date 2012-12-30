@@ -61,10 +61,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
       }
       else
       {
-         for (var i = 0; i < stream.length; i++)
-         {
-            this.stream += String.fromCharCode(stream.charCodeAt(i) & 0xff);
-         }
+         this.stream = JSZip.utils.string2binary(stream);
       }
       this.index = 0;
    }
@@ -120,15 +117,6 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
          return this.stream.charCodeAt(i);
       },
       /**
-       * Get the next byte of this stream.
-       * @return {string} the next byte.
-       */
-      readByte : function ()
-      {
-         this.checkOffset(1);
-         return this.byteAt(1 + this.index++);
-      },
-      /**
        * Get the next number with a given byte size.
        * @param {number} size the number of bytes to read.
        * @return {number} the corresponding number.
@@ -137,9 +125,9 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
       {
          var result = 0, i;
          this.checkOffset(size);
-         for(i = size - 1; i >= 0; i--)
+         for(i = this.index + size - 1; i >= this.index; i--)
          {
-            result = (result << 8) + this.byteAt(this.index + i);
+            result = (result << 8) + this.byteAt(i);
          }
          this.index += size;
          return result;
@@ -594,6 +582,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
          input = files[i];
          this.file(input.fileName, input.uncompressedFileData, {
             binary:true,
+            optimizedBinaryString:true,
             date:input.date,
             dir:input.dir
          });

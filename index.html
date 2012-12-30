@@ -365,6 +365,8 @@ folder.file(/^file/); // array of size 2, the relative paths start with file
              UTF-8 characters will be encoded. If the data is an ArrayBuffer or an Uint8Array, this will be set to true.</li>
              <li><code>date</code> (Date) use it to specify the last modification date.
              If not set the current date is used.</li>
+             <li><code>optimizedBinaryString</code> (boolean), default false. Set it to true if (and only if) the input
+             has already been prepared with a 0xFF mask.</li>
           </ul>
         </dd>
         <dt>Returns : </dt>

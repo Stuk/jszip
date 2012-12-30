@@ -214,6 +214,18 @@ JSZip.prototype = (function ()
          var bufferView = new Uint8Array(data);
          data = JSZip.utils.uint8Array2String(bufferView);
       }
+      else if (o.binary && !o.base64)
+      {
+         // optimizedBinaryString == true means that the file has already been filtered with a 0xFF mask
+         if (o.optimizedBinaryString !== true)
+         {
+            // this a string, not in a base64 format.
+            // Be sure that this is a correct "binary string"
+            data = JSZip.utils.string2binary(data);
+         }
+         // we remove this option since it's only relevant here
+         delete o.optimizedBinaryString;
+      }
 
       return this.files[name] = new ZipObject(name, data, o);
    };
@@ -271,7 +283,7 @@ JSZip.prototype = (function ()
     */
    var prepareLocalHeaderData = function(file, utfEncodedFileName, compressionType) {
       var useUTF8 = utfEncodedFileName !== file.name,
-          data    = file.data,
+          data    = file.asBinary(),
           o       = file.options,
           dosTime,
           dosDate;
@@ -292,15 +304,6 @@ JSZip.prototype = (function ()
       dosDate = dosDate | (o.date.getMonth() + 1);
       dosDate = dosDate << 5;
       dosDate = dosDate | o.date.getDate();
-
-      if (o.base64 === true) {
-         data = JSZipBase64.decode(data);
-      }
-      // decode UTF-8 strings if we are dealing with text data
-      if(o.binary === false) {
-         data = this.utf8encode(data);
-      }
-
 
       var compression    = JSZip.compressions[compressionType];
       var compressedData = compression.compress(data);
@@ -798,6 +801,20 @@ JSZip.compressions = {
 };
 
 JSZip.utils = {
+   /**
+    * Convert a string to a "binary string" : a string containing only char codes between 0 and 255.
+    * @param {string} str the string to transform.
+    * @return {String} the binary string.
+    */
+   string2binary : function (str)
+   {
+      var result = "";
+      for (var i = 0; i < str.length; i++)
+      {
+         result += String.fromCharCode(str.charCodeAt(i) & 0xff);
+      }
+      return result;
+   },
    /**
     * Create a Uint8Array from the string.
     * @param {string} str the string to transform.

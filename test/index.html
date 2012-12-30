@@ -69,6 +69,10 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    // Note : if you just want to give it to JSZip.load, you can skip this part
    // (this transformation is already done there) and just return responseText.
    window.getBinaryFromXHR = window.getBinaryFromXHR || function (responseText, xhr) {
+      // we skip the & 0xFF part, since this must be tested in the JSZip tests.
+      return responseText;
+      // if you check this method to know how to load binay data, remove this return :)
+
       var result = "";
       for (var i = 0; i < responseText.length; i++) {
          var code = responseText.charCodeAt(i) & 0xff;
@@ -81,6 +85,10 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 <script type="text/javascript">
 
    function similar(actual, expected, mistakes) {
+      // actual is the generated zip, expected is what we got from the xhr.
+      // Be sure to have a well formatted string
+      expected = JSZip.utils.string2binary(expected);
+
       if (actual.length !== expected.length)
       {
          mistakes -= Math.abs((actual.length||0) - (expected.length||0));
@@ -448,15 +456,23 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
+   testZipFile("add file: from XHR (with bytes > 255)", "ref/text.zip", function(textZip) {
+      var zip = new JSZip();
+      zip.file("text.zip", textZip, {binary:true});
+      var actual = zip.generate({base64:false});
+
+      equals(reload(actual), actual, "high-order byte is discarded and won't mess up the result");
+   });
+
    function testFileDataGetters (zip) {
-      equals(zip.file("amount.txt").asText(), "€15\n");
+      equals(zip.file("amount.txt").asText(), "€15\n", "asText()");
       // http://www.fileformat.info/info/unicode/char/20ac/index.htm
-      equals(zip.file("amount.txt").asBinary(), "\xE2\x82\xAC15\n");
+      equals(zip.file("amount.txt").asBinary(), "\xE2\x82\xAC15\n", "asBinary()");
       if (window.ArrayBuffer) {
          var buffer = zip.file("amount.txt").asArrayBuffer();
          ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
          var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
-         equals(actual, "\xE2\x82\xAC15\n");
+         equals(actual, "\xE2\x82\xAC15\n", "asArrayBuffer()");
       } else {
          try {
             zip.file("amount.txt").asArrayBuffer();
@@ -469,7 +485,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
          var bufferView = zip.file("amount.txt").asUint8Array();
          ok(bufferView instanceof Uint8Array, "The result is a instance of Uint8Array");
          var actual = String.fromCharCode.apply(null, bufferView);
-         equals(actual, "\xE2\x82\xAC15\n");
+         equals(actual, "\xE2\x82\xAC15\n", "asUint8Array()");
       } else {
          try {
             zip.file("amount.txt").asUint8Array();
