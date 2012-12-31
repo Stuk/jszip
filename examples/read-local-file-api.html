@@ -36,12 +36,22 @@
         // Closure to capture the file information.
         reader.onload = (function(theFile) {
           return function(e) {
-            $result.append("<h3>" + theFile.name + "</h3>");
+            var $title = $("<h3>", {
+              text : theFile.name
+            });
+            $result.append($title);
             var $ul = $("<ul>");
             try {
 
+              var dateBefore = new Date();
               // read the content of the file with JSZip
               var zip = new JSZip(e.target.result);
+              var dateAfter = new Date();
+
+              $title.append($("<span>", {
+                text:" (parsed in " + (dateAfter - dateBefore) + "ms)"
+              }));
+
               // that, or a good ol' for(var entryName in zip.files)
               $.each(zip.files, function (index, zipEntry) {
                 $ul.append("<li>" + zipEntry.name + "</li>");
