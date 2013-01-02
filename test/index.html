@@ -8,7 +8,7 @@
 <!--
 Only used to avoid cross browser xhr madness.
 -->
-<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="jquery-1.8.3.min.js"></script>
 
 <script type="text/javascript" src="../jszip.js"></script>
 <script type="text/javascript" src="../jszip-load.js"></script>
@@ -143,23 +143,26 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
                xhr:jQuery.ajaxSettings.xhr()
             };
             $.ajax(zipName, {
+               cache: false,
                context: context,
                xhr:function(){return context.xhr},
-               mimeType:'text/plain; charset=x-user-defined',
-               complete: function(jqXHR, textStatus) {
-                  start();
-                  if (textStatus !== "success")
-                  {
-                     ok(false, "Ajax error for " + zipName + " : textStatus=" + textStatus);
-                  }
-                  try
-                  {
-                     // this.xhr comes from the context
-                     var file = getBinaryFromXHR(jqXHR.responseText, this.xhr);
-                     refZips[zipName] = file;
-                     testFunction.call(this, file);
-                  } catch(e) {ok(false, e.message||e)}
-               }
+               mimeType:'text/plain; charset=x-user-defined'
+            })
+            .done(function(data, textStatus, jqXHR){
+              start();
+              try
+              {
+                  // this.xhr comes from the context
+                  var file = getBinaryFromXHR(jqXHR.responseText, this.xhr);
+                  refZips[zipName] = file;
+                  testFunction.call(this, file);
+              } catch(e) {
+                ok(false, e.message||e)
+              }
+            })
+            .fail(function(){
+              start();
+              ok(false, "Ajax error for " + zipName + " : " + arguments);
             });
          }
       });
@@ -468,7 +471,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(zip.file("amount.txt").asText(), "€15\n", "asText()");
       // http://www.fileformat.info/info/unicode/char/20ac/index.htm
       equals(zip.file("amount.txt").asBinary(), "\xE2\x82\xAC15\n", "asBinary()");
-      if (window.ArrayBuffer) {
+      if (JSZip.support.arraybuffer) {
          var buffer = zip.file("amount.txt").asArrayBuffer();
          ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
          var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
@@ -481,7 +484,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
             ok(e.message.match("not supported by this browser"), "the error message is useful");
          }
       }
-      if (window.Uint8Array) {
+      if (JSZip.support.uint8array) {
          var bufferView = zip.file("amount.txt").asUint8Array();
          ok(bufferView instanceof Uint8Array, "The result is a instance of Uint8Array");
          var actual = String.fromCharCode.apply(null, bufferView);
@@ -508,7 +511,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       testFileDataGetters(zip);
    });
 
-   if (window.Uint8Array) {
+   if (JSZip.support.uint8array) {
       test("add file: file(name, Uint8Array)", function() {
          var zip = new JSZip();
          var string = "\xE2\x82\xAC15\n";
@@ -521,7 +524,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       });
    }
 
-   if (window.ArrayBuffer) {
+   if (JSZip.support.arraybuffer) {
       test("add file: file(name, ArrayBuffer)", function() {
          var zip = new JSZip();
          var string = "\xE2\x82\xAC15\n";
@@ -560,7 +563,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
-   if (window.Uint8Array) {
+   if (JSZip.support.uint8array) {
       testZipFile("generate : responseType:uint8array", "ref/text.zip", function(expected) {
          var zip = new JSZip();
          zip.file("Hello.txt", "Hello World\n");
@@ -585,7 +588,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       });
    }
 
-   if (window.ArrayBuffer) {
+   if (JSZip.support.arraybuffer) {
       testZipFile("generate : responseType:arraybuffer", "ref/text.zip", function(expected) {
          var zip = new JSZip();
          zip.file("Hello.txt", "Hello World\n");
@@ -609,7 +612,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       });
    }
 
-   if (window.Blob) {
+   if (JSZip.support.blob) {
       testZipFile("generate : responseType:blob", "ref/text.zip", function(expected) {
          var zip = new JSZip();
          zip.file("Hello.txt", "Hello World\n");
@@ -813,7 +816,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
 
-   if (window.ArrayBuffer) {
+   if (JSZip.support.arraybuffer) {
       testZipFile("load(ArrayBuffer) works", "ref/all.zip", function(fileAsString) {
          var file = new ArrayBuffer(fileAsString.length);
          var bufferView = new Uint8Array(file);
@@ -827,7 +830,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       });
    }
 
-   if (window.Uint8Array) {
+   if (JSZip.support.uint8array) {
       testZipFile("load(Uint8Array) works", "ref/all.zip", function(fileAsString) {
          var file = new Uint8Array(fileAsString.length);
          for( var i = 0; i < fileAsString.length; ++i ) {

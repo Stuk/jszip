@@ -122,8 +122,7 @@ JSZip.prototype = (function ()
       asArrayBuffer : function ()
       {
          return JSZip.utils.string2Uint8Array(this.asBinary()).buffer;
-      },
-
+      }
    };
 
    /**
@@ -201,13 +200,13 @@ JSZip.prototype = (function ()
 
       o = prepareFileAttrs(o);
 
-      if (typeof Uint8Array !== "undefined" && data instanceof Uint8Array)
+      if (JSZip.support.uint8array && data instanceof Uint8Array)
       {
          o.base64 = false;
          o.binary = true;
          data = JSZip.utils.uint8Array2String(data);
       }
-      else if (typeof ArrayBuffer !== "undefined" && data instanceof ArrayBuffer)
+      else if (JSZip.support.arraybuffer && data instanceof ArrayBuffer)
       {
          o.base64 = false;
          o.binary = true;
@@ -578,24 +577,7 @@ JSZip.prototype = (function ()
             case "arraybuffer" :
                return JSZip.utils.string2Uint8Array(zip).buffer;
             case "blob" :
-               if (typeof Blob === "undefined")
-               {
-                  throw new Error("Blob is not supported by this browser");
-               }
-               var zipArray = JSZip.utils.string2Uint8Array(zip);
-               try
-               {
-                  // Blob constructor
-                  return new Blob([zipArray], { type: "application/zip" });
-               }
-               catch(e)
-               {
-                  // deprecated, browser only, old way
-                  var builder = new (window.BlobBuilder || window.WebKitBlobBuilder ||
-                     window.MozBlobBuilder || window.MSBlobBuilder)();
-                  builder.append(zipArray.buffer);
-                  return builder.getBlob('application/zip');
-               }
+               return JSZip.utils.string2Blob(zip);
             default : // case "string" :
                return (options.base64) ? JSZipBase64.encode(zip) : zip;
          }
@@ -800,6 +782,48 @@ JSZip.compressions = {
    }
 };
 
+/*
+ * List features that require a modern browser, and if the current browser support them.
+ */
+JSZip.support = {
+   arraybuffer : (function(){
+      return typeof ArrayBuffer !== "undefined" && typeof Uint8Array !== "undefined";
+   })(),
+   uint8array : (function(){
+      return typeof Uint8Array !== "undefined";
+   })(),
+   // the spec started with BlobBuilder then replaced it with a construtor for Blob.
+   // Result : we have browsers that :
+   // * know the BlobBuilder (but with prefix)
+   // * know the Blob constructor
+   // * know about Blob but not about how to build them
+   // About the "=== 0" test : if given the wrong type, it may be converted to a string.
+   // Instead of an empty content, we will get "[object Uint8Array]" for example.
+   blob : (function(){
+      if (typeof ArrayBuffer === "undefined")
+      {
+         return false;
+      }
+      var buffer = new ArrayBuffer(0);
+      try
+      {
+         return new Blob([buffer], { type: "application/zip" }).size === 0;
+      }
+      catch(e) {}
+
+      try
+      {
+         var builder = new (window.BlobBuilder || window.WebKitBlobBuilder ||
+                            window.MozBlobBuilder || window.MSBlobBuilder)();
+         builder.append(buffer);
+         return builder.getBlob('application/zip').size === 0;
+      }
+      catch(e) {}
+
+      return false;
+   })()
+};
+
 JSZip.utils = {
    /**
     * Convert a string to a "binary string" : a string containing only char codes between 0 and 255.
@@ -823,7 +847,7 @@ JSZip.utils = {
     */
    string2Uint8Array : function (str)
    {
-      if (typeof Uint8Array === "undefined")
+      if (!JSZip.support.uint8array)
       {
          throw new Error("Uint8Array is not supported by this browser");
       }
@@ -845,7 +869,7 @@ JSZip.utils = {
     */
    uint8Array2String : function (array)
    {
-      if (typeof Uint8Array === "undefined")
+      if (!JSZip.support.uint8array)
       {
          throw new Error("Uint8Array is not supported by this browser");
       }
@@ -856,6 +880,40 @@ JSZip.utils = {
       }
 
       return result;
+   },
+   /**
+    * Create a blob from the given string.
+    * @param {string} str the string to transform.
+    * @return {Blob} the string.
+    * @throws {Error} an Error if the browser doesn't support the requested feature.
+    */
+   string2Blob : function (str)
+   {
+      if (!JSZip.support.blob)
+      {
+         throw new Error("Blob is not supported by this browser");
+      }
+
+      var buffer = JSZip.utils.string2Uint8Array(str).buffer;
+      try
+      {
+         // Blob constructor
+         return new Blob([buffer], { type: "application/zip" });
+      }
+      catch(e) {}
+
+      try
+      {
+         // deprecated, browser only, old way
+         var builder = new (window.BlobBuilder || window.WebKitBlobBuilder ||
+                            window.MozBlobBuilder || window.MSBlobBuilder)();
+         builder.append(buffer);
+         return builder.getBlob('application/zip');
+      }
+      catch(e) {}
+
+      // well, fuck ?!
+      throw new Error("Bug : can't construct the Blob.")
    }
 };
 
