@@ -19,7 +19,7 @@ window.onload = function () {
   var blobLink = document.getElementById('blob');
   try {
     blobLink.download = "hello.zip";
-    blobLink.href = window.URL.createObjectURL(zip.generate({responseType:"blob"}));
+    blobLink.href = window.URL.createObjectURL(zip.generate({type:"blob"}));
   } catch(e) {
     blobLink.innerHTML += " (not supported on this browser)";
   }

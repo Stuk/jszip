@@ -487,9 +487,9 @@ JSZip.prototype = (function ()
       /**
        * Generate the complete zip file
        * @param {Object} options the options to generate the zip file :
-       * - base64, true to generate base64.
+       * - base64, (deprecated, use type instead) true to generate base64.
        * - compression, "STORE" by default.
-       * - responseType, "string" by default.
+       * - type, "base64" by default. Values are : string, base64, uint8array, arraybuffer, blob.
        * @return {String|Uint8Array|ArrayBuffer|Blob} the zip file
        */
       generate : function(options)
@@ -497,7 +497,7 @@ JSZip.prototype = (function ()
          options = extend(options || {}, {
             base64 : true,
             compression : "STORE",
-            responseType : "string"
+            type : "base64"
          });
          var compression = options.compression.toUpperCase();
 
@@ -570,7 +570,7 @@ JSZip.prototype = (function ()
          var zip = fileData + dirData + dirEnd;
 
 
-         switch(options.responseType.toLowerCase())
+         switch(options.type.toLowerCase())
          {
             case "uint8array" :
                return JSZip.utils.string2Uint8Array(zip);
@@ -578,8 +578,10 @@ JSZip.prototype = (function ()
                return JSZip.utils.string2Uint8Array(zip).buffer;
             case "blob" :
                return JSZip.utils.string2Blob(zip);
-            default : // case "string" :
+            case "base64" :
                return (options.base64) ? JSZipBase64.encode(zip) : zip;
+            default : // case "string" :
+               return zip;
          }
       },
 
@@ -786,20 +788,23 @@ JSZip.compressions = {
  * List features that require a modern browser, and if the current browser support them.
  */
 JSZip.support = {
+   // contains true if JSZip can read/generate ArrayBuffer, false otherwise.
    arraybuffer : (function(){
       return typeof ArrayBuffer !== "undefined" && typeof Uint8Array !== "undefined";
    })(),
+   // contains true if JSZip can read/generate Uint8Array, false otherwise.
    uint8array : (function(){
       return typeof Uint8Array !== "undefined";
    })(),
-   // the spec started with BlobBuilder then replaced it with a construtor for Blob.
-   // Result : we have browsers that :
-   // * know the BlobBuilder (but with prefix)
-   // * know the Blob constructor
-   // * know about Blob but not about how to build them
-   // About the "=== 0" test : if given the wrong type, it may be converted to a string.
-   // Instead of an empty content, we will get "[object Uint8Array]" for example.
+   // contains true if JSZip can read/generate Blob, false otherwise.
    blob : (function(){
+      // the spec started with BlobBuilder then replaced it with a construtor for Blob.
+      // Result : we have browsers that :
+      // * know the BlobBuilder (but with prefix)
+      // * know the Blob constructor
+      // * know about Blob but not about how to build them
+      // About the "=== 0" test : if given the wrong type, it may be converted to a string.
+      // Instead of an empty content, we will get "[object Uint8Array]" for example.
       if (typeof ArrayBuffer === "undefined")
       {
          return false;
