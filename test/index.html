@@ -176,7 +176,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.file("Hello.txt", "Hello World\n");
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       /*
       Expected differing bytes:
@@ -198,7 +198,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.file("Hello.txt", "Hello World\n");
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       /*
       Expected differing bytes:
@@ -239,7 +239,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 	  zip.file("Hello.txt", "Hello World\n", {date : new Date("July 17, 2009 14:36:57")});
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       /*
       Expected differing bytes:
@@ -259,7 +259,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.file("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       equals(reload(actual), actual, "Generated ZIP can be parsed");
@@ -270,7 +270,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.folder("folder");
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       equals(reload(actual), actual, "Generated ZIP can be parsed");
@@ -282,7 +282,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.folder("images").file("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       /*
       Expected differing bytes:
@@ -321,7 +321,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       // these changes won't be used
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
@@ -383,7 +383,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.remove("Remove.txt");
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
@@ -395,7 +395,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.remove("folder/Remove.txt");
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
@@ -407,7 +407,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       folder.remove("Remove.txt");
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
@@ -419,7 +419,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.remove("remove");
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
@@ -434,7 +434,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.remove("remove");
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
@@ -447,7 +447,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.folder("folder").remove("1");
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       equals(reload(actual), actual, "Generated ZIP can be parsed");
@@ -692,7 +692,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       });
       var content = zip.generate();
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
 
@@ -703,7 +703,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.file("Hello.txt", "Hello World\n");
       var content = zip.generate({compression:'STORE'});
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       // no difference with the "Zip text file" test.
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
@@ -715,7 +715,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
       var content = zip.generate({compression:'STORE'});
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
@@ -726,7 +726,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
       var content = zip.generate({compression:'DEFLATE'});
 
-      var actual = JSZipBase64.decode(content);
+      var actual = JSZip.Base64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });

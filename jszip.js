@@ -7,6 +7,11 @@ JSZip - A Javascript class for generating and reading zip files
 Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
 
 Usage:
+   // CommonJS
+   var JSZip = require("jszip");
+   // Require.js
+   requirejs(["jszip"], function (JSZip) { ... });
+
    zip = new JSZip();
    zip.file("hello.txt", "Hello, World!").add("tempfile", "nothing");
    zip.folder("images").file("smile.gif", base64Data, {base64: true});
@@ -16,6 +21,22 @@ Usage:
    base64zip = zip.generate();
 
 **/
+
+// UMD from https://github.com/umdjs/umd/blob/master/returnExports.js
+(function (root, factory) {
+    if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(factory);
+    } else {
+        // Browser globals (root is window)
+        root.JSZip = factory();
+  }
+}(this, function () {
 
 /**
  * Representation a of zip file in js
@@ -857,7 +878,7 @@ JSZip.utils = {
  *
  *  Hacked so that it doesn't utf8 en/decode everything
  **/
-var JSZipBase64 = (function() {
+var JSZipBase64 = JSZip.Base64 = (function() {
    // private property
    var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
@@ -930,6 +951,10 @@ var JSZipBase64 = (function() {
       }
    };
 }());
+
+return JSZip;
+
+}));
 
 // enforcing Stuk's coding style
 // vim: set shiftwidth=3 softtabstop=3:

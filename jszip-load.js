@@ -7,7 +7,7 @@ JSZip - A Javascript class for generating and reading zip files
 Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
 
 **/
-/*global JSZip,JSZipBase64 */
+/*global JSZip */
 (function () {
 
    /**
@@ -509,8 +509,9 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
    JSZip.prototype.load = function(data, options) {
       var files, zipEntries, i, input;
       options = options || {};
+
       if(options.base64) {
-         data = JSZipBase64.decode(data);
+         data = JSZip.Base64.decode(data);
       }
 
       zipEntries = new ZipEntries(data, options);
