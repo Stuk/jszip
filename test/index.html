@@ -89,13 +89,11 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       // Be sure to have a well formatted string
       expected = JSZip.utils.string2binary(expected);
 
-      if (actual.length !== expected.length)
-      {
+      if (actual.length !== expected.length) {
          mistakes -= Math.abs((actual.length||0) - (expected.length||0));
       }
 
-      for (var i = 0; i < Math.min(actual.length, expected.length); i++)
-      {
+      for (var i = 0; i < Math.min(actual.length, expected.length); i++) {
          if (actual.charAt(i) !== expected.charAt(i)) {
             mistakes--;
          }
@@ -118,13 +116,10 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    var refZips = [];
 
    function testZipFile(testName, zipName, testFunction) {
-      test(testName, function ()
-      {
+      test(testName, function () {
          if (refZips[zipName]) {
             testFunction.call(this, refZips[zipName]);
-         }
-         else
-         {
+         } else {
             stop();
             /*
              * Here is the tricky part : getting the data.
@@ -150,8 +145,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
             })
             .done(function(data, textStatus, jqXHR){
               start();
-              try
-              {
+              try {
                   // this.xhr comes from the context
                   var file = getBinaryFromXHR(jqXHR.responseText, this.xhr);
                   refZips[zipName] = file;
@@ -742,13 +736,10 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    // zip -0 -X -e encrypted.zip Hello.txt
    testZipFile("basic encryption", "ref/encrypted.zip", function(file) {
-      try
-      {
+      try {
          var zip = new JSZip(file);
          ok(false, "Encryption is not supported, but no exception were thrown");
-      }
-      catch(e)
-      {
+      } catch(e) {
          equal(e.message, "Encrypted zip are not supported", "the error message is useful");
       }
    });
@@ -757,49 +748,37 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    module("Load file, corrupted zip"); // {{{
 
    testZipFile("bad compression method", "ref/invalid/compression.zip", function(file) {
-      try
-      {
+      try {
          var zip = new JSZip(file);
          ok(false, "no exception were thrown");
-      }
-      catch(e)
-      {
+      } catch(e) {
          ok(e.message.match("Corrupted zip"), "the error message is useful");
       }
    });
 
    testZipFile("invalid crc32 but no check", "ref/invalid/crc32.zip", function(file) {
-      try
-      {
+      try {
          var zip = new JSZip(file, {checkCRC32:false});
          ok(true, "no exception were thrown");
-      }
-      catch(e)
-      {
+      } catch(e) {
          ok(false, "An exception were thrown but the check should have been disabled.");
       }
    });
 
    testZipFile("invalid crc32", "ref/invalid/crc32.zip", function(file) {
-      try
-      {
+      try {
          var zip = new JSZip(file, {checkCRC32:true});
          ok(false, "no exception were thrown");
-      }
-      catch(e)
-      {
+      } catch(e) {
          ok(e.message.match("Corrupted zip"), "the error message is useful");
       }
    });
 
    testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file) {
-      try
-      {
+      try {
          var zip = new JSZip(file);
          ok(false, "no exception were thrown");
-      }
-      catch(e)
-      {
+      } catch(e) {
          ok(e.message.match("Corrupted zip"), "the error message is useful");
       }
    });

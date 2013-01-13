@@ -8,8 +8,7 @@
  * Original code can be found here: http://www.onicos.com/staff/iz/amuse/javascript/expert/deflate.txt
  */
 
-if(!JSZip)
-{
+if(!JSZip) {
    throw "JSZip not defined";
 }
 
@@ -1693,3 +1692,6 @@ if(!JSZip.compressions["DEFLATE"]) {
 }
 
 })();
+
+// enforcing Stuk's coding style
+// vim: set shiftwidth=3 softtabstop=3:
