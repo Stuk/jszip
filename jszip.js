@@ -154,9 +154,7 @@ JSZip.prototype = (function ()
       {
          for (attr in arguments[i])
          {
-            if( !arguments[i].hasOwnProperty(attr) ) { continue; }
-
-            if(typeof result[attr] === "undefined")
+            if(arguments[i].hasOwnProperty(attr) && typeof result[attr] === "undefined")
             {
                result[attr] = arguments[i][attr];
             }

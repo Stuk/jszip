@@ -50,11 +50,11 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
     */
    function StreamReader(stream) {
       this.stream = "";
-      if (typeof Uint8Array !== "undefined" && stream instanceof Uint8Array)
+      if (JSZip.support.uint8array && stream instanceof Uint8Array)
       {
          this.stream = JSZip.utils.uint8Array2String(stream);
       }
-      else if (typeof ArrayBuffer !== "undefined" && stream instanceof ArrayBuffer)
+      else if (JSZip.support.arraybuffer && stream instanceof ArrayBuffer)
       {
          var bufferView = new Uint8Array(stream);
          this.stream = JSZip.utils.uint8Array2String(bufferView);
