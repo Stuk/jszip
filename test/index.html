@@ -8,7 +8,7 @@
 <!--
 Only used to avoid cross browser xhr madness.
 -->
-<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="jquery-1.8.3.min.js"></script>
 
 <script type="text/javascript" src="../jszip.js"></script>
 <script type="text/javascript" src="../jszip-load.js"></script>
@@ -69,6 +69,10 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    // Note : if you just want to give it to JSZip.load, you can skip this part
    // (this transformation is already done there) and just return responseText.
    window.getBinaryFromXHR = window.getBinaryFromXHR || function (responseText, xhr) {
+      // we skip the & 0xFF part, since this must be tested in the JSZip tests.
+      return responseText;
+      // if you check this method to know how to load binay data, remove this return :)
+
       var result = "";
       for (var i = 0; i < responseText.length; i++) {
          var code = responseText.charCodeAt(i) & 0xff;
@@ -81,13 +85,15 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 <script type="text/javascript">
 
    function similar(actual, expected, mistakes) {
-      if (actual.length !== expected.length)
-      {
+      // actual is the generated zip, expected is what we got from the xhr.
+      // Be sure to have a well formatted string
+      expected = JSZip.utils.string2binary(expected);
+
+      if (actual.length !== expected.length) {
          mistakes -= Math.abs((actual.length||0) - (expected.length||0));
       }
 
-      for (var i = 0; i < Math.min(actual.length, expected.length); i++)
-      {
+      for (var i = 0; i < Math.min(actual.length, expected.length); i++) {
          if (actual.charAt(i) !== expected.charAt(i)) {
             mistakes--;
          }
@@ -103,20 +109,17 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
     * bytes -> JSZip -> bytes
     */
    function reload(bytesStream) {
-      return new JSZip(bytesStream, {checkCRC32:true}).generate({base64:false});
+      return new JSZip(bytesStream, {checkCRC32:true}).generate({type:"string"});
    }
 
    // cache for files
    var refZips = [];
 
    function testZipFile(testName, zipName, testFunction) {
-      test(testName, function ()
-      {
+      test(testName, function () {
          if (refZips[zipName]) {
             testFunction.call(this, refZips[zipName]);
-         }
-         else
-         {
+         } else {
             stop();
             /*
              * Here is the tricky part : getting the data.
@@ -135,23 +138,25 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
                xhr:jQuery.ajaxSettings.xhr()
             };
             $.ajax(zipName, {
+               cache: false,
                context: context,
                xhr:function(){return context.xhr},
-               mimeType:'text/plain; charset=x-user-defined',
-               complete: function(jqXHR, textStatus) {
-                  start();
-                  if (textStatus !== "success")
-                  {
-                     ok(false, "Ajax error for " + zipName + " : textStatus=" + textStatus);
-                  }
-                  try
-                  {
-                     // this.xhr comes from the context
-                     var file = getBinaryFromXHR(jqXHR.responseText, this.xhr);
-                     refZips[zipName] = file;
-                     testFunction.call(this, file);
-                  } catch(e) {ok(false, e.message||e)}
-               }
+               mimeType:'text/plain; charset=x-user-defined'
+            })
+            .done(function(data, textStatus, jqXHR){
+              start();
+              try {
+                  // this.xhr comes from the context
+                  var file = getBinaryFromXHR(jqXHR.responseText, this.xhr);
+                  refZips[zipName] = file;
+                  testFunction.call(this, file);
+              } catch(e) {
+                ok(false, e.message||e)
+              }
+            })
+            .fail(function(){
+              start();
+              ok(false, "Ajax error for " + zipName + " : " + arguments);
             });
          }
       });
@@ -213,7 +218,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    testZipFile("Zip text file with UTF-8 characters", "ref/utf8.zip", function(expected) {
       var zip = new JSZip();
       zip.file("amount.txt", "€15\n");
-      var actual = zip.generate({base64:false});
+      var actual = zip.generate({type:"string"});
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       equals(reload(actual), actual, "Generated ZIP can be parsed");
@@ -223,7 +228,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(expected) {
       var zip = new JSZip();
       zip.file("€15.txt", "€15\n");
-      var actual = zip.generate({base64:false});
+      var actual = zip.generate({type:"string"});
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       equals(reload(actual), actual, "Generated ZIP can be parsed");
@@ -448,14 +453,189 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
-   testZipFile("Byte string output", "ref/text.zip", function(expected) {
+   testZipFile("add file: from XHR (with bytes > 255)", "ref/text.zip", function(textZip) {
+      var zip = new JSZip();
+      zip.file("text.zip", textZip, {binary:true});
+      var actual = zip.generate({base64:false});
+
+      equals(reload(actual), actual, "high-order byte is discarded and won't mess up the result");
+   });
+
+   function testFileDataGetters (zip) {
+      equals(zip.file("amount.txt").asText(), "€15\n", "asText()");
+      // http://www.fileformat.info/info/unicode/char/20ac/index.htm
+      equals(zip.file("amount.txt").asBinary(), "\xE2\x82\xAC15\n", "asBinary()");
+      if (JSZip.support.arraybuffer) {
+         var buffer = zip.file("amount.txt").asArrayBuffer();
+         ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
+         var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
+         equals(actual, "\xE2\x82\xAC15\n", "asArrayBuffer()");
+      } else {
+         try {
+            zip.file("amount.txt").asArrayBuffer();
+            ok(false, "no exception thrown");
+         } catch (e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      }
+      if (JSZip.support.uint8array) {
+         var bufferView = zip.file("amount.txt").asUint8Array();
+         ok(bufferView instanceof Uint8Array, "The result is a instance of Uint8Array");
+         var actual = String.fromCharCode.apply(null, bufferView);
+         equals(actual, "\xE2\x82\xAC15\n", "asUint8Array()");
+      } else {
+         try {
+            zip.file("amount.txt").asUint8Array();
+            ok(false, "no exception thrown");
+         } catch (e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      }
+   }
+
+   test("add file: file(name, string)", function() {
+      var zip = new JSZip();
+      zip.file("amount.txt", "€15\n");
+      testFileDataGetters(zip);
+   });
+
+   test("add file: file(name, base64)", function() {
+      var zip = new JSZip();
+      zip.file("amount.txt", "4oKsMTUK", {base64:true});
+      testFileDataGetters(zip);
+   });
+
+   if (JSZip.support.uint8array) {
+      test("add file: file(name, Uint8Array)", function() {
+         var zip = new JSZip();
+         var string = "\xE2\x82\xAC15\n";
+         var array = new Uint8Array(string.length);
+         for(var i = 0; i < string.length; i++) {
+            array[i] = string.charCodeAt(i);
+         }
+         zip.file("amount.txt", array);
+         testFileDataGetters(zip);
+      });
+   }
+
+   if (JSZip.support.arraybuffer) {
+      test("add file: file(name, ArrayBuffer)", function() {
+         var zip = new JSZip();
+         var string = "\xE2\x82\xAC15\n";
+         var array = new Uint8Array(string.length);
+         for(var i = 0; i < string.length; i++) {
+            array[i] = string.charCodeAt(i);
+         }
+         zip.file("amount.txt", array.buffer);
+         testFileDataGetters(zip);
+      });
+   }
+
+   testZipFile("generate : base64:false. Deprecated, but it still works", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n");
-      var content = zip.generate({base64:false});
+      var actual = zip.generate({base64:false});
 
-      var actual = content;
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
+
+   testZipFile("generate : base64:true. Deprecated, but it still works", "ref/text.zip", function(expected) {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "Hello World\n");
+      var content = zip.generate({base64:true});
+      var actual = JSZipBase64.decode(content);
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+
+   testZipFile("generate : type:string", "ref/text.zip", function(expected) {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "Hello World\n");
+      var actual = zip.generate({type:"string"});
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+
+   testZipFile("generate : type:base64", "ref/text.zip", function(expected) {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "Hello World\n");
+      var content = zip.generate({type:"base64"});
+
+      var actual = JSZipBase64.decode(content);
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+
+   if (JSZip.support.uint8array) {
+      testZipFile("generate : type:uint8array", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         var array = zip.generate({type:"uint8array"});
+         ok(array instanceof Uint8Array, "The result is a instance of Uint8Array");
+         equals(array.length, expected.length);
+
+         var actual = String.fromCharCode.apply(null, array);
+
+         ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+      });
+   } else {
+      testZipFile("generate : type:uint8array", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         try {
+            var blob = zip.generate({type:"uint8array"});
+            ok(false, "Uint8Array is not supported, but no exception thrown");
+         } catch(e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      });
+   }
+
+   if (JSZip.support.arraybuffer) {
+      testZipFile("generate : type:arraybuffer", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         var buffer = zip.generate({type:"arraybuffer"});
+         ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
+
+         var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
+
+         ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+      });
+   } else {
+      testZipFile("generate : type:arraybuffer", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         try {
+            var blob = zip.generate({type:"arraybuffer"});
+            ok(false, "ArrayBuffer is not supported, but no exception thrown");
+         } catch(e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      });
+   }
+
+   if (JSZip.support.blob) {
+      testZipFile("generate : type:blob", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         var blob = zip.generate({type:"blob"});
+         ok(blob instanceof Blob, "The result is a instance of Blob");
+         equals(blob.type, "application/zip");
+         equals(blob.size, expected.length);
+      });
+   } else {
+      testZipFile("generate : type:blob", "ref/text.zip", function(expected) {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "Hello World\n");
+         try {
+            var blob = zip.generate({type:"blob"});
+            ok(false, "Blob is not supported, but no exception thrown");
+         } catch(e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      });
+   }
 
    test("Filtering a zip", function() {
       var zip = new JSZip();
@@ -556,13 +736,10 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
    // zip -0 -X -e encrypted.zip Hello.txt
    testZipFile("basic encryption", "ref/encrypted.zip", function(file) {
-      try
-      {
+      try {
          var zip = new JSZip(file);
          ok(false, "Encryption is not supported, but no exception were thrown");
-      }
-      catch(e)
-      {
+      } catch(e) {
          equal(e.message, "Encrypted zip are not supported", "the error message is useful");
       }
    });
@@ -571,55 +748,88 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    module("Load file, corrupted zip"); // {{{
 
    testZipFile("bad compression method", "ref/invalid/compression.zip", function(file) {
-      try
-      {
+      try {
          var zip = new JSZip(file);
          ok(false, "no exception were thrown");
-      }
-      catch(e)
-      {
+      } catch(e) {
          ok(e.message.match("Corrupted zip"), "the error message is useful");
       }
    });
 
    testZipFile("invalid crc32 but no check", "ref/invalid/crc32.zip", function(file) {
-      try
-      {
+      try {
          var zip = new JSZip(file, {checkCRC32:false});
          ok(true, "no exception were thrown");
-      }
-      catch(e)
-      {
+      } catch(e) {
          ok(false, "An exception were thrown but the check should have been disabled.");
       }
    });
 
    testZipFile("invalid crc32", "ref/invalid/crc32.zip", function(file) {
-      try
-      {
+      try {
          var zip = new JSZip(file, {checkCRC32:true});
          ok(false, "no exception were thrown");
-      }
-      catch(e)
-      {
+      } catch(e) {
          ok(e.message.match("Corrupted zip"), "the error message is useful");
       }
    });
 
    testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file) {
-      try
-      {
+      try {
          var zip = new JSZip(file);
          ok(false, "no exception were thrown");
-      }
-      catch(e)
-      {
+      } catch(e) {
          ok(e.message.match("Corrupted zip"), "the error message is useful");
       }
    });
    // }}} Load file, corrupted zip
 
    module("Load file"); // {{{
+
+   testZipFile("load(string) works", "ref/all.zip", function(file) {
+      ok(typeof file === "string");
+      var zip = new JSZip(file);
+      equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+   });
+
+   testZipFile("load(string) handles bytes > 255", "ref/all.zip", function(file) {
+      // the method used to load zip with ajax will remove the extra bits.
+      // adding extra bits :)
+      var updatedFile = "";
+      for (var i = 0; i < file.length; i++) {
+         updatedFile += String.fromCharCode((file.charCodeAt(i) & 0xff) + 0x4200);
+      }
+      var zip = new JSZip(updatedFile);
+
+      equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+   });
+
+   if (JSZip.support.arraybuffer) {
+      testZipFile("load(ArrayBuffer) works", "ref/all.zip", function(fileAsString) {
+         var file = new ArrayBuffer(fileAsString.length);
+         var bufferView = new Uint8Array(file);
+         for( var i = 0; i < fileAsString.length; ++i ) {
+              bufferView[i] = fileAsString.charCodeAt(i);
+         }
+
+         ok(file instanceof ArrayBuffer);
+         var zip = new JSZip(file);
+         equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+      });
+   }
+
+   if (JSZip.support.uint8array) {
+      testZipFile("load(Uint8Array) works", "ref/all.zip", function(fileAsString) {
+         var file = new Uint8Array(fileAsString.length);
+         for( var i = 0; i < fileAsString.length; ++i ) {
+              file[i] = fileAsString.charCodeAt(i);
+         }
+
+         ok(file instanceof Uint8Array);
+         var zip = new JSZip(file);
+         equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
+      });
+   }
 
    // zip -6 -X deflate.zip Hello.txt
    testZipFile("zip with DEFLATE", "ref/deflate.zip", function(file) {
