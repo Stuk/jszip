@@ -20,7 +20,7 @@ Usage:
 /**
  * Representation a of zip file in js
  * @constructor
- * @param {String=} data the data to load, if any (optional).
+ * @param {String=|ArrayBuffer=|Uint8Array=} data the data to load, if any (optional).
  * @param {Object=} options the options for creating this objects (optional).
  */
 var JSZip = function(data, options) {
@@ -34,7 +34,7 @@ var JSZip = function(data, options) {
    // Where we are in the hierarchy
    this.root = "";
 
-   if(data) {
+   if (data) {
       this.load(data, options);
    }
 };
@@ -57,8 +57,7 @@ JSZip.defaults = {
 };
 
 
-JSZip.prototype = (function ()
-{
+JSZip.prototype = (function () {
    /**
     * A simple object representing a file in the zip file.
     * @constructor
@@ -77,17 +76,43 @@ JSZip.prototype = (function ()
        * Return the content as UTF8 string.
        * @return {string} the UTF8 string.
        */
-      asText : function ()
-      {
-         return this.options.binary ? JSZip.prototype.utf8decode(this.data) : this.data;
+      asText : function () {
+         var result = this.data;
+         if (this.options.base64) {
+            result = JSZipBase64.decode(result);
+         }
+         if (this.options.binary) {
+            result = JSZip.prototype.utf8decode(result);
+         }
+         return result;
       },
       /**
        * Returns the binary content.
        * @return {string} the content as binary.
        */
-      asBinary : function ()
-      {
-         return this.options.binary ? this.data : JSZip.prototype.utf8encode(this.data);
+      asBinary : function () {
+         var result = this.data;
+         if (this.options.base64) {
+            result = JSZipBase64.decode(result);
+         }
+         if (!this.options.binary) {
+            result = JSZip.prototype.utf8encode(result);
+         }
+         return result;
+      },
+      /**
+       * Returns the content as an Uint8Array.
+       * @return {Uint8Array} the content as an Uint8Array.
+       */
+      asUint8Array : function () {
+         return JSZip.utils.string2Uint8Array(this.asBinary());
+      },
+      /**
+       * Returns the content as an ArrayBuffer.
+       * @return {ArrayBuffer} the content as an ArrayBufer.
+       */
+      asArrayBuffer : function () {
+         return JSZip.utils.string2Uint8Array(this.asBinary()).buffer;
       }
    };
 
@@ -100,8 +125,7 @@ JSZip.prototype = (function ()
     */
    var decToHex = function(dec, bytes) {
       var hex = "", i;
-      for(i = 0; i < bytes; i++)
-      {
+      for(i = 0; i < bytes; i++) {
          hex += String.fromCharCode(dec&0xff);
          dec=dec>>>8;
       }
@@ -116,12 +140,9 @@ JSZip.prototype = (function ()
     */
    var extend = function () {
       var result = {}, i, attr;
-      for (i = 0; i < arguments.length; i++) // arguments is not enumerable in some browsers
-      {
-         for (attr in arguments[i])
-         {
-            if(typeof result[attr] === "undefined")
-            {
+      for (i = 0; i < arguments.length; i++) { // arguments is not enumerable in some browsers
+         for (attr in arguments[i]) {
+            if (arguments[i].hasOwnProperty(attr) && typeof result[attr] === "undefined") {
                result[attr] = arguments[i][attr];
             }
          }
@@ -151,7 +172,7 @@ JSZip.prototype = (function ()
    * Add a file in the current folder.
    * @private
    * @param {string} name the name of the file
-   * @param {string} data the data of the file
+   * @param {String|ArrayBuffer|Uint8Array} data the data of the file
    * @param {Object} o the options of the file
    * @return {Object} the new file.
    */
@@ -164,6 +185,26 @@ JSZip.prototype = (function ()
 
       o = prepareFileAttrs(o);
 
+      if (JSZip.support.uint8array && data instanceof Uint8Array) {
+         o.base64 = false;
+         o.binary = true;
+         data = JSZip.utils.uint8Array2String(data);
+      } else if (JSZip.support.arraybuffer && data instanceof ArrayBuffer) {
+         o.base64 = false;
+         o.binary = true;
+         var bufferView = new Uint8Array(data);
+         data = JSZip.utils.uint8Array2String(bufferView);
+      } else if (o.binary && !o.base64) {
+         // optimizedBinaryString == true means that the file has already been filtered with a 0xFF mask
+         if (o.optimizedBinaryString !== true) {
+            // this is a string, not in a base64 format.
+            // Be sure that this is a correct "binary string"
+            data = JSZip.utils.string2binary(data);
+         }
+         // we remove this option since it's only relevant here
+         delete o.optimizedBinaryString;
+      }
+
       return this.files[name] = new ZipObject(name, data, o);
    };
 
@@ -175,8 +216,7 @@ JSZip.prototype = (function ()
     * @return {string} the parent folder, or ""
     */
    var parentFolder = function (path) {
-      if (path.slice(-1) == '/')
-      {
+      if (path.slice(-1) == '/') {
          path = path.substring(0, path.length - 1);
       }
       var lastSlash = path.lastIndexOf('/');
@@ -196,8 +236,7 @@ JSZip.prototype = (function ()
       }
 
       // Does this folder already exist?
-      if (!this.files[name])
-      {
+      if (!this.files[name]) {
          // be sure sub folders exist
          var parent = parentFolder(name);
          if (parent) {
@@ -220,7 +259,7 @@ JSZip.prototype = (function ()
     */
    var prepareLocalHeaderData = function(file, utfEncodedFileName, compressionType) {
       var useUTF8 = utfEncodedFileName !== file.name,
-          data    = file.data,
+          data    = file.asBinary(),
           o       = file.options,
           dosTime,
           dosDate;
@@ -241,15 +280,6 @@ JSZip.prototype = (function ()
       dosDate = dosDate | (o.date.getMonth() + 1);
       dosDate = dosDate << 5;
       dosDate = dosDate | o.date.getDate();
-
-      if (o.base64 === true) {
-         data = JSZipBase64.decode(data);
-      }
-      // decode UTF-8 strings if we are dealing with text data
-      if(o.binary === false) {
-         data = this.utf8encode(data);
-      }
-
 
       var compression    = JSZip.compressions[compressionType];
       var compressedData = compression.compress(data);
@@ -290,13 +320,12 @@ JSZip.prototype = (function ()
       /**
        * Read an existing zip and merge the data in the current JSZip object.
        * The implementation is in jszip-load.js, don't forget to include it.
-       * @param {string} stream  The stream to load
+       * @param {String|ArrayBuffer|Uint8Array} stream  The stream to load
        * @param {Object} options Options for loading the stream.
        *  options.base64 : is the stream in base64 ? default : false
        * @return {JSZip} the current JSZip object
        */
-      load : function (stream, options)
-      {
+      load : function (stream, options) {
          throw new Error("Load method is not defined. Is the file jszip-load.js included ?");
       },
 
@@ -307,18 +336,16 @@ JSZip.prototype = (function ()
        * It takes 2 arguments : the relative path and the file.
        * @return {Array} An array of matching elements.
        */
-      filter : function (search)
-      {
+      filter : function (search) {
          var result = [], filename, relativePath, file, fileClone;
-         for (filename in this.files)
-         {
+         for (filename in this.files) {
+            if ( !this.files.hasOwnProperty(filename) ) { continue; }
             file = this.files[filename];
             // return a new object, don't let the user mess with our internal objects :)
             fileClone = new ZipObject(file.name, file.data, extend(file.options));
             relativePath = filename.slice(this.root.length, filename.length);
             if (filename.slice(0, this.root.length) === this.root && // the file is in the current root
-                search(relativePath, fileClone)) // and the file matches the function
-            {
+                search(relativePath, fileClone)) { // and the file matches the function
                result.push(fileClone);
             }
          }
@@ -329,31 +356,24 @@ JSZip.prototype = (function ()
        * Add a file to the zip file, or search a file.
        * @param   {string|RegExp} name The name of the file to add (if data is defined),
        * the name of the file to find (if no data) or a regex to match files.
-       * @param   {string} data  The file data, either raw or base64 encoded
+       * @param   {String|ArrayBuffer|Uint8Array} data  The file data, either raw or base64 encoded
        * @param   {Object} o     File options
        * @return  {JSZip|Object|Array} this JSZip object (when adding a file),
        * a file (when searching by string) or an array of files (when searching by regex).
        */
-      file : function(name, data, o)
-      {
-         if (arguments.length === 1)
-         {
-            if (name instanceof RegExp)
-            {
+      file : function(name, data, o) {
+         if (arguments.length === 1) {
+            if (name instanceof RegExp) {
                var regexp = name;
                return this.filter(function(relativePath, file) {
                   return !file.options.dir && regexp.test(relativePath);
                });
-            }
-            else // text
-            {
+            } else { // text
                return this.filter(function (relativePath, file) {
                   return !file.options.dir && relativePath === name;
                })[0]||null;
             }
-         }
-         else // more than one argument : we have data !
-         {
+         } else { // more than one argument : we have data !
             name = this.root+name;
             fileAdd.call(this, name, data, o);
          }
@@ -365,15 +385,12 @@ JSZip.prototype = (function ()
        * @param   {String|RegExp} arg The name of the directory to add, or a regex to search folders.
        * @return  {JSZip} an object with the new directory as the root, or an array containing matching folders.
        */
-      folder : function(arg)
-      {
-         if (!arg)
-         {
+      folder : function(arg) {
+         if (!arg) {
             throw new Error("folder : wrong argument");
          }
 
-         if (arg instanceof RegExp)
-         {
+         if (arg instanceof RegExp) {
             return this.filter(function(relativePath, file) {
                return file.options.dir && arg.test(relativePath);
             });
@@ -394,12 +411,10 @@ JSZip.prototype = (function ()
        * @param {string} name the name of the file to delete
        * @return {JSZip} this JSZip object
        */
-      remove : function(name)
-      {
+      remove : function(name) {
          name = this.root + name;
          var file = this.files[name];
-         if (!file)
-         {
+         if (!file) {
             // Look for any folders
             if (name.slice(-1) != "/") {
                name += "/";
@@ -407,21 +422,16 @@ JSZip.prototype = (function ()
             file = this.files[name];
          }
 
-         if (file)
-         {
-            if (!file.options.dir)
-            {
+         if (file) {
+            if (!file.options.dir) {
                // file
                delete this.files[name];
-            }
-            else
-            {
+            } else {
                // folder
                var kids = this.filter(function (relativePath, file) {
                   return file.name.slice(0, name.length) === name;
                });
-               for (var i = 0; i < kids.length; i++)
-               {
+               for (var i = 0; i < kids.length; i++) {
                   delete this.files[kids[i].name];
                }
             }
@@ -433,15 +443,16 @@ JSZip.prototype = (function ()
       /**
        * Generate the complete zip file
        * @param {Object} options the options to generate the zip file :
-       * - base64, true to generate base64.
+       * - base64, (deprecated, use type instead) true to generate base64.
        * - compression, "STORE" by default.
-       * @return {string} the zip file
+       * - type, "base64" by default. Values are : string, base64, uint8array, arraybuffer, blob.
+       * @return {String|Uint8Array|ArrayBuffer|Blob} the zip file
        */
-      generate : function(options)
-      {
+      generate : function(options) {
          options = extend(options || {}, {
             base64 : true,
-            compression : "STORE"
+            compression : "STORE",
+            type : "base64"
          });
          var compression = options.compression.toUpperCase();
 
@@ -452,9 +463,8 @@ JSZip.prototype = (function ()
             throw compression + " is not a valid compression method !";
          }
 
-         for (var name in this.files)
-         {
-            if( !this.files.hasOwnProperty(name) ) { continue; }
+         for (var name in this.files) {
+            if ( !this.files.hasOwnProperty(name) ) { continue; }
 
             var file = this.files[name];
 
@@ -512,7 +522,20 @@ JSZip.prototype = (function ()
          "\x00\x00";
 
          var zip = fileData + dirData + dirEnd;
-         return (options.base64) ? JSZipBase64.encode(zip) : zip;
+
+
+         switch(options.type.toLowerCase()) {
+            case "uint8array" :
+               return JSZip.utils.string2Uint8Array(zip);
+            case "arraybuffer" :
+               return JSZip.utils.string2Uint8Array(zip).buffer;
+            case "blob" :
+               return JSZip.utils.string2Blob(zip);
+            case "base64" :
+               return (options.base64) ? JSZipBase64.encode(zip) : zip;
+            default : // case "string" :
+               return zip;
+         }
       },
 
       /**
@@ -521,8 +544,7 @@ JSZip.prototype = (function ()
        *  http://www.webtoolkit.info/
        *
        */
-      crc32 : function(str, crc)
-      {
+      crc32 : function(str, crc) {
 
          if (str === "" || typeof str === "undefined") {
             return 0;
@@ -610,13 +632,10 @@ JSZip.prototype = (function ()
       },
 
       // Inspired by http://my.opera.com/GreyWyvern/blog/show.dml/1725165
-      clone : function()
-      {
+      clone : function() {
          var newObj = new JSZip();
-         for (var i in this)
-         {
-            if (typeof this[i] !== "function")
-            {
+         for (var i in this) {
+            if (typeof this[i] !== "function") {
                newObj[i] = this[i];
             }
          }
@@ -637,12 +656,10 @@ JSZip.prototype = (function ()
 
             if (c < 128) {
                utftext += String.fromCharCode(c);
-            }
-            else if((c > 127) && (c < 2048)) {
+            } else if ((c > 127) && (c < 2048)) {
                utftext += String.fromCharCode((c >> 6) | 192);
                utftext += String.fromCharCode((c & 63) | 128);
-            }
-            else {
+            } else {
                utftext += String.fromCharCode((c >> 12) | 224);
                utftext += String.fromCharCode(((c >> 6) & 63) | 128);
                utftext += String.fromCharCode((c & 63) | 128);
@@ -668,13 +685,11 @@ JSZip.prototype = (function ()
             if (c < 128) {
                string += String.fromCharCode(c);
                i++;
-            }
-            else if((c > 191) && (c < 224)) {
+            } else if ((c > 191) && (c < 224)) {
                c2 = utftext.charCodeAt(i+1);
                string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
                i += 2;
-            }
-            else {
+            } else {
                c2 = utftext.charCodeAt(i+1);
                c3 = utftext.charCodeAt(i+2);
                string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
@@ -703,14 +718,135 @@ JSZip.prototype = (function ()
 JSZip.compressions = {
    "STORE" : {
       magic : "\x00\x00",
-      compress : function (content)
-      {
+      compress : function (content) {
          return content; // no compression
       },
-      uncompress : function (content)
-      {
+      uncompress : function (content) {
          return content; // no compression
       }
+   }
+};
+
+/*
+ * List features that require a modern browser, and if the current browser support them.
+ */
+JSZip.support = {
+   // contains true if JSZip can read/generate ArrayBuffer, false otherwise.
+   arraybuffer : (function(){
+      return typeof ArrayBuffer !== "undefined" && typeof Uint8Array !== "undefined";
+   })(),
+   // contains true if JSZip can read/generate Uint8Array, false otherwise.
+   uint8array : (function(){
+      return typeof Uint8Array !== "undefined";
+   })(),
+   // contains true if JSZip can read/generate Blob, false otherwise.
+   blob : (function(){
+      // the spec started with BlobBuilder then replaced it with a construtor for Blob.
+      // Result : we have browsers that :
+      // * know the BlobBuilder (but with prefix)
+      // * know the Blob constructor
+      // * know about Blob but not about how to build them
+      // About the "=== 0" test : if given the wrong type, it may be converted to a string.
+      // Instead of an empty content, we will get "[object Uint8Array]" for example.
+      if (typeof ArrayBuffer === "undefined") {
+         return false;
+      }
+      var buffer = new ArrayBuffer(0);
+      try {
+         return new Blob([buffer], { type: "application/zip" }).size === 0;
+      }
+      catch(e) {}
+
+      try {
+         var builder = new (window.BlobBuilder || window.WebKitBlobBuilder ||
+                            window.MozBlobBuilder || window.MSBlobBuilder)();
+         builder.append(buffer);
+         return builder.getBlob('application/zip').size === 0;
+      }
+      catch(e) {}
+
+      return false;
+   })()
+};
+
+JSZip.utils = {
+   /**
+    * Convert a string to a "binary string" : a string containing only char codes between 0 and 255.
+    * @param {string} str the string to transform.
+    * @return {String} the binary string.
+    */
+   string2binary : function (str) {
+      var result = "";
+      for (var i = 0; i < str.length; i++) {
+         result += String.fromCharCode(str.charCodeAt(i) & 0xff);
+      }
+      return result;
+   },
+   /**
+    * Create a Uint8Array from the string.
+    * @param {string} str the string to transform.
+    * @return {Uint8Array} the typed array.
+    * @throws {Error} an Error if the browser doesn't support the requested feature.
+    */
+   string2Uint8Array : function (str) {
+      if (!JSZip.support.uint8array) {
+         throw new Error("Uint8Array is not supported by this browser");
+      }
+      var buffer = new ArrayBuffer(str.length);
+      var bufferView = new Uint8Array(buffer);
+      for(var i = 0; i < str.length; i++) {
+         bufferView[i] = str.charCodeAt(i);
+      }
+
+      return bufferView;
+   },
+
+   /**
+    * Create a string from the Uint8Array.
+    * @param {Uint8Array} array the array to transform.
+    * @return {string} the string.
+    * @throws {Error} an Error if the browser doesn't support the requested feature.
+    */
+   uint8Array2String : function (array) {
+      if (!JSZip.support.uint8array) {
+         throw new Error("Uint8Array is not supported by this browser");
+      }
+      var result = "";
+      for(var i = 0; i < array.length; i++) {
+         result += String.fromCharCode(array[i]);
+      }
+
+      return result;
+   },
+   /**
+    * Create a blob from the given string.
+    * @param {string} str the string to transform.
+    * @return {Blob} the string.
+    * @throws {Error} an Error if the browser doesn't support the requested feature.
+    */
+   string2Blob : function (str) {
+      if (!JSZip.support.blob) {
+         throw new Error("Blob is not supported by this browser");
+      }
+
+      var buffer = JSZip.utils.string2Uint8Array(str).buffer;
+      try {
+         // Blob constructor
+         return new Blob([buffer], { type: "application/zip" });
+      }
+      catch(e) {}
+
+      try {
+         // deprecated, browser only, old way
+         var builder = new (window.BlobBuilder || window.WebKitBlobBuilder ||
+                            window.MozBlobBuilder || window.MSBlobBuilder)();
+         builder.append(buffer);
+         return builder.getBlob('application/zip');
+      }
+      catch(e) {}
+
+      // well, fuck ?!
+      throw new Error("Bug : can't construct the Blob.");
    }
 };
 
