@@ -387,7 +387,7 @@ JSZip.prototype = (function () {
        */
       folder : function(arg) {
          if (!arg) {
-            throw new Error("folder : wrong argument");
+            return this;
          }
 
          if (arg instanceof RegExp) {

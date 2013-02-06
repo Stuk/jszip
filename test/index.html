@@ -265,6 +265,16 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equals(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
+   test("Zip folder() shouldn't throw an exception", function(expected) {
+      var zip = new JSZip();
+      try {
+         zip.folder();
+         ok(true, "no exception thrown");
+      } catch (e) {
+         ok(false, e.message||e);
+      }
+   });
+
    testZipFile("Zip empty folder", "ref/folder.zip", function(expected) {
       var zip = new JSZip();
       zip.folder("folder");
