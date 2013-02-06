@@ -432,7 +432,30 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       var actual = JSZipBase64.decode(content);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
 
+   testZipFile("Delete folder with a final /", "ref/text.zip", function(expected) {
+      var zip = new JSZip();
+      zip.folder("remove").file("Remove.txt", "This folder and file should be deleted\n");
+      zip.file("Hello.txt", "Hello World\n");
+      zip.remove("remove/");
+      var content = zip.generate();
+
+      var actual = JSZipBase64.decode(content);
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+
+   testZipFile("Delete unknown path", "ref/text.zip", function(expected) {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "Hello World\n");
+      zip.remove("unknown_file");
+      zip.remove("unknown_folder/Hello.txt");
+      var content = zip.generate();
+
+      var actual = JSZipBase64.decode(content);
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
    testZipFile("Delete nested folders", "ref/text.zip", function(expected) {
@@ -740,6 +763,16 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
+
+   test("unknown compression throws an exception", function () {
+      var zip = new JSZip();
+      try {
+         zip.generate({compression:'MAYBE'});
+         ok(false, "no exception");
+      } catch (e) {
+         ok(true, "an exception were thrown");
+      }
+   });
    // }}} More advanced
 
    module("Load file, not supported features"); // {{{
@@ -889,6 +922,15 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equal(zip.file("€15.txt").asText(), "€15\n", "the utf8 content was correctly read (with file().asText).");
       equal(zip.files["€15.txt"].asText(), "€15\n", "the utf8 content was correctly read (with files[].astext).");
    });
+
+   test("A folder stays a folder", function () {
+      var zip = new JSZip();
+      zip.folder("folder/");
+      ok(zip.files['folder/'].options.dir, "the folder is marked as a folder");
+      var reloaded = new JSZip(zip.generate({base64:false}));
+      ok(reloaded.files['folder/'].options.dir, "the folder is marked as a folder");
+   });
+
    // }}} Load file
 
    module("Load complex files"); // {{{
