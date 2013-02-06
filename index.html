@@ -538,12 +538,23 @@ zip.filter(function (relativePath, file){
 
       <h3 id="zip_load_limits">Loading zip files, limitations</h3>
       <p>
-      The first limitation comes from the limited subset of supported zip features.
+      All the features of zip files are not supported.
       Classic zip files will work but encrypted zip, multi-volume, etc are not supported
       and the load() method will throw an <code>Error</code>.
       </p>
       <p>
-      The second limitation comes from the browser (and the machine running the browser).
+      ZIP64 files can be loaded, but only if the zip file is not "too big". ZIP64 uses 64bits integers
+      but Javascript represents all numbers as
+      <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">
+         64-bit double precision IEEE 754 floating point numbers</a> (see section 8.5).
+      So, we have 53bits for integers and
+      <a href="https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Operators/Bitwise_Operators">
+         bitwise operations treat everything as 32bits</a>.
+      So if all the 64bits integers can fit into 32 bits integers, everything will be fine. If
+      it's not the case, you will have other problems anyway (see next limitation).
+      </p>
+      <p>
+      An other limitation comes from the browser (and the machine running the browser).
       A compressed zip file of 10M is common and easily opened by desktop application,
       but not in a browser. The processing of such a beast is likely to be painful :
       the browser will eat hundreds of megabytes while using CPU like never.<br/>
@@ -553,7 +564,7 @@ zip.filter(function (relativePath, file){
       Conclusion : reading small files is OK, reading others is not.
       </p>
       <p>
-      Third limitation : reading and generating a zip file won't give you back the same file.
+      Reading and generating a zip file won't give you back the same file.
       Some data are discarded (file metadata) and other are added (subfolders).
       </p>
    </div>

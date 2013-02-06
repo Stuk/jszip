@@ -892,20 +892,24 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
 
-   // when zip doesn't know the size of the stream, it will be cautious and use
-   // the ZIP64 feature, just in case.
-   // cat file.txt|zip -X -0 > zip64.zip
+   // use -fz to force use of Zip64 format
+   // zip -fz -0 zip64.zip Hello.txt
    testZipFile("zip 64", "ref/zip64.zip", function(file) {
       var zip = new JSZip(file);
-      equal(zip.file("-").data, "Hello World\n", "the zip was correctly read.");
+      equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
 
-   // jar produces zip with data descriptors
-   // jar c0Mvf data_descriptor.zip Hello.txt
+   // use -fd to force data descriptors as if streaming
+   // zip -fd -0 data_descriptor.zip Hello.txt
    testZipFile("zip with data descriptor", "ref/data_descriptor.zip", function(file) {
       var zip = new JSZip(file);
       equal(zip.file("Hello.txt").data, "Hello World\n", "the zip was correctly read.");
    });
+
+   // combo of zip64 and data descriptors :
+   // zip -fz -fd -0 data_descriptor_zip64.zip Hello.txt
+   // this generate a corrupted zip file :(
+   // TODO : find how to get the two features
 
    // zip -0 -X zip_within_zip.zip Hello.txt && zip -0 -X nested.zip Hello.txt zip_within_zip.zip
    testZipFile("nested zip", "ref/nested.zip", function(file) {
@@ -915,12 +919,43 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       equal(nested.file("Hello.txt").data, "Hello World\n", "the inner zip was correctly read.");
    });
 
+   // zip -fd -0 nested_data_descriptor.zip data_descriptor.zip
+   testZipFile("nested zip with data descriptors", "ref/nested_data_descriptor.zip", function(file) {
+      var zip = new JSZip(file);
+      var nested = new JSZip(zip.file("data_descriptor.zip").data);
+      equal(nested.file("Hello.txt").data, "Hello World\n", "the inner zip was correctly read.");
+   });
+
+   // zip -fz -0 nested_zip64.zip zip64.zip
+   testZipFile("nested zip 64", "ref/nested_zip64.zip", function(file) {
+      var zip = new JSZip(file);
+      var nested = new JSZip(zip.file("zip64.zip").data);
+      equal(nested.file("Hello.txt").data, "Hello World\n", "the inner zip was correctly read.");
+   });
+
+   // nested zip 64 with data descriptors
+   // zip -fz -fd -0 nested_data_descriptor_zip64.zip data_descriptor_zip64.zip
+   // this generate a corrupted zip file :(
+   // TODO : find how to get the two features
+
    // zip -X -0 utf8_in_name.zip €15.txt
    testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(file) {
       var zip = new JSZip(file);
       ok(zip.file("€15.txt") !== null, "the utf8 file is here.");
       equal(zip.file("€15.txt").asText(), "€15\n", "the utf8 content was correctly read (with file().asText).");
       equal(zip.files["€15.txt"].asText(), "€15\n", "the utf8 content was correctly read (with files[].astext).");
+   });
+
+   // zip backslash.zip -0 -X Hel\\lo.txt
+   testZipFile("Zip text file with backslash in filename", "ref/backslash.zip", function(file) {
+      var zip = new JSZip(file);
+      equal(zip.file("Hel\\lo.txt").asText(), "Hello World\n", "the utf8 content was correctly read.");
+   });
+
+   // use izarc to generate a zip file on windows
+   testZipFile("Zip text file from windows with \\ in central dir", "ref/slashes_and_izarc.zip", function(file) {
+      var zip = new JSZip(file);
+      equal(zip.folder("test").file("Hello.txt").asText(), "Hello world\r\n", "the content was correctly read.");
    });
 
    test("A folder stays a folder", function () {
