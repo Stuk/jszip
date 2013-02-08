@@ -387,7 +387,7 @@ JSZip.prototype = (function () {
        */
       folder : function(arg) {
          if (!arg) {
-            throw new Error("folder : wrong argument");
+            return this;
          }
 
          if (arg instanceof RegExp) {
@@ -487,7 +487,7 @@ JSZip.prototype = (function () {
             // internal file attributes TODO
             "\x00\x00" +
             // external file attributes
-            (this.files[name].dir===true?"\x10\x00\x00\x00":"\x00\x00\x00\x00")+
+            (this.files[name].options.dir===true?"\x10\x00\x00\x00":"\x00\x00\x00\x00")+
             // relative offset of local header
             decToHex(fileOffset, 4) +
             // file name
