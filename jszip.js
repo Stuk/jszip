@@ -91,17 +91,17 @@ JSZip.prototype = (function () {
        * @return {string} the content as binary.
        */
       asBinary : function () {
-        var result = this.data;
-        if (result == null) {
-          return result;
-        }
-        if (this.options.base64) {
-          result = JSZipBase64.decode(result);
-        }
-        if (!this.options.binary) {
-          result = JSZip.prototype.utf8encode(result);
-        }
-        return result;
+         var result = this.data;
+         if (result == null) {
+            return result;
+         }
+         if (this.options.base64) {
+            result = JSZipBase64.decode(result);
+         }
+         if (!this.options.binary) {
+            result = JSZip.prototype.utf8encode(result);
+         }
+         return result;
       },
       /**
        * Returns the content as an Uint8Array.
