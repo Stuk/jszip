@@ -91,14 +91,17 @@ JSZip.prototype = (function () {
        * @return {string} the content as binary.
        */
       asBinary : function () {
-         var result = this.data;
-         if (this.options.base64) {
-            result = JSZipBase64.decode(result);
-         }
-         if (!this.options.binary) {
-            result = JSZip.prototype.utf8encode(result);
-         }
-         return result;
+        var result = this.data;
+        if (result == null) {
+          return result;
+        }
+        if (this.options.base64) {
+          result = JSZipBase64.decode(result);
+        }
+        if (!this.options.binary) {
+          result = JSZip.prototype.utf8encode(result);
+        }
+        return result;
       },
       /**
        * Returns the content as an Uint8Array.
@@ -243,7 +246,7 @@ JSZip.prototype = (function () {
             folderAdd.call(this, parent);
          }
 
-         fileAdd.call(this, name, '', {dir:true});
+         fileAdd.call(this, name, null, {dir:true});
       }
       return this.files[name];
    };
@@ -282,7 +285,7 @@ JSZip.prototype = (function () {
       dosDate = dosDate | o.date.getDate();
 
       var compression    = JSZip.compressions[compressionType];
-      var compressedData = compression.compress(data);
+      var compressedData = data !== null ? compression.compress(data) : null;
 
       var header = "";
 
@@ -292,17 +295,17 @@ JSZip.prototype = (function () {
       // set bit 11 if utf8
       header += useUTF8 ? "\x00\x08" : "\x00\x00";
       // compression method
-      header += compression.magic;
+      header += data !== null ? compression.magic : '\x00\x00';
       // last mod file time
       header += decToHex(dosTime, 2);
       // last mod file date
       header += decToHex(dosDate, 2);
       // crc-32
-      header += decToHex(this.crc32(data), 4);
+      header += data !== null ? decToHex(this.crc32(data), 4) : '\x00\x00\x00\x00';
       // compressed size
-      header += decToHex(compressedData.length, 4);
+      header += data !== null ? decToHex(compressedData.length, 4) : '\x00\x00\x00\x00';
       // uncompressed size
-      header += decToHex(data.length, 4);
+      header += data !== null ? decToHex(data.length, 4) : '\x00\x00\x00\x00';
       // file name length
       header += decToHex(utfEncodedFileName.length, 2);
       // extra field length
@@ -473,7 +476,7 @@ JSZip.prototype = (function () {
             var fileRecord = "",
             dirRecord = "",
             data = prepareLocalHeaderData.call(this, file, utfEncodedFileName, compression);
-            fileRecord = JSZip.signature.LOCAL_FILE_HEADER + data.header + utfEncodedFileName + data.compressedData;
+            fileRecord = JSZip.signature.LOCAL_FILE_HEADER + data.header + utfEncodedFileName + (data.compressedData !== null ? data.compressedData : '');
 
             dirRecord = JSZip.signature.CENTRAL_FILE_HEADER +
             // version made by (00: DOS)
