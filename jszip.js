@@ -78,6 +78,9 @@ JSZip.prototype = (function () {
        */
       asText : function () {
          var result = this.data;
+         if (result == null) {	
+            return result;	
+         }
          if (this.options.base64) {
             result = JSZipBase64.decode(result);
          }
