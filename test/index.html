@@ -5,11 +5,6 @@
 <title>JavaScript Zip Testing</title>
 <link media="screen" href="qunit.css" type="text/css" rel="stylesheet">
 
-<!--
-Only used to avoid cross browser xhr madness.
--->
-<script type="text/javascript" src="jquery-1.8.3.min.js"></script>
-
 <script type="text/javascript" src="../jszip.js"></script>
 <script type="text/javascript" src="../jszip-load.js"></script>
 <script type="text/javascript" src="../jszip-deflate.js"></script>
@@ -45,7 +40,7 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
 <script type="text/javascript">
    // IE-specific logic here
    // helper to convert from responseBody to a "responseText" like thing
-   window.getBinaryFromXHR = function (responseText, xhr) {
+   window.getBinaryFromXHR = function (xhr) {
       var binary = xhr.responseBody;
       var byteMapping = {};
       for ( var i = 0; i < 256; i++ ) {
@@ -68,17 +63,19 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
    // https://developer.mozilla.org/En/Using_XMLHttpRequest#Handling_binary_data
    // Note : if you just want to give it to JSZip.load, you can skip this part
    // (this transformation is already done there) and just return responseText.
-   window.getBinaryFromXHR = window.getBinaryFromXHR || function (responseText, xhr) {
+   window.getBinaryFromXHR = window.getBinaryFromXHR || function (xhr) {
       // we skip the & 0xFF part, since this must be tested in the JSZip tests.
-      return responseText;
+      if (xhr.response) {
+         if (JSZip.support.arraybuffer && xhr.response instanceof ArrayBuffer) {
+            return JSZip.utils.uint8Array2String(new Uint8Array(xhr.response));
+         }
+         return xhr.response;
+      } else {
+         return xhr.responseText;
+      }
       // if you check this method to know how to load binay data, remove this return :)
 
-      var result = "";
-      for (var i = 0; i < responseText.length; i++) {
-         var code = responseText.charCodeAt(i) & 0xff;
-         result += String.fromCharCode(code);
-      }
-      return result;
+      return JSZip.utils.string2binary(xhr.responseText);
    };
 </script>
 
@@ -121,43 +118,95 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
             testFunction.call(this, refZips[zipName]);
          } else {
             stop();
+
             /*
              * Here is the tricky part : getting the data.
              * In firefox/chrome/opera/... setting the mimeType to 'text/plain; charset=x-user-defined'
              * is enough, the result is in the standard xhr.responseText.
              * cf https://developer.mozilla.org/En/XMLHttpRequest/Using_XMLHttpRequest#Receiving_binary_data_in_older_browsers
-             * In IE, we must use (the IE only) attribute responseBody
+             * In IE <= 9, we must use (the IE only) attribute responseBody
              * (for binary data, its content is different from responseText).
-             * With jQuery 1.5+, we don't have access directly to the native xhr
-             * object in the callback.
-             * The workaround is to use the default method of jQuery to create it,
-             * put the xhr into a context accessible in the callbacks and define
-             * a custom method for getting the xhr object (will return the known xhr).
+             * In IE 10, the 'charset=x-user-defined' trick doesn't work, only the
+             * responseType will work :
+             * http://msdn.microsoft.com/en-us/library/ie/hh673569%28v=vs.85%29.aspx#Binary_Object_upload_and_download
+             *
+             * I'd like to use jQuery to avoid this XHR madness, but it doesn't support
+             * the responseType attribute : http://bugs.jquery.com/ticket/11461
              */
-            var context = {
-               xhr:jQuery.ajaxSettings.xhr()
-            };
-            $.ajax(zipName, {
-               cache: false,
-               context: context,
-               xhr:function(){return context.xhr},
-               mimeType:'text/plain; charset=x-user-defined'
-            })
-            .done(function(data, textStatus, jqXHR){
-              start();
-              try {
-                  // this.xhr comes from the context
-                  var file = getBinaryFromXHR(jqXHR.responseText, this.xhr);
-                  refZips[zipName] = file;
-                  testFunction.call(this, file);
-              } catch(e) {
-                ok(false, e.message||e)
-              }
-            })
-            .fail(function(){
-              start();
-              ok(false, "Ajax error for " + zipName + " : " + arguments);
-            });
+
+            // taken from jQuery
+            function createStandardXHR() {
+               try {
+                  return new window.XMLHttpRequest();
+               } catch( e ) {}
+            }
+
+            function createActiveXHR() {
+               try {
+                  return new window.ActiveXObject("Microsoft.XMLHTTP");
+               } catch( e ) {}
+            }
+
+            var isLocal = window.location.protocol === "file:";
+
+            // Create the request object
+            var createXHR = window.ActiveXObject ?
+               /* Microsoft failed to properly
+                * implement the XMLHttpRequest in IE7 (can't request local files),
+                * so we use the ActiveXObject when it is available
+                * Additionally XMLHttpRequest can be disabled in IE7/IE8 so
+                * we need a fallback.
+                */
+               function() {
+               return !isLocal && createStandardXHR() || createActiveXHR();
+            } :
+               // For all other browsers, use the standard XMLHttpRequest object
+               createStandardXHR;
+
+
+
+            try {
+
+               var xhr = createXHR();
+
+               xhr.open('GET', zipName + "?_=" + ( new Date() ).getTime(), true);
+
+               // recent browsers
+               if ("responseType" in xhr) {
+                  xhr.responseType = "arraybuffer";
+               }
+
+               // older browser
+               if(xhr.overrideMimeType) {
+                  xhr.overrideMimeType("text/plain; charset=x-user-defined");
+               }
+
+               xhr.onreadystatechange = function(e) {
+                  // use `xhr` and not `this`... thanks IE
+                  if (xhr.readyState === 4) {
+                     if (xhr.status === 200 || isLocal) {
+                        start();
+                        try {
+                           // this.xhr comes from the context
+                           var file = getBinaryFromXHR(xhr);
+                           refZips[zipName] = file;
+                           testFunction.call(this, file);
+                        } catch(e) {
+                           ok(false, e.message||e);
+                        }
+                     } else {
+                        start();
+                        ok(false, "Ajax error for " + zipName + " : " + this.status);
+                     }
+                  }
+               };
+
+               xhr.send();
+
+            } catch (e) {
+               start();
+               ok(false, "Ajax error for " + zipName + " : " + (e.message||e));
+            }
          }
       });
    }

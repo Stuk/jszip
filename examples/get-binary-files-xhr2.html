@@ -17,7 +17,9 @@ window.onload = function () {
   //=========================
   var xhr1 = new XMLHttpRequest();
   xhr1.open('GET', '../test/ref/text.zip', true);
-  xhr1.overrideMimeType('text/plain; charset=x-user-defined');
+  if (xhr1.overrideMimeType) {
+    xhr1.overrideMimeType('text/plain; charset=x-user-defined');
+  }
 
   xhr1.onreadystatechange = function(e) {
     if (this.readyState == 4 && this.status == 200) {
