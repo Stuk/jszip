@@ -78,8 +78,8 @@ JSZip.prototype = (function () {
        */
       asText : function () {
          var result = this.data;
-         if (result === null) {
-            return result;
+         if (result === null || typeof result === "undefined") {
+            return "";
          }
          if (this.options.base64) {
             result = JSZipBase64.decode(result);
@@ -95,8 +95,8 @@ JSZip.prototype = (function () {
        */
       asBinary : function () {
          var result = this.data;
-         if (result === null) {
-            return result;
+         if (result === null || typeof result === "undefined") {
+            return "";
          }
          if (this.options.base64) {
             result = JSZipBase64.decode(result);
@@ -191,7 +191,9 @@ JSZip.prototype = (function () {
 
       o = prepareFileAttrs(o);
 
-      if (o.dir) {
+      if (o.dir || data === null || typeof data === "undefined") {
+         o.base64 = false;
+         o.binary = false;
          data = null;
       } else if (JSZip.support.uint8array && data instanceof Uint8Array) {
          o.base64 = false;

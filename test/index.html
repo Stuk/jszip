@@ -526,6 +526,61 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       }
    }
 
+   function testEmptyFileDataGetters (zip) {
+      equals(zip.file("amount.txt").asText(), "", "asText()");
+      equals(zip.file("amount.txt").asBinary(), "", "asBinary()");
+      if (JSZip.support.arraybuffer) {
+         var buffer = zip.file("amount.txt").asArrayBuffer();
+         ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
+         var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
+         equals(actual, "", "asArrayBuffer()");
+      } else {
+         try {
+            zip.file("amount.txt").asArrayBuffer();
+            ok(false, "no exception thrown");
+         } catch (e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      }
+      if (JSZip.support.uint8array) {
+         var bufferView = zip.file("amount.txt").asUint8Array();
+         ok(bufferView instanceof Uint8Array, "The result is a instance of Uint8Array");
+         var actual = String.fromCharCode.apply(null, bufferView);
+         equals(actual, "", "asUint8Array()");
+      } else {
+         try {
+            zip.file("amount.txt").asUint8Array();
+            ok(false, "no exception thrown");
+         } catch (e) {
+            ok(e.message.match("not supported by this browser"), "the error message is useful");
+         }
+      }
+   }
+
+   test("add file: file(name, undefined)", function() {
+      var zip = new JSZip(), undef;
+      zip.file("amount.txt", undef);
+      testEmptyFileDataGetters(zip);
+      zip = new JSZip();
+      zip.file("amount.txt", undef, {binary:true});
+      testEmptyFileDataGetters(zip);
+      zip = new JSZip();
+      zip.file("amount.txt", undef, {base64:true});
+      testEmptyFileDataGetters(zip);
+   });
+
+   test("add file: file(name, null)", function() {
+      var zip = new JSZip();
+      zip.file("amount.txt", null);
+      testEmptyFileDataGetters(zip);
+      zip = new JSZip();
+      zip.file("amount.txt", null, {binary:true});
+      testEmptyFileDataGetters(zip);
+      zip = new JSZip();
+      zip.file("amount.txt", null, {base64:true});
+      testEmptyFileDataGetters(zip);
+   });
+
    test("add file: file(name, string)", function() {
       var zip = new JSZip();
       zip.file("amount.txt", "€15\n");
