@@ -868,6 +868,28 @@ Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-ima
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
 
+   test("Empty files / folders are not compressed", function() {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
+      zip.folder("folder").file("empty", "");
+
+      var deflateCount = 0, emptyDeflateCount = 0;
+      var oldDeflateCompress = JSZip.compressions.DEFLATE.compress;
+      JSZip.compressions.DEFLATE.compress = function (str) {
+         deflateCount++;
+         if (!str) {
+            emptyDeflateCount++;
+         }
+         return str;
+      };
+      zip.generate({compression:'DEFLATE'});
+
+      equal(deflateCount, 1, "The file has been compressed");
+      equal(emptyDeflateCount, 0, "The file without content and the folder has not been compressed.");
+
+      JSZip.compressions.DEFLATE.compress = oldDeflateCompress;
+   });
+
    test("unknown compression throws an exception", function () {
       var zip = new JSZip();
       try {
