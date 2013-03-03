@@ -78,7 +78,7 @@ testZipFile("Zip text file !", "ref/text.zip", function(expected) {
       18 Total
       */
    ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-   equals(reload(actual), actual, "Generated ZIP can be parsed");
+   equal(reload(actual), actual, "Generated ZIP can be parsed");
 });
 
 testZipFile("Add a file to overwrite", "ref/text.zip", function(expected) {
@@ -100,7 +100,7 @@ testZipFile("Add a file to overwrite", "ref/text.zip", function(expected) {
       18 Total
       */
    ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-   equals(reload(actual), actual, "Generated ZIP can be parsed");
+   equal(reload(actual), actual, "Generated ZIP can be parsed");
    });
 
 // zip -X -0 utf8.zip amount.txt
@@ -110,7 +110,7 @@ testZipFile("Zip text file with UTF-8 characters", "ref/utf8.zip", function(expe
       var actual = zip.generate({type:"string"});
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-      equals(reload(actual), actual, "Generated ZIP can be parsed");
+      equal(reload(actual), actual, "Generated ZIP can be parsed");
       });
 
 // zip -X -0 utf8_in_name.zip €15.txt
@@ -120,7 +120,7 @@ testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name
       var actual = zip.generate({type:"string"});
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-      equals(reload(actual), actual, "Generated ZIP can be parsed");
+      equal(reload(actual), actual, "Generated ZIP can be parsed");
       });
 
 testZipFile("Zip text file with date", "ref/text.zip", function(expected) {
@@ -139,7 +139,7 @@ testZipFile("Zip text file with date", "ref/text.zip", function(expected) {
          10 Total
          */
       ok(similar(actual, expected, 10) , "Generated ZIP matches reference ZIP");
-      equals(reload(actual), actual, "Generated ZIP can be parsed");
+      equal(reload(actual), actual, "Generated ZIP can be parsed");
 });
 
 
@@ -151,7 +151,7 @@ testZipFile("Zip image file", "ref/image.zip", function(expected) {
    var actual = JSZipBase64.decode(content);
 
    ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-   equals(reload(actual), actual, "Generated ZIP can be parsed");
+   equal(reload(actual), actual, "Generated ZIP can be parsed");
 });
 
 test("Zip folder() shouldn't throw an exception", function(expected) {
@@ -172,7 +172,7 @@ testZipFile("Zip empty folder", "ref/folder.zip", function(expected) {
    var actual = JSZipBase64.decode(content);
 
    ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-   equals(reload(actual), actual, "Generated ZIP can be parsed");
+   equal(reload(actual), actual, "Generated ZIP can be parsed");
 });
 
 testZipFile("Zip text, folder and image", "ref/all.zip", function(expected) {
@@ -196,7 +196,7 @@ testZipFile("Zip text, folder and image", "ref/all.zip", function(expected) {
       */
 
    ok(similar(actual, expected, 54) , "Generated ZIP matches reference ZIP");
-   equals(reload(actual), actual, "Generated ZIP can be parsed");
+   equal(reload(actual), actual, "Generated ZIP can be parsed");
 });
 
 test("Finding a file", function() {
@@ -205,10 +205,10 @@ test("Finding a file", function() {
    zip.file("Readme.French", "Bonjour tout le monde!\n");
    zip.file("Readme.Pirate", "Ahoy m'hearty!\n");
 
-   equals(zip.file("Readme.French").data, "Bonjour tout le monde!\n", "Exact match found");
-   equals(zip.file("Readme.Deutch"), null, "Match exactly nothing");
-   equals(zip.file(/Readme\../).length, 2, "Match regex free text");
-   equals(zip.file(/pirate/i).length, 1, "Match regex 1 result");
+   equal(zip.file("Readme.French").data, "Bonjour tout le monde!\n", "Exact match found");
+   equal(zip.file("Readme.Deutch"), null, "Match exactly nothing");
+   equal(zip.file(/Readme\../).length, 2, "Match regex free text");
+   equal(zip.file(/pirate/i).length, 1, "Match regex 1 result");
 });
 
 testZipFile("Finding a file : modifying the result doesn't alter the zip", "ref/text.zip", function(expected) {
@@ -231,9 +231,9 @@ test("Finding a file (text search) with a relative folder", function() {
    zip.folder("files/translation").file("Readme.French", "Bonjour tout le monde!\n");
    zip.folder("files").folder("translation").file("Readme.Pirate", "Ahoy m'hearty!\n");
 
-   equals(zip.file("files/translation/Readme.French").data, "Bonjour tout le monde!\n", "finding file with the full path");
-   equals(zip.folder("files").file("translation/Readme.French").data, "Bonjour tout le monde!\n", "finding file with a relative path");
-   equals(zip.folder("files/translation").file("Readme.French").data, "Bonjour tout le monde!\n", "finding file with a relative path");
+   equal(zip.file("files/translation/Readme.French").data, "Bonjour tout le monde!\n", "finding file with the full path");
+   equal(zip.folder("files").file("translation/Readme.French").data, "Bonjour tout le monde!\n", "finding file with a relative path");
+   equal(zip.folder("files/translation").file("Readme.French").data, "Bonjour tout le monde!\n", "finding file with a relative path");
 });
 
 test("Finding files (regex) with a relative folder", function() {
@@ -242,12 +242,12 @@ test("Finding files (regex) with a relative folder", function() {
    zip.folder("files/translation").file("Readme.French", "Bonjour tout le monde!\n");
    zip.folder("files").folder("translation").file("Readme.Pirate", "Ahoy m'hearty!\n");
 
-   equals(zip.file(/Readme/).length, 3, "match files in subfolders");
-   equals(zip.folder("files/translation").file(/Readme/).length, 2, "regex match only in subfolders");
-   equals(zip.folder("files").folder("translation").file(/Readme/).length, 2, "regex match only in subfolders");
-   equals(zip.folder("files/translation").file(/pirate/i).length, 1, "regex match only in subfolders");
-   equals(zip.folder("files/translation").file(/^readme/i).length, 2, "regex match only with the relative path");
-   equals(zip.folder("files/default").file(/pirate/i).length, 0, "regex match only in subfolders");
+   equal(zip.file(/Readme/).length, 3, "match files in subfolders");
+   equal(zip.folder("files/translation").file(/Readme/).length, 2, "regex match only in subfolders");
+   equal(zip.folder("files").folder("translation").file(/Readme/).length, 2, "regex match only in subfolders");
+   equal(zip.folder("files/translation").file(/pirate/i).length, 1, "regex match only in subfolders");
+   equal(zip.folder("files/translation").file(/^readme/i).length, 2, "regex match only with the relative path");
+   equal(zip.folder("files/default").file(/pirate/i).length, 0, "regex match only in subfolders");
 });
 
 test("Finding folders", function () {
@@ -255,9 +255,9 @@ test("Finding folders", function () {
    zip.folder("root/").folder("sub1/");
    zip.folder("root/sub2/subsub1");
 
-   equals(zip.folder(/sub2\/$/).length, 1, "unique result");
-   equals(zip.folder(/sub1/).length, 2, "multiple results");
-   equals(zip.folder(/root/).length, 4, "match on whole path");
+   equal(zip.folder(/sub2\/$/).length, 1, "unique result");
+   equal(zip.folder(/sub1/).length, 2, "multiple results");
+   equal(zip.folder(/root/).length, 4, "match on whole path");
 });
 
 test("Finding folders with relative path", function () {
@@ -266,10 +266,10 @@ test("Finding folders with relative path", function () {
    zip.folder("root/sub2/subsub1");
    var root = zip.folder("root/sub2");
 
-   equals(root.folder(/sub2\/$/).length, 0, "current folder is not matched");
-   equals(root.folder(/sub1/).length, 1, "sub folder is matched");
-   equals(root.folder(/^subsub1/).length, 1, "relative folder path is used");
-   equals(root.folder(/root/).length, 0, "parent folder is not matched");
+   equal(root.folder(/sub2\/$/).length, 0, "current folder is not matched");
+   equal(root.folder(/sub1/).length, 1, "sub folder is matched");
+   equal(root.folder(/^subsub1/).length, 1, "relative folder path is used");
+   equal(root.folder(/root/).length, 0, "parent folder is not matched");
 });
 // }}} module Essential
 
@@ -372,7 +372,7 @@ testZipFile("Delete nested folders from relative path", "ref/folder.zip", functi
    var actual = JSZipBase64.decode(content);
 
    ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-   equals(reload(actual), actual, "Generated ZIP can be parsed");
+   equal(reload(actual), actual, "Generated ZIP can be parsed");
 });
 
 testZipFile("add file: from XHR (with bytes > 255)", "ref/text.zip", function(textZip) {
@@ -380,18 +380,18 @@ testZipFile("add file: from XHR (with bytes > 255)", "ref/text.zip", function(te
    zip.file("text.zip", textZip, {binary:true});
    var actual = zip.generate({base64:false});
 
-   equals(reload(actual), actual, "high-order byte is discarded and won't mess up the result");
+   equal(reload(actual), actual, "high-order byte is discarded and won't mess up the result");
 });
 
 function testFileDataGetters (zip) {
-   equals(zip.file("amount.txt").asText(), "€15\n", "asText()");
+   equal(zip.file("amount.txt").asText(), "€15\n", "asText()");
    // http://www.fileformat.info/info/unicode/char/20ac/index.htm
-   equals(zip.file("amount.txt").asBinary(), "\xE2\x82\xAC15\n", "asBinary()");
+   equal(zip.file("amount.txt").asBinary(), "\xE2\x82\xAC15\n", "asBinary()");
    if (JSZip.support.arraybuffer) {
       var buffer = zip.file("amount.txt").asArrayBuffer();
       ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
       var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
-      equals(actual, "\xE2\x82\xAC15\n", "asArrayBuffer()");
+      equal(actual, "\xE2\x82\xAC15\n", "asArrayBuffer()");
    } else {
       try {
          zip.file("amount.txt").asArrayBuffer();
@@ -404,7 +404,7 @@ function testFileDataGetters (zip) {
       var bufferView = zip.file("amount.txt").asUint8Array();
       ok(bufferView instanceof Uint8Array, "The result is a instance of Uint8Array");
       var actual = String.fromCharCode.apply(null, bufferView);
-      equals(actual, "\xE2\x82\xAC15\n", "asUint8Array()");
+      equal(actual, "\xE2\x82\xAC15\n", "asUint8Array()");
    } else {
       try {
          zip.file("amount.txt").asUint8Array();
@@ -416,13 +416,13 @@ function testFileDataGetters (zip) {
 }
 
 function testEmptyFileDataGetters (zip) {
-   equals(zip.file("amount.txt").asText(), "", "asText()");
-   equals(zip.file("amount.txt").asBinary(), "", "asBinary()");
+   equal(zip.file("amount.txt").asText(), "", "asText()");
+   equal(zip.file("amount.txt").asBinary(), "", "asBinary()");
    if (JSZip.support.arraybuffer) {
       var buffer = zip.file("amount.txt").asArrayBuffer();
       ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
       var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
-      equals(actual, "", "asArrayBuffer()");
+      equal(actual, "", "asArrayBuffer()");
    } else {
       try {
          zip.file("amount.txt").asArrayBuffer();
@@ -435,7 +435,7 @@ function testEmptyFileDataGetters (zip) {
       var bufferView = zip.file("amount.txt").asUint8Array();
       ok(bufferView instanceof Uint8Array, "The result is a instance of Uint8Array");
       var actual = String.fromCharCode.apply(null, bufferView);
-      equals(actual, "", "asUint8Array()");
+      equal(actual, "", "asUint8Array()");
    } else {
       try {
          zip.file("amount.txt").asUint8Array();
@@ -549,7 +549,7 @@ if (JSZip.support.uint8array) {
       zip.file("Hello.txt", "Hello World\n");
       var array = zip.generate({type:"uint8array"});
       ok(array instanceof Uint8Array, "The result is a instance of Uint8Array");
-      equals(array.length, expected.length);
+      equal(array.length, expected.length);
 
       var actual = String.fromCharCode.apply(null, array);
 
@@ -598,8 +598,8 @@ if (JSZip.support.blob) {
       zip.file("Hello.txt", "Hello World\n");
       var blob = zip.generate({type:"blob"});
       ok(blob instanceof Blob, "The result is a instance of Blob");
-      equals(blob.type, "application/zip");
-      equals(blob.size, expected.length);
+      equal(blob.type, "application/zip");
+      equal(blob.size, expected.length);
    });
 } else {
    testZipFile("generate : type:blob", "ref/text.zip", function(expected) {
@@ -622,7 +622,7 @@ test("Filtering a zip", function() {
    var result = zip.filter(function (relativeFilename, file){
       return relativeFilename.indexOf(".txt") != -1;
    });
-   equals(result.length, 2, "filter has filtered");
+   equal(result.length, 2, "filter has filtered");
    ok(result[0].name.indexOf(".txt") != -1, "filter has filtered the good file");
    ok(result[1].name.indexOf(".txt") != -1, "filter has filtered the good file");
 });
@@ -639,8 +639,8 @@ test("Filtering a zip from a relative path", function() {
    var result = zip.folder("foo").filter(function (relativeFilename, file) {
       return relativeFilename.indexOf("3") != -1;
    });
-   equals(result.length, 1, "filter has filtered");
-   equals(result[0].name, "foo/3.log", "filter has filtered the good file");
+   equal(result.length, 1, "filter has filtered");
+   equal(result[0].name, "foo/3.log", "filter has filtered the good file");
 });
 
 test("Filtering a zip : the full path is still accessible", function() {
@@ -655,8 +655,8 @@ test("Filtering a zip : the full path is still accessible", function() {
    var result = zip.folder("foo").filter(function (relativeFilename, file) {
       return file.name.indexOf("3") != -1;
    });
-   equals(result.length, 1, "the filter only match files/folders in the current folder");
-   equals(result[0].name, "foo/3.log", "filter has filtered the good file");
+   equal(result.length, 1, "the filter only match files/folders in the current folder");
+   equal(result[0].name, "foo/3.log", "filter has filtered the good file");
 });
 
 testZipFile("Filtering a zip : the filter function can't alter the data", "ref/text.zip", function(expected) {
