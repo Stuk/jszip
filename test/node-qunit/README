@@ -1,0 +1,3 @@
+To run the tests in a browser, just open the test/index.html file.
+To run the tests in nodejs, use node-qunit :
+qunit -c node-qunit/node-load-jszip.js -d JSZipTestUtils:node-qunit/node-test-utils.js -t test.js
