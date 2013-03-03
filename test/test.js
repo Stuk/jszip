@@ -58,7 +58,7 @@ test("JSZip", function(){
    ok(zip, "Constructor works");
 });
 
-module("Essential"); // {{{
+QUnit.module("Essential"); // {{{
 
 testZipFile("Zip text file !", "ref/text.zip", function(expected) {
    var zip = new JSZip();
@@ -273,7 +273,7 @@ test("Finding folders with relative path", function () {
 });
 // }}} module Essential
 
-module("More advanced"); // {{{
+QUnit.module("More advanced"); // {{{
 
 testZipFile("Delete file", "ref/text.zip", function(expected) {
    var zip = new JSZip();
@@ -741,7 +741,7 @@ test("unknown compression throws an exception", function () {
 });
 // }}} More advanced
 
-module("Load file, not supported features"); // {{{
+QUnit.module("Load file, not supported features"); // {{{
 
 // zip -0 -X -e encrypted.zip Hello.txt
 testZipFile("basic encryption", "ref/encrypted.zip", function(file) {
@@ -754,7 +754,7 @@ testZipFile("basic encryption", "ref/encrypted.zip", function(file) {
 });
 // }}} Load file, not supported features
 
-module("Load file, corrupted zip"); // {{{
+QUnit.module("Load file, corrupted zip"); // {{{
 
 testZipFile("bad compression method", "ref/invalid/compression.zip", function(file) {
    try {
@@ -793,7 +793,7 @@ testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file) {
 });
 // }}} Load file, corrupted zip
 
-module("Load file"); // {{{
+QUnit.module("Load file"); // {{{
 
 testZipFile("load(string) works", "ref/all.zip", function(file) {
    ok(typeof file === "string");
@@ -934,7 +934,7 @@ test("A folder stays a folder", function () {
 
 // }}} Load file
 
-module("Load complex files"); // {{{
+QUnit.module("Load complex files"); // {{{
 
 if (QUnit.urlParams.complexfiles) {
 
