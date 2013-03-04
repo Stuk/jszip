@@ -186,7 +186,7 @@ location.href="data:application/zip;base64,"+content;
           <td>Tested with 3.0 / 3.6 / latest version</td>
           <td>Tested with the latest version</td>
           <td>Tested with the latest version</td>
-          <td>Tested with IE 6 / 7 / 8 / 9</td>
+          <td>Tested with IE 6 / 7 / 8 / 9 / 10</td>
          </tr>
       </table>
 
@@ -223,7 +223,7 @@ Downloadify.create('downloadify',{
 });</pre>
 
       <h4>Other solution-ish: Blob URL</h4>
-      <p>With <a href="http://caniuse.com/bloburls">some recent browsers</a> come a new way to download Blobs (a zip file for example) : blob urls. The <a href="http://updates.html5rocks.com/2011/08/Downloading-resources-in-HTML5-a-download">download attribute on &lt;a&gt;</a> allows you to give the name of the file. Blob urls start to be widely supported but this attribute is currently only supported in Chrome. See <a href="examples/download-zip-file.html">the example</a>.</p>
+      <p>With <a href="http://caniuse.com/bloburls">some recent browsers</a> come a new way to download Blobs (a zip file for example) : blob urls. The <a href="http://updates.html5rocks.com/2011/08/Downloading-resources-in-HTML5-a-download">download attribute on &lt;a&gt;</a> allows you to give the name of the file. Blob urls start to be widely supported but this attribute is currently only supported in Chrome and Firefox (>= 20). See <a href="examples/download-zip-file.html">the example</a>.</p>
       <pre class="example">
 var blob = zip.generate({type:"blob"});
 myLink.href = window.URL.createObjectURL(blob);
