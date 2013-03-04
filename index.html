@@ -573,6 +573,13 @@ zip.filter(function (relativePath, file){
       </p>
 
       <h2>Changelog</h2>
+      <h3>1.0.1 <span>2013-03-04</span></h3>
+      <ul>
+         <li>Fixed an issue when generating a compressed zip file with empty files or folders,
+         see <a href="https://github.com/Stuk/jszip/pull/33">#33</a>.</li>
+         <li>With bad data (<code>null</code> or <code>undefined</code>), asText/asBinary/asUint8Array/asArrayBuffer methods
+         now return an empty string, see <a href="https://github.com/Stuk/jszip/pull/36">#36</a>.</li>
+      </ul>
       <h3>1.0.0 <span>2013-02-14</span></h3>
       <p>
       First release after a long period without version.
@@ -588,7 +595,7 @@ zip.filter(function (relativePath, file){
       </p>
 
       <h3>Version</h3>
-      <p>1.0.0</p>
+      <p>1.0.1</p>
 
       <h3>Todo</h3>
       <ul>
