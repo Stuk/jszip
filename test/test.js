@@ -383,128 +383,139 @@ testZipFile("add file: from XHR (with bytes > 255)", "ref/text.zip", function(te
    equal(reload(actual), actual, "high-order byte is discarded and won't mess up the result");
 });
 
-function testFileDataGetters (zip) {
-   equal(zip.file("amount.txt").asText(), "€15\n", "asText()");
-   // http://www.fileformat.info/info/unicode/char/20ac/index.htm
-   equal(zip.file("amount.txt").asBinary(), "\xE2\x82\xAC15\n", "asBinary()");
-   if (JSZip.support.arraybuffer) {
-      var buffer = zip.file("amount.txt").asArrayBuffer();
-      ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
-      var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
-      equal(actual, "\xE2\x82\xAC15\n", "asArrayBuffer()");
-   } else {
-      try {
-         zip.file("amount.txt").asArrayBuffer();
-         ok(false, "no exception thrown");
-      } catch (e) {
-         ok(e.message.match("not supported by this browser"), "the error message is useful");
-      }
-   }
-   if (JSZip.support.uint8array) {
-      var bufferView = zip.file("amount.txt").asUint8Array();
-      ok(bufferView instanceof Uint8Array, "The result is a instance of Uint8Array");
-      var actual = String.fromCharCode.apply(null, bufferView);
-      equal(actual, "\xE2\x82\xAC15\n", "asUint8Array()");
-   } else {
-      try {
-         zip.file("amount.txt").asUint8Array();
-         ok(false, "no exception thrown");
-      } catch (e) {
-         ok(e.message.match("not supported by this browser"), "the error message is useful");
-      }
-   }
+function testFileDataGetters (opts) {
+   _actualTestFileDataGetters(opts);
+
+   var reloadedZip = new JSZip(opts.zip.generate({type:"string"}), {checkCRC32:true});
+
+   _actualTestFileDataGetters({
+      name : "reloaded, " + opts.name,
+      zip : reloadedZip,
+      textData : opts.textData,
+      rawData : opts.rawData
+   });
 }
 
-function testEmptyFileDataGetters (zip) {
-   equal(zip.file("amount.txt").asText(), "", "asText()");
-   equal(zip.file("amount.txt").asBinary(), "", "asBinary()");
+function _actualTestFileDataGetters (opts) {
+   if (typeof opts.rawData === "undefined") {
+      opts.rawData = opts.textData;
+   }
+
+   equal(opts.zip.file("file.txt").asText(), opts.textData, opts.name + " : asText()");
+   // http://www.fileformat.info/info/unicode/char/20ac/index.htm
+   equal(opts.zip.file("file.txt").asBinary(), opts.rawData, opts.name + " : asBinary()");
    if (JSZip.support.arraybuffer) {
-      var buffer = zip.file("amount.txt").asArrayBuffer();
-      ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
+      var buffer = opts.zip.file("file.txt").asArrayBuffer();
+      ok(buffer instanceof ArrayBuffer, opts.name + " : the result is a instance of ArrayBuffer");
       var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
-      equal(actual, "", "asArrayBuffer()");
+      equal(actual, opts.rawData, opts.name + " : asArrayBuffer()");
    } else {
       try {
-         zip.file("amount.txt").asArrayBuffer();
+         opts.zip.file("file.txt").asArrayBuffer();
          ok(false, "no exception thrown");
       } catch (e) {
-         ok(e.message.match("not supported by this browser"), "the error message is useful");
+         ok(e.message.match("not supported by this browser"), opts.name + " : the error message is useful");
       }
    }
    if (JSZip.support.uint8array) {
-      var bufferView = zip.file("amount.txt").asUint8Array();
-      ok(bufferView instanceof Uint8Array, "The result is a instance of Uint8Array");
+      var bufferView = opts.zip.file("file.txt").asUint8Array();
+      ok(bufferView instanceof Uint8Array, opts.name + " : the result is a instance of Uint8Array");
       var actual = String.fromCharCode.apply(null, bufferView);
-      equal(actual, "", "asUint8Array()");
+      equal(actual, opts.rawData, opts.name + " : asUint8Array()");
    } else {
       try {
-         zip.file("amount.txt").asUint8Array();
+         opts.zip.file("file.txt").asUint8Array();
          ok(false, "no exception thrown");
       } catch (e) {
-         ok(e.message.match("not supported by this browser"), "the error message is useful");
+         ok(e.message.match("not supported by this browser"), opts.name + " : the error message is useful");
       }
    }
 }
 
 test("add file: file(name, undefined)", function() {
    var zip = new JSZip(), undef;
-   zip.file("amount.txt", undef);
-   testEmptyFileDataGetters(zip);
+   zip.file("file.txt", undef);
+   testFileDataGetters({name : "undefined", zip : zip, textData : ""});
    zip = new JSZip();
-   zip.file("amount.txt", undef, {binary:true});
-   testEmptyFileDataGetters(zip);
+   zip.file("file.txt", undef, {binary:true});
+   testFileDataGetters({name : "undefined", zip : zip, textData : ""});
    zip = new JSZip();
-   zip.file("amount.txt", undef, {base64:true});
-   testEmptyFileDataGetters(zip);
+   zip.file("file.txt", undef, {base64:true});
+   testFileDataGetters({name : "undefined", zip : zip, textData : ""});
 });
 
 test("add file: file(name, null)", function() {
    var zip = new JSZip();
-   zip.file("amount.txt", null);
-   testEmptyFileDataGetters(zip);
+   zip.file("file.txt", null);
+   testFileDataGetters({name : "null", zip : zip, textData : ""});
    zip = new JSZip();
-   zip.file("amount.txt", null, {binary:true});
-   testEmptyFileDataGetters(zip);
+   zip.file("file.txt", null, {binary:true});
+   testFileDataGetters({name : "null", zip : zip, textData : ""});
    zip = new JSZip();
-   zip.file("amount.txt", null, {base64:true});
-   testEmptyFileDataGetters(zip);
+   zip.file("file.txt", null, {base64:true});
+   testFileDataGetters({name : "null", zip : zip, textData : ""});
 });
 
-test("add file: file(name, string)", function() {
+test("add file: file(name, stringAsText)", function() {
    var zip = new JSZip();
-   zip.file("amount.txt", "€15\n");
-   testFileDataGetters(zip);
+   zip.file("file.txt", "€15\n", {binary:false});
+   testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+   zip = new JSZip();
+   zip.file("file.txt", "test\r\ntest\r\n", {binary:false});
+   testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+});
+
+test("add file: file(name, stringAsBinary)", function() {
+   var zip = new JSZip();
+   zip.file("file.txt", "\xE2\x82\xAC15\n", {binary:true});
+   testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+   zip = new JSZip();
+   zip.file("file.txt", "test\r\ntest\r\n", {binary:true});
+   testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 });
 
 test("add file: file(name, base64)", function() {
    var zip = new JSZip();
-   zip.file("amount.txt", "4oKsMTUK", {base64:true});
-   testFileDataGetters(zip);
+   zip.file("file.txt", "4oKsMTUK", {base64:true});
+   testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+   zip = new JSZip();
+   zip.file("file.txt", "dGVzdA0KdGVzdA0K", {base64:true});
+   testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 });
 
 if (JSZip.support.uint8array) {
    test("add file: file(name, Uint8Array)", function() {
+      var str2array = function (str) {
+         var array = new Uint8Array(str.length);
+         for(var i = 0; i < str.length; i++) {
+            array[i] = str.charCodeAt(i);
+         }
+         return array;
+      };
       var zip = new JSZip();
-      var string = "\xE2\x82\xAC15\n";
-      var array = new Uint8Array(string.length);
-      for(var i = 0; i < string.length; i++) {
-         array[i] = string.charCodeAt(i);
-      }
-      zip.file("amount.txt", array);
-      testFileDataGetters(zip);
+      zip.file("file.txt", str2array("\xE2\x82\xAC15\n"));
+      testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+      zip = new JSZip();
+      zip.file("file.txt", str2array("test\r\ntest\r\n"));
+      testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
    });
 }
 
 if (JSZip.support.arraybuffer) {
    test("add file: file(name, ArrayBuffer)", function() {
+      var str2buffer = function (str) {
+         var array = new Uint8Array(str.length);
+         for(var i = 0; i < str.length; i++) {
+            array[i] = str.charCodeAt(i);
+         }
+         return array.buffer;
+      };
       var zip = new JSZip();
-      var string = "\xE2\x82\xAC15\n";
-      var array = new Uint8Array(string.length);
-      for(var i = 0; i < string.length; i++) {
-         array[i] = string.charCodeAt(i);
-      }
-      zip.file("amount.txt", array.buffer);
-      testFileDataGetters(zip);
+      zip.file("file.txt", str2buffer("\xE2\x82\xAC15\n"));
+      testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+      zip = new JSZip();
+      zip.file("file.txt", str2buffer("test\r\ntest\r\n"));
+      testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
    });
 }
 

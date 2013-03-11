@@ -659,7 +659,6 @@ JSZip.prototype = (function () {
        * http://www.webtoolkit.info/javascript-utf8.html
        */
       utf8encode : function (string) {
-         string = string.replace(/\r\n/g,"\n");
          var utftext = "";
 
          for (var n = 0; n < string.length; n++) {
