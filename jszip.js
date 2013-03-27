@@ -53,7 +53,8 @@ JSZip.defaults = {
    base64: false,
    binary: false,
    dir: false,
-   date: null
+   date: null,
+   compression: null
 };
 
 
@@ -170,6 +171,7 @@ JSZip.prototype = (function () {
       }
       o = extend(o, JSZip.defaults);
       o.date = o.date || new Date();
+      if (o.compression !== null) o.compression = o.compression.toUpperCase();
 
       return o;
    };
@@ -292,7 +294,12 @@ JSZip.prototype = (function () {
       dosDate = dosDate | o.date.getDate();
 
       var hasData = data !== null && data.length !== 0;
-
+      
+      compressionType = o.compression || compressionType;
+      if (!JSZip.compressions[compressionType]) {
+         throw compressionType + " is not a valid compression method !";
+      }
+      
       var compression    = JSZip.compressions[compressionType];
       var compressedData = hasData ? compression.compress(data) : '';
 
@@ -470,10 +477,6 @@ JSZip.prototype = (function () {
 
          // The central directory, and files data
          var directory = [], files = [], fileOffset = 0;
-
-         if (!JSZip.compressions[compression]) {
-            throw compression + " is not a valid compression method !";
-         }
 
          for (var name in this.files) {
             if ( !this.files.hasOwnProperty(name) ) { continue; }
