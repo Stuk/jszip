@@ -475,6 +475,10 @@ JSZip.prototype = (function () {
          });
          var compression = options.compression.toUpperCase();
 
+         if (!JSZip.compressions[compression]) {
+            throw compression + " is not a valid compression method !";
+         }
+         
          // The central directory, and files data
          var directory = [], files = [], fileOffset = 0;
 
