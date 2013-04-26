@@ -212,7 +212,7 @@ location.href="data:application/zip;base64,"+content;
       <p>Downloadify uses a small Flash SWF to download files to a user's computer with a filename that you can choose. Doug Neiner has added the <code>dataType</code> option to allow you to pass a zip for downloading. Follow the <a href="http://downloadify.info/downloadify/test.html">Downloadify demo</a> with the following changes:</p>
       <pre class="example">
 zip = new JSZip();
-zip.add("Hello.", "hello.txt");
+zip.file("Hello.", "hello.txt");
 Downloadify.create('downloadify',{
 ...
   data: function(){
@@ -367,13 +367,13 @@ folder.file(/^file/); // array of size 2, the relative paths start with file
         <dd>A JSZip object, for chaining.</dd>
       </dl>
       <pre class="example">
-zip.add("Hello.txt", "Hello World\n");
-zip.add("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
-zip.add("magic.txt", "U2VjcmV0IGNvZGU=", {base64: true, binary: false});
-zip.add("Xmas.txt", "Ho ho ho !", {date : new Date("December 25, 2007 00:00:01")});
-zip.add("folder/file.txt", "file in folder");
+zip.file("Hello.txt", "Hello World\n");
+zip.file("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
+zip.file("magic.txt", "U2VjcmV0IGNvZGU=", {base64: true, binary: false});
+zip.file("Xmas.txt", "Ho ho ho !", {date : new Date("December 25, 2007 00:00:01")});
+zip.file("folder/file.txt", "file in folder");
 
-zip.add("animals.txt", "dog,platypus\n").add("people.txt", "james,sebastian\n");
+zip.file("animals.txt", "dog,platypus\n").file("people.txt", "james,sebastian\n");
 
 // result : Hello.txt, smile.gif, magic.txt, Xmas.txt, animals.txt, people.txt,
 // folder/, folder/file.txt</pre>
@@ -389,9 +389,9 @@ zip.add("animals.txt", "dog,platypus\n").add("people.txt", "james,sebastian\n");
       </dl>
       <pre class="example">
 zip.folder("images");
-zip.folder("css").add("style.css", "body {background: #FF0000}");
+zip.folder("css").file("style.css", "body {background: #FF0000}");
 // or specify an absolute path (using forward slashes)
-zip.add("css/font.css", "body {font-family: sans-serif}")
+zip.file("css/font.css", "body {font-family: sans-serif}")
 
 // result : images/, css/, css/style.css, css/font.css</pre>
 
@@ -428,11 +428,11 @@ zip.folder("home/Jean").folder(/^vid/); // array of 1</pre>
       </dl>
       <pre class="example">
 var zip = new JSZip();
-zip.add("Hello.txt", "Hello World\n");
-zip.add("temp.txt", "nothing").remove("temp.txt");
+zip.file("Hello.txt", "Hello World\n");
+zip.file("temp.txt", "nothing").remove("temp.txt");
 // result : Hello.txt
 
-zip.folder("css").add("style.css", "body {background: #FF0000}");
+zip.folder("css").file("style.css", "body {background: #FF0000}");
 zip.remove("Hello.txt").remove("css");
 //result : empty zip</pre>
 
