@@ -8,7 +8,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
 
 Usage:
    zip = new JSZip();
-   zip.file("hello.txt", "Hello, World!").add("tempfile", "nothing");
+   zip.file("hello.txt", "Hello, World!").file("tempfile", "nothing");
    zip.folder("images").file("smile.gif", base64Data, {base64: true});
    zip.file("Xmas.txt", "Ho ho ho !", {date : new Date("December 25, 2007 00:00:01")});
    zip.remove("tempfile");
@@ -294,12 +294,12 @@ JSZip.prototype = (function () {
       dosDate = dosDate | o.date.getDate();
 
       var hasData = data !== null && data.length !== 0;
-      
+
       compressionType = o.compression || compressionType;
       if (!JSZip.compressions[compressionType]) {
          throw compressionType + " is not a valid compression method !";
       }
-      
+
       var compression    = JSZip.compressions[compressionType];
       var compressedData = hasData ? compression.compress(data) : '';
 
@@ -478,7 +478,7 @@ JSZip.prototype = (function () {
          if (!JSZip.compressions[compression]) {
             throw compression + " is not a valid compression method !";
          }
-         
+
          // The central directory, and files data
          var directory = [], files = [], fileOffset = 0;
 
