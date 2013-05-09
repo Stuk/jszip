@@ -280,7 +280,6 @@ zip.load(zipDataFromXHR, {base64:false});</pre>
         <dd>The file if any, <code>null</code> otherwise. The file has the following structure :
           <ul>
             <li><code>name</code> the absolute path of the file</li>
-            <li><code>data</code> the data contained in the file</li>
             <li><code>options</code> the options of the file. The available options are :
               <ul>
                 <li><code>base64</code>, boolean, cf <a href="#doc_file_name_data_options">file(name, data [,options])</a></li>
@@ -302,12 +301,11 @@ var zip = new JSZip();
 zip.file("file.txt", "content");
 
 zip.file("file.txt").name // "file.txt"
-zip.file("file.txt").data // "content"
+zip.file("file.txt").asText() // "content"
 zip.file("file.txt").options.dir // false
 
 // utf8 example
 var zip = new JSZip(zipFromAjaxWithUTF8);
-zip.file("amount.txt").data // "&#226;&#130;&#172;15" <!-- something like that -->
 zip.file("amount.txt").asText() // "&euro;15"
 zip.file("amount.txt").asArrayBuffer() // an ArrayBuffer containing &euro;15
 zip.file("amount.txt").asUint8Array() // an Uint8Array containing &euro;15
@@ -339,7 +337,7 @@ folder.file(/file/);  // array of size 2
 folder.file(/^file/); // array of size 2, the relative paths start with file
 
 // arrays contain objects in the form:
-// {name: "file2.txt", data: "content", dir: false}</pre>
+// {name: "file2.txt", dir: false, asText : function () {...}, ...}</pre>
 
       <h4 id="doc_file_name_data_options">file(name, data [,options])</h4>
       <dl>
@@ -464,8 +462,15 @@ zip.remove("Hello.txt").remove("css");
       HTML5 note : when using type = "uint8array", "arraybuffer" or "blob", be sure to check if the browser supports it (you can use <a href="#jszip_support"><code>JSZip.support</code></a>).
       This method will throw an exception otherwise.
       <pre class="example">
-content = zip.generate();
+content = zip.generate(); // base64
 location.href="data:application/zip;base64,"+content;</pre>
+
+      <pre class="example">
+var blobLink = document.getElementById('blobLink');
+blobLink.download = "hello.zip";
+blobLink.href = window.URL.createObjectURL(
+   zip.generate({type:"blob"})
+);</pre>
 
       <pre class="example">
 content = zip.generate({type:"string"});
@@ -514,7 +519,7 @@ zip.load(zipDataFromXHR);</pre>
         <dd><code>predicate</code> (function) the predicate to use : <code>function (relativePath, file) {...}</code> It takes 2 arguments : the relative path and the file.
           <ul>
             <li><code>relativePath</code> (String) The filename and its path, reliatively to the current folder.</li>
-            <li><code>file</code> (Object) The file being tested. Like the result of <a href="#doc_file_name"><code>file(name)</code></a>, the file has the form <code>{name:"...", data:"...", options:{...}}</code>.</li>
+            <li><code>file</code> (Object) The file being tested. Like the result of <a href="#doc_file_name"><code>file(name)</code></a>, the file has the form <code>{name:"...", options:{...}, asText:function,...}</code>.</li>
             <li>Return true if the file should be included, false otherwise.</li>
           </ul>
         </dd>
@@ -526,7 +531,7 @@ var zip = new JSZip().folder("dir");
 zip.file("readme.txt", "content");
 zip.filter(function (relativePath, file){
   // relativePath == "readme.txt"
-  // file = {name:"dir/readme.txt",data:"content",options:{...}}
+  // file = {name:"dir/readme.txt",options:{...},asText:function}
   return true/false;
 });</pre>
 
@@ -586,6 +591,30 @@ zip.filter(function (relativePath, file){
       <p>
       First release after a long period without version.
       </p>
+
+      <h2 id="migrating_guide">Migrating Guide</h2>
+      <h3>From 1.0.x to ?</h3>
+      <p>
+         <ul>
+            <li><code>JSZipBase64</code> has been renamed to <code>JSZip.base64</code>.</li>
+            <li>
+               The <code>data</code> attribute doesn't exist anymore :
+               use the getters <code>asText()</code>, <code>asBinary()</code>, etc
+            </li>
+            <li>
+               The compression/decompression methods now give their input type with the
+               <code>compressInputType</code> and <code>uncompressInputType<code> attributes.
+         </ul>
+
+         Example for the data attribute :
+         <pre>// before
+zip.file("test.txt").data;
+zip.files["test.txt"].data;
+
+// after
+zip.file("test.txt").asText();
+zip.files["test.txt"].asText();
+      </p>
    </div>
 
    <div id="who" class="grid_3">
@@ -598,6 +627,7 @@ zip.filter(function (relativePath, file){
 
       <h3>Version</h3>
       <p>1.0.1</p>
+      <p>See the <a href="#migrating_guide">migrating guide</a> when updating the library !</p>
 
       <h3>Todo</h3>
       <ul>

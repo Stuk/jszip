@@ -768,10 +768,12 @@ function zip_inflate(str) {
 if(!JSZip.compressions["DEFLATE"]) {
   JSZip.compressions["DEFLATE"] = {
     magic : "\x08\x00",
-    uncompress : zip_inflate
+    uncompress : zip_inflate,
+    uncompressInputType : "string"
   }
 } else {
   JSZip.compressions["DEFLATE"].uncompress = zip_inflate;
+  JSZip.compressions["DEFLATE"].uncompressInputType = "string";
 }
 
 })();

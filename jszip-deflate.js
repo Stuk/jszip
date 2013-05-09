@@ -1685,10 +1685,12 @@ var zip_deflate = function(str, level) {
 if(!JSZip.compressions["DEFLATE"]) {
   JSZip.compressions["DEFLATE"] = {
     magic : "\x08\x00",
-    compress : zip_deflate
+    compress : zip_deflate,
+    compressInputType : "string"
   }
 } else {
   JSZip.compressions["DEFLATE"].compress = zip_deflate;
+  JSZip.compressions["DEFLATE"].compressInputType = "string";
 }
 
 })();
