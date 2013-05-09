@@ -357,7 +357,7 @@ folder.file(/^file/); // array of size 2, the relative paths start with file
              <li><code>date</code> (Date) use it to specify the last modification date.
              If not set the current date is used.</li>
              <li><code>compression</code> (String), default null. If set, specifies the file compression method to use. If not, the default file compression is used, cf <a href="#doc_generate_options">generate(options)</a>.</li>
-             <li><code>optimizedBinaryString</code> (boolean), default false. Set it to true if (and only if) the input
+             <li><code>optimizedBinaryString</code> (boolean), default false. Set it to true if (and only if) the input is a string and
              has already been prepared with a 0xFF mask.</li>
           </ul>
         </dd>
@@ -489,6 +489,8 @@ for (var c = 0; c &lt; content.length; c++) {
           <ul>
             <li><code>base64</code> (boolean) <code>true</code> if the data is base64 encoded, <code>false</code> for binary. Default : <code>false</code>.</li>
             <li><code>checkCRC32</code> (boolean) <code>true</code> if the read data should be checked against its CRC32. Default : <code>false</code>.</li>
+            <li><code>optimizedBinaryString</code> (boolean), default false. Set it to true if (and only if) the input is a string and
+            has already been prepared with a 0xFF mask.</li>
           </ul>
         </dd>
         <dt>Returns : </dt>
@@ -548,11 +550,13 @@ zip.filter(function (relativePath, file){
       </p>
 
       <h3 id="zip_load_limits">Loading zip files, limitations</h3>
+      <h4>Not supported features</h4>
       <p>
       All the features of zip files are not supported.
       Classic zip files will work but encrypted zip, multi-volume, etc are not supported
       and the load() method will throw an <code>Error</code>.
       </p>
+      <h4>ZIP64 and 32bit integers</h4>
       <p>
       ZIP64 files can be loaded, but only if the zip file is not "too big". ZIP64 uses 64bits integers
       but Javascript represents all numbers as
@@ -564,16 +568,29 @@ zip.filter(function (relativePath, file){
       So if all the 64bits integers can fit into 32 bits integers, everything will be fine. If
       it's not the case, you will have other problems anyway (see next limitation).
       </p>
+      <h4>Performance issues</h4>
       <p>
       An other limitation comes from the browser (and the machine running the browser).
-      A compressed zip file of 10M is common and easily opened by desktop application,
-      but not in a browser. The processing of such a beast is likely to be painful :
-      the browser will eat hundreds of megabytes while using CPU like never.<br/>
-      If you use an old browser, things will be worse. For example, IE6 and IE7 are
-      quite slow to to execute the unit tests, and they completely freeze as soon as
-      they try to handle larger files.<br />
-      Conclusion : reading small files is OK, reading others is not.
+      A compressed zip file of 10MB is "easily" opened by firefox/chrome/opera/IE10 but
+      will crash older IE. Also keep in mind that strings in javascript are encoded in UTF-16 :
+      a 10MB ascii text file will take 20MB of memory.
       </p>
+      <p>
+      If you're having performance issues, please consider the following :
+      <ul>
+         <li>Don't use IE &lt; 10. Everything is better with WebGL support.</li>
+         <li>
+            If you load the file from an ajax call, ask your XHR an ArrayBuffer.
+            Loading a string is asking for troubles.
+         </li>
+         <li>
+            If you want to get the content of an ASCII file as a string, consider using
+            <code>asBinary()</code> instead of <code>asText()</code>. The transformation
+            "binary string" -&gt; "utf string" is a consuming process.
+         </li>
+      </ul>
+      </p>
+      <h4>The output zip will differ from the input zip</h4>
       <p>
       Reading and generating a zip file won't give you back the same file.
       Some data are discarded (file metadata) and other are added (subfolders).
