@@ -66,24 +66,32 @@ JSZip.prototype = (function () {
     * @param {function} filter a function String -> String, applied if not null on the result.
     * @return {String} the string representing this._data.
     */
-   var dataToString = function (filter) {
+   var dataToString = function (asUTF8) {
       var result = this._data;
       if (result === null || typeof result === "undefined") {
          return "";
       }
       if (result instanceof JSZip.CompressedObject) {
-         result = JSZip.utils.transformTo("string", result.getContent());
-         this._data = result;
+         result = result.getContent();
          this.options.binary = true;
          this.options.base64 = false;
-      } else {
-         result = JSZip.utils.transformTo("string", result);
+         this._data = result;
       }
+      // if the data is a base64 string, we decode it before checking the encoding !
       if (this.options.base64) {
          result = JSZip.base64.decode(result);
       }
-      if (filter) {
-         result = filter(result);
+      if (asUTF8 && this.options.binary) {
+         // JSZip.prototype.utf8decode supports arrays as input
+         // skip to array => string step, utf8decode will do it.
+         result = JSZip.prototype.utf8decode(result);
+      } else {
+         // no utf8 transformation, do the array => string step.
+         result = JSZip.utils.transformTo("string", result);
+      }
+
+      if (!asUTF8 && !this.options.binary) {
+         result = JSZip.prototype.utf8encode(result);
       }
       return result;
    };
@@ -106,14 +114,14 @@ JSZip.prototype = (function () {
        * @return {string} the UTF8 string.
        */
       asText : function () {
-         return dataToString.call(this, this.options.binary ? JSZip.prototype.utf8decode : null);
+         return dataToString.call(this, true);
       },
       /**
        * Returns the binary content.
        * @return {string} the content as binary.
        */
       asBinary : function () {
-         return dataToString.call(this, !this.options.binary ? JSZip.prototype.utf8encode : null);
+         return dataToString.call(this, false);
       },
       /**
        * Returns the content as an Uint8Array.
@@ -236,7 +244,7 @@ JSZip.prototype = (function () {
 
          // special case : it's way easier to work with Uint8Array than with ArrayBuffer
          if (dataType === "arraybuffer") {
-            data = new Uint8Array(data);
+            data = JSZip.utils.transformTo("uint8array", data);
          }
       }
 
@@ -802,57 +810,65 @@ JSZip.prototype = (function () {
        * http://www.webtoolkit.info/javascript-utf8.html
        */
       utf8encode : function (string) {
-         var utftext = "";
+         var result = [];
 
          for (var n = 0; n < string.length; n++) {
 
             var c = string.charCodeAt(n);
 
             if (c < 128) {
-               utftext += String.fromCharCode(c);
+               result.push(String.fromCharCode(c));
             } else if ((c > 127) && (c < 2048)) {
-               utftext += String.fromCharCode((c >> 6) | 192);
-               utftext += String.fromCharCode((c & 63) | 128);
+               result.push(String.fromCharCode((c >> 6) | 192));
+               result.push(String.fromCharCode((c & 63) | 128));
             } else {
-               utftext += String.fromCharCode((c >> 12) | 224);
-               utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-               utftext += String.fromCharCode((c & 63) | 128);
+               result.push(String.fromCharCode((c >> 12) | 224));
+               result.push(String.fromCharCode(((c >> 6) & 63) | 128));
+               result.push(String.fromCharCode((c & 63) | 128));
             }
 
          }
 
-         return utftext;
+         return result.join("");
       },
 
       /**
        * http://www.webtoolkit.info/javascript-utf8.html
        */
-      utf8decode : function (utftext) {
-         var string = "";
+      utf8decode : function (input) {
+         var result = [];
+         var type = JSZip.utils.getTypeOf(input);
+         var isArray = type !== "string";
          var i = 0;
          var c = 0, c1 = 0, c2 = 0, c3 = 0;
 
-         while ( i < utftext.length ) {
+         // check if we can use the TextDecoder API
+         // see http://encoding.spec.whatwg.org/#api
+         if (JSZip.support.uint8array && type === 'uint8array' && typeof TextDecoder === "function") {
+            return TextDecoder("utf-8").decode(input);
+         }
 
-            c = utftext.charCodeAt(i);
+         while ( i < input.length ) {
+
+            c = isArray ? input[i] : input.charCodeAt(i);
 
             if (c < 128) {
-               string += String.fromCharCode(c);
+               result.push(String.fromCharCode(c));
                i++;
             } else if ((c > 191) && (c < 224)) {
-               c2 = utftext.charCodeAt(i+1);
-               string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+               c2 = isArray ? input[i+1] : input.charCodeAt(i+1);
+               result.push(String.fromCharCode(((c & 31) << 6) | (c2 & 63)));
                i += 2;
             } else {
-               c2 = utftext.charCodeAt(i+1);
-               c3 = utftext.charCodeAt(i+2);
-               string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+               c2 = isArray ? input[i+1] : input.charCodeAt(i+1);
+               c3 = isArray ? input[i+2] : input.charCodeAt(i+2);
+               result.push(String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63)));
                i += 3;
             }
 
          }
 
-         return string;
+         return result.join("");
       }
    };
 }());
@@ -1029,16 +1045,31 @@ JSZip.support = {
     * @return {String} the result.
     */
    function arrayLikeToString(array) {
-      var result = "";
-      for(var i = 0; i < array.length; i++) {
-         // yup, String.fromCharCode.apply(null, array); is waaaaaay faster
-         // see http://jsperf.com/converting-a-uint8array-to-a-string/2
-         // but... the stack is limited !
-         // maybe http://jsperf.com/arraybuffer-to-string-apply-performance/2 ?
-         result += String.fromCharCode(array[i]);
-      }
+      // Performances notes :
+      // --------------------
+      // String.fromCharCode.apply(null, array) is the fastest, see
+      // see http://jsperf.com/converting-a-uint8array-to-a-string/2
+      // but the stack is limited (and we can get huge arrays !).
+      //
+      // result += String.fromCharCode(array[i]); generate too many strings !
+      //
+      // This code is inspired by http://jsperf.com/arraybuffer-to-string-apply-performance/2
+      var chunk = 65536;
+      var result = [], len = array.length, type = JSZip.utils.getTypeOf(array), k = 0;
 
-      return result;
+      while (k < len && chunk > 1) {
+         try {
+            if (type === "array") {
+               result.push(String.fromCharCode.apply(null, array.slice(k, Math.max(k + chunk, len))));
+            } else {
+               result.push(String.fromCharCode.apply(null, array.subarray(k, k + chunk)));
+            }
+            k += chunk;
+         } catch (e) {
+            chunk = Math.floor(chunk / 2);
+         }
+      }
+      return result.join("");
    };
 
    /**
