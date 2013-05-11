@@ -40,9 +40,11 @@ function testZipFile(testName, zipName, testFunction) {
             start();
             refZips[zipName] = file;
             testFunction.call(this, file);
-         }, function(errorMessage){
-            start();
-            ok(false, "Ajax error for " + zipName + " : " + this.status);
+         }, function(error){
+            if (QUnit.config.semaphore) {
+               start();
+            }
+            ok(false, error);
          });
       }
    });
