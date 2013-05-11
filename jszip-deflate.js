@@ -1,15 +1,15 @@
 "use strict";
 
 (function () {
-  if(!JSZip) {
-    throw "JSZip not defined";
-  }
-  var context = {};
-  (function () {
+   if(!JSZip) {
+      throw "JSZip not defined";
+   }
+   var context = {};
+   (function () {
 
-    // https://github.com/imaya/zlib.js
-    // commit 4630e858caf90dbe9ca68ef44866eaf286cf7d8a
-    // file bin/deflate.min.js
+      // https://github.com/imaya/zlib.js
+      // tag 0.1.6
+      // file bin/deflate.min.js
 
 /** @license zlib.js 2012 - imaya [ https://github.com/imaya/zlib.js ] The MIT License */(function() {'use strict';var n=void 0,u=!0,aa=this;function ba(e,d){var c=e.split("."),f=aa;!(c[0]in f)&&f.execScript&&f.execScript("var "+c[0]);for(var a;c.length&&(a=c.shift());)!c.length&&d!==n?f[a]=d:f=f[a]?f[a]:f[a]={}};var C="undefined"!==typeof Uint8Array&&"undefined"!==typeof Uint16Array&&"undefined"!==typeof Uint32Array;function K(e,d){this.index="number"===typeof d?d:0;this.d=0;this.buffer=e instanceof(C?Uint8Array:Array)?e:new (C?Uint8Array:Array)(32768);if(2*this.buffer.length<=this.index)throw Error("invalid index");this.buffer.length<=this.index&&ca(this)}function ca(e){var d=e.buffer,c,f=d.length,a=new (C?Uint8Array:Array)(f<<1);if(C)a.set(d);else for(c=0;c<f;++c)a[c]=d[c];return e.buffer=a}
 K.prototype.a=function(e,d,c){var f=this.buffer,a=this.index,b=this.d,k=f[a],m;c&&1<d&&(e=8<d?(L[e&255]<<24|L[e>>>8&255]<<16|L[e>>>16&255]<<8|L[e>>>24&255])>>32-d:L[e]>>8-d);if(8>d+b)k=k<<d|e,b+=d;else for(m=0;m<d;++m)k=k<<1|e>>d-m-1&1,8===++b&&(b=0,f[a++]=L[k],k=0,a===f.length&&(f=ca(this)));f[a]=k;this.buffer=f;this.d=b;this.index=a};K.prototype.finish=function(){var e=this.buffer,d=this.index,c;0<this.d&&(e[d]<<=8-this.d,e[d]=L[e[d]],d++);C?c=e.subarray(0,d):(e.length=d,c=e);return c};
@@ -36,28 +36,31 @@ function Ja(e,d,c){function f(a){var b=g[a][p[a]];b===d?(f(a+1),f(a+1)):--k[b];+
 function pa(e){var d=new (C?Uint16Array:Array)(e.length),c=[],f=[],a=0,b,k,m,g;b=0;for(k=e.length;b<k;b++)c[e[b]]=(c[e[b]]|0)+1;b=1;for(k=16;b<=k;b++)f[b]=a,a+=c[b]|0,a<<=1;b=0;for(k=e.length;b<k;b++){a=f[e[b]];f[e[b]]+=1;m=d[b]=0;for(g=e[b];m<g;m++)d[b]=d[b]<<1|a&1,a>>>=1}return d};ba("Zlib.RawDeflate",ka);ba("Zlib.RawDeflate.prototype.compress",ka.prototype.h);var Ka={NONE:0,FIXED:1,DYNAMIC:ma},V,La,$,Ma;if(Object.keys)V=Object.keys(Ka);else for(La in V=[],$=0,Ka)V[$++]=La;$=0;for(Ma=V.length;$<Ma;++$)La=V[$],ba("Zlib.RawDeflate.CompressionType."+La,Ka[La]);}).call(this); //@ sourceMappingURL=rawdeflate.min.js.map
 
 
-  }).call(context);
+   }).call(context);
 
-  var compress = function (input) {
-    var deflate = new context.Zlib.RawDeflate(input);
-    return deflate.compress();
-  };
+   var compress = function (input) {
+      var deflate = new context.Zlib.RawDeflate(input);
+      return deflate.compress();
+   };
 
-  var USE_TYPEDARRAY =
-    (typeof Uint8Array !== 'undefined') &&
-    (typeof Uint16Array !== 'undefined') &&
-    (typeof Uint32Array !== 'undefined');
+   var USE_TYPEDARRAY =
+      (typeof Uint8Array !== 'undefined') &&
+      (typeof Uint16Array !== 'undefined') &&
+      (typeof Uint32Array !== 'undefined');
 
 
-  // we add the compression method for JSZip
-  if(!JSZip.compressions["DEFLATE"]) {
-    JSZip.compressions["DEFLATE"] = {
-      magic : "\x08\x00",
-      compress : compress,
-      compressInputType : USE_TYPEDARRAY ? "uint8array" : "array"
-    }
-  } else {
-    JSZip.compressions["DEFLATE"].compress = compress;
-    JSZip.compressions["DEFLATE"].compressInputType = USE_TYPEDARRAY ? "uint8array" : "array";
-  }
+   // we add the compression method for JSZip
+   if(!JSZip.compressions["DEFLATE"]) {
+      JSZip.compressions["DEFLATE"] = {
+         magic : "\x08\x00",
+         compress : compress,
+         compressInputType : USE_TYPEDARRAY ? "uint8array" : "array"
+      }
+   } else {
+      JSZip.compressions["DEFLATE"].compress = compress;
+      JSZip.compressions["DEFLATE"].compressInputType = USE_TYPEDARRAY ? "uint8array" : "array";
+   }
 })();
+
+// enforcing Stuk's coding style
+// vim: set shiftwidth=3 softtabstop=3:
