@@ -51,7 +51,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
     * Developer tip : when debugging, a watch on pretty(this.reader.data.slice(this.reader.index))
     * is very useful :)
     * @constructor
-    * @param {String|ArrayBuffer|Uint8Array} data the data to read.
+    * @param {String|ArrayBuffer|Uint8Array|Buffer} data the data to read.
     */
    function DataReader(data) {
       this.data = null; // type : see implementation
@@ -203,9 +203,11 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
     * @param {Uint8Array} data the data to read.
     */
    function Uint8ArrayReader(data) {
-      this.data = data;
-      this.length = this.data.length;
-      this.index = 0;
+      if (data) {
+         this.data = data;
+         this.length = this.data.length;
+         this.index = 0;
+      }
    }
    Uint8ArrayReader.prototype = new DataReader();
    /**
@@ -236,6 +238,28 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
    Uint8ArrayReader.prototype.readData = function (size) {
       this.checkOffset(size);
       var result = this.data.subarray(this.index, this.index + size);
+      this.index += size;
+      return result;
+   };
+
+   /**
+    * Read bytes from a Buffer.
+    * @constructor
+    * @param {Buffer} data the data to read.
+    */
+   function NodeBufferReader(data) {
+      this.data = data;
+      this.length = this.data.length;
+      this.index = 0;
+   }
+   NodeBufferReader.prototype = new Uint8ArrayReader();
+
+   /**
+    * @see DataReader.readData
+    */
+   NodeBufferReader.prototype.readData = function (size) {
+      this.checkOffset(size);
+      var result = this.data.slice(this.index, this.index + size);
       this.index += size;
       return result;
    };
@@ -465,7 +489,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
    /**
     * All the entries in the zip file.
     * @constructor
-    * @param {String|ArrayBuffer|Uint8Array} data the binary data to load.
+    * @param {String|ArrayBuffer|Uint8Array|Buffer} data the binary data to load.
     * @param {Object} loadOptions Options for loading the data.
     */
    function ZipEntries(data, loadOptions) {
@@ -635,13 +659,15 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
          var type = JSZip.utils.getTypeOf(data);
          if (type === "string" && !JSZip.support.uint8array) {
             this.reader = new StringReader(data, this.loadOptions.optimizedBinaryString);
+         } else if (type === "nodebuffer") {
+            this.reader = new NodeBufferReader(data);
          } else {
             this.reader = new Uint8ArrayReader(JSZip.utils.transformTo("uint8array", data));
          }
       },
       /**
        * Read a zip file and create ZipEntries.
-       * @param {String|ArrayBuffer|Uint8Array} data the binary string representing a zip file.
+       * @param {String|ArrayBuffer|Uint8Array|Buffer} data the binary string representing a zip file.
        */
       load : function(data) {
          this.prepareReader(data);
@@ -655,7 +681,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
    /**
     * Implementation of the load method of JSZip.
     * It uses the above classes to decode a zip file, and load every files.
-    * @param {String|ArrayBuffer|Uint8Array} data the data to load.
+    * @param {String|ArrayBuffer|Uint8Array|Buffer} data the data to load.
     * @param {Object} options Options for loading the data.
     *  options.base64 : is the data in base64 ? default : false
     */
