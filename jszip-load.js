@@ -632,7 +632,8 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
          }
       },
       prepareReader : function (data) {
-         if (JSZip.utils.getTypeOf(data) === "string") {
+         var type = JSZip.utils.getTypeOf(data);
+         if (type === "string" && !JSZip.support.uint8array) {
             this.reader = new StringReader(data, this.loadOptions.optimizedBinaryString);
          } else {
             this.reader = new Uint8ArrayReader(JSZip.utils.transformTo("uint8array", data));
