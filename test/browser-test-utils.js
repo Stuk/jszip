@@ -9,7 +9,7 @@
       // we skip the & 0xFF part, since this must be tested in the JSZip tests.
       if (xhr.response) {
          if (JSZip.support.arraybuffer && xhr.response instanceof ArrayBuffer) {
-            return JSZip.utils.uint8Array2String(new Uint8Array(xhr.response));
+            return JSZip.utils.transformTo("string", xhr.response);
          }
          return xhr.response;
       } else {
@@ -91,7 +91,7 @@
                      var file = JSZipTestUtils.getBinaryFromXHR(xhr);
                      success(file);
                   } catch(e) {
-                     error(e.message||e);
+                     error(e);
                   }
                } else {
                   error("Ajax error for " + zipName + " : " + this.status);
@@ -102,7 +102,7 @@
          xhr.send();
 
       } catch (e) {
-         error("Ajax error for " + zipName + " : " + (e.message||e));
+         error(e);
       }
    };
 
