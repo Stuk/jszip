@@ -834,28 +834,31 @@ JSZip.prototype = (function () {
        * http://www.webtoolkit.info/javascript-utf8.html
        */
       utf8encode : function (string) {
-         // TextEncoder + Uint8Array to binary string is faster than checking every bytes.
+         // TextEncoder + Uint8Array to binary string is faster than checking every bytes on long strings.
          // http://jsperf.com/utf8encode-vs-textencoder
+         // On short strings (file names for example), the TextEncoder API is (currently) slower.
          if (JSZip.support.uint8array && typeof TextEncoder === "function") {
             var u8 = TextEncoder("utf-8").encode(string);
             return JSZip.utils.transformTo("string", u8);
          }
 
-         var result = [];
+         // array.join may be slower than string concatenation but generates less objects (less time spent garbage collecting).
+         // See also http://jsperf.com/array-direct-assignment-vs-push/31
+         var result = [], resIndex = 0;
 
          for (var n = 0; n < string.length; n++) {
 
             var c = string.charCodeAt(n);
 
             if (c < 128) {
-               result.push(String.fromCharCode(c));
+               result[resIndex++] = String.fromCharCode(c);
             } else if ((c > 127) && (c < 2048)) {
-               result.push(String.fromCharCode((c >> 6) | 192));
-               result.push(String.fromCharCode((c & 63) | 128));
+               result[resIndex++] = String.fromCharCode((c >> 6) | 192);
+               result[resIndex++] = String.fromCharCode((c & 63) | 128);
             } else {
-               result.push(String.fromCharCode((c >> 12) | 224));
-               result.push(String.fromCharCode(((c >> 6) & 63) | 128));
-               result.push(String.fromCharCode((c & 63) | 128));
+               result[resIndex++] = String.fromCharCode((c >> 12) | 224);
+               result[resIndex++] = String.fromCharCode(((c >> 6) & 63) | 128);
+               result[resIndex++] = String.fromCharCode((c & 63) | 128);
             }
 
          }
@@ -867,7 +870,7 @@ JSZip.prototype = (function () {
        * http://www.webtoolkit.info/javascript-utf8.html
        */
       utf8decode : function (input) {
-         var result = [];
+         var result = [], resIndex = 0;
          var type = JSZip.utils.getTypeOf(input);
          var isArray = type !== "string";
          var i = 0;
@@ -886,16 +889,16 @@ JSZip.prototype = (function () {
             c = isArray ? input[i] : input.charCodeAt(i);
 
             if (c < 128) {
-               result.push(String.fromCharCode(c));
+               result[resIndex++] = String.fromCharCode(c);
                i++;
             } else if ((c > 191) && (c < 224)) {
                c2 = isArray ? input[i+1] : input.charCodeAt(i+1);
-               result.push(String.fromCharCode(((c & 31) << 6) | (c2 & 63)));
+               result[resIndex++] = String.fromCharCode(((c & 31) << 6) | (c2 & 63));
                i += 2;
             } else {
                c2 = isArray ? input[i+1] : input.charCodeAt(i+1);
                c3 = isArray ? input[i+2] : input.charCodeAt(i+2);
-               result.push(String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63)));
+               result[resIndex++] = String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
                i += 3;
             }
 
