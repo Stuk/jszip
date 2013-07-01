@@ -277,6 +277,10 @@ JSZip.prototype = (function () {
          o.base64 = false;
          o.binary = true;
 
+         if (!dataType && !(data instanceof JSZip.CompressedObject)) {
+            throw new Error("The data of '" + name + "' is in an unsupported format !");
+         }
+
          // special case : it's way easier to work with Uint8Array than with ArrayBuffer
          if (dataType === "arraybuffer") {
             data = JSZip.utils.transformTo("uint8array", data);

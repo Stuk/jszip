@@ -540,6 +540,25 @@ test("add file: file(name, base64)", function() {
    testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 });
 
+test("add file: file(name, unsupported)", function() {
+   var zip = new JSZip();
+   try {
+      zip.file("test.txt", new Date());
+      ok(false, "An unsupported object was added, but no exception thrown");
+   } catch(e) {
+      ok(e.message.match("unsupported format"), "the error message is useful");
+   }
+   if (JSZip.support.blob) {
+      var blob = zip.generate({type:"blob"});
+      try {
+         zip.file("test.txt", blob);
+         ok(false, "An blob was added, but no exception thrown");
+      } catch(e) {
+         ok(e.message.match("unsupported format"), "the error message is useful");
+      }
+   }
+});
+
 if (JSZip.support.uint8array) {
    test("add file: file(name, Uint8Array)", function() {
       var str2array = function (str) {
