@@ -293,6 +293,7 @@ zip.load(zipDataFromXHR, {base64:false});</pre>
             <li><code>asBinary()</code>, string, the content as binary (utf8 decoded if necessary).</li>
             <li><code>asArrayBuffer()</code>, ArrayBuffer, need a <a href="#jszip_support">compatible browser</a>.</li>
             <li><code>asUint8Array()</code>, Uint8Array, need a <a href="#jszip_support">compatible browser</a>.</li>
+            <li><code>asNodeBuffer()</code>, nodejs Buffer, need <a href="#jszip_support">nodejs</a>.</li>
           </ul>
         </dd>
       </dl>
@@ -345,7 +346,7 @@ folder.file(/^file/); // array of size 2, the relative paths start with file
         <dd>Add a file to the zip file.</dd>
         <dt>Parameters : </dt>
         <dd><code>name</code> (String) the name of the file.</dd>
-        <dd><code>data</code> (String/ArrayBuffer/Uint8Array) the content of the file.</dd>
+        <dd><code>data</code> (String/ArrayBuffer/Uint8Array/Buffer) the content of the file.</dd>
         <dd><code>options</code> (Object) the options :
           <ul>
              <li><code>base64</code> (boolean) set to <code>true</code> if the data
@@ -452,6 +453,7 @@ zip.remove("Hello.txt").remove("css");
                   <li><code>uint8array</code> : the result will be a Uint8Array containing the zip. This requires a compatible browser.</li>
                   <li><code>arraybuffer</code> : the result will be a ArrayBuffer containing the zip. This requires a compatible browser.</li>
                   <li><code>blob</code> : the result will be a Blob containing the zip. This requires a compatible browser.</li>
+                  <li><code>nodebuffer</code> : the result will be a nodejs Buffer containing the zip. This requires nodejs.</li>
                </ul>
              </li>
           </ul>
@@ -484,7 +486,7 @@ for (var c = 0; c &lt; content.length; c++) {
         <dt>Description : </dt>
         <dd>Read an existing zip and merge the data in the current JSZip object. The implementation is in jszip-load.js, don't forget to include it. This technique has some limitations, see <a href="#zip_load_limits">below</a>.</dd>
         <dt>Parameters : </dt>
-        <dd><code>data</code> (String/ArrayBuffer/Uint8Array) the zip file</dd>
+        <dd><code>data</code> (String/ArrayBuffer/Uint8Array/Buffer) the zip file</dd>
         <dd><code>options</code> (Object) the options to load the zip file :
           <ul>
             <li><code>base64</code> (boolean) <code>true</code> if the data is base64 encoded, <code>false</code> for binary. Default : <code>false</code>.</li>
@@ -546,6 +548,7 @@ zip.filter(function (relativePath, file){
             <li><code>arraybuffer</code> : true if JSZip can read and generate ArrayBuffer, false otherwise.</li>
             <li><code>uint8array</code> : true if JSZip can read and generate Uint8Array, false otherwise.</li>
             <li><code>blob</code> : true if JSZip can read and generate Blob, false otherwise.</li>
+            <li><code>nodebuffer</code> : true if JSZip can read and generate nodejs Buffer, false otherwise.</li>
          </ul>
       </p>
 

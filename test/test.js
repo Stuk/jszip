@@ -70,6 +70,9 @@ test("JSZip.utils.transformTo", function () {
    if (JSZip.support.uint8array) {
       supportedArgs.push("uint8array");
    }
+   if (JSZip.support.nodebuffer) {
+      supportedArgs.push("nodebuffer");
+   }
 
    var txt = 'test text !';
 
@@ -413,6 +416,7 @@ function testFileDataGetters (opts) {
    _actualTestFileDataGetters.asBinary(opts);
    _actualTestFileDataGetters.asArrayBuffer(opts);
    _actualTestFileDataGetters.asUint8Array(opts);
+   _actualTestFileDataGetters.asNodeBuffer(opts);
 
    var reload = function () {
       return {
@@ -428,6 +432,7 @@ function testFileDataGetters (opts) {
    _actualTestFileDataGetters.asBinary(reload());
    _actualTestFileDataGetters.asArrayBuffer(reload());
    _actualTestFileDataGetters.asUint8Array(reload());
+   _actualTestFileDataGetters.asNodeBuffer(reload());
 }
 
 var _actualTestFileDataGetters = {
@@ -461,6 +466,21 @@ var _actualTestFileDataGetters = {
       } else {
          try {
             opts.zip.file("file.txt").asUint8Array();
+            ok(false, "no exception thrown");
+         } catch (e) {
+            ok(e.message.match("not supported by this browser"), opts.name + " : the error message is useful");
+         }
+      }
+   },
+   asNodeBuffer : function (opts) {
+      if (JSZip.support.nodebuffer) {
+         var buffer = opts.zip.file("file.txt").asNodeBuffer();
+         ok(buffer instanceof Buffer, opts.name + " : the result is a instance of Buffer");
+         var actual = String.fromCharCode.apply(null, buffer);
+         equal(actual, opts.rawData, opts.name + " : .asNodeBuffer()");
+      } else {
+         try {
+            opts.zip.file("file.txt").asNodeBuffer();
             ok(false, "no exception thrown");
          } catch (e) {
             ok(e.message.match("not supported by this browser"), opts.name + " : the error message is useful");
@@ -520,6 +540,25 @@ test("add file: file(name, base64)", function() {
    testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 });
 
+test("add file: file(name, unsupported)", function() {
+   var zip = new JSZip();
+   try {
+      zip.file("test.txt", new Date());
+      ok(false, "An unsupported object was added, but no exception thrown");
+   } catch(e) {
+      ok(e.message.match("unsupported format"), "the error message is useful");
+   }
+   if (JSZip.support.blob) {
+      var blob = zip.generate({type:"blob"});
+      try {
+         zip.file("test.txt", blob);
+         ok(false, "An blob was added, but no exception thrown");
+      } catch(e) {
+         ok(e.message.match("unsupported format"), "the error message is useful");
+      }
+   }
+});
+
 if (JSZip.support.uint8array) {
    test("add file: file(name, Uint8Array)", function() {
       var str2array = function (str) {
@@ -549,6 +588,27 @@ if (JSZip.support.arraybuffer) {
             array[i] = str.charCodeAt(i);
          }
          return array.buffer;
+      };
+      var zip = new JSZip();
+      zip.file("file.txt", str2buffer("\xE2\x82\xAC15\n"));
+      testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+      zip = new JSZip();
+      zip.file("file.txt", str2buffer("test\r\ntest\r\n"));
+      testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+      zip = new JSZip();
+      zip.file("file.txt", str2buffer(""));
+      testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+   });
+}
+
+if (JSZip.support.nodebuffer) {
+   test("add file: file(name, Buffer)", function() {
+      var str2buffer = function (str) {
+         var array = new Buffer(str.length);
+         for(var i = 0; i < str.length; i++) {
+            array[i] = str.charCodeAt(i);
+         }
+         return array;
       };
       var zip = new JSZip();
       zip.file("file.txt", str2buffer("\xE2\x82\xAC15\n"));
@@ -640,6 +700,33 @@ if (JSZip.support.arraybuffer) {
       try {
          var blob = zip.generate({type:"arraybuffer"});
          ok(false, "ArrayBuffer is not supported, but no exception thrown");
+      } catch(e) {
+         ok(e.message.match("not supported by this browser"), "the error message is useful");
+      }
+   });
+}
+
+if (JSZip.support.nodebuffer) {
+   testZipFile("generate : type:nodebuffer", "ref/text.zip", function(expected) {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "Hello World\n");
+      var buffer = zip.generate({type:"nodebuffer"});
+      ok(buffer instanceof Buffer, "The result is a instance of ArrayBuffer");
+
+      var actual = "";
+      for (var i = 0; i < buffer.length; i++) {
+         actual += String.fromCharCode(buffer[i]);
+      }
+
+      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   });
+} else {
+   testZipFile("generate : type:nodebuffer", "ref/text.zip", function(expected) {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "Hello World\n");
+      try {
+         var blob = zip.generate({type:"nodebuffer"});
+         ok(false, "Buffer is not supported, but no exception thrown");
       } catch(e) {
          ok(e.message.match("not supported by this browser"), "the error message is useful");
       }
@@ -903,6 +990,17 @@ if (JSZip.support.arraybuffer) {
       // if we request a file in the same format, we might get the same Uint8Array or its ArrayBuffer (the original zip file).
       equal(new JSZip(file).file("Hello.txt").asArrayBuffer().byteLength, 12, "don't get the original buffer");
       equal(new JSZip(file).file("Hello.txt").asUint8Array().buffer.byteLength, 12, "don't get a view of the original buffer");
+
+      equal(new JSZip(file).file("Hello.txt").asText(), "Hello World\n", "the zip was correctly read.");
+   });
+}
+
+if (JSZip.support.nodebuffer) {
+   testZipFile("load(Buffer) works", "ref/all.zip", function(fileAsString) {
+      var file = new Buffer(fileAsString.length);
+      for( var i = 0; i < fileAsString.length; ++i ) {
+         file[i] = fileAsString.charCodeAt(i);
+      }
 
       equal(new JSZip(file).file("Hello.txt").asText(), "Hello World\n", "the zip was correctly read.");
    });
