@@ -21,7 +21,7 @@ Usage:
 /**
  * Representation a of zip file in js
  * @constructor
- * @param {String=|ArrayBuffer=|Uint8Array=} data the data to load, if any (optional).
+ * @param {String=|ArrayBuffer=|Uint8Array=|Buffer=} data the data to load, if any (optional).
  * @param {Object=} options the options for creating this objects (optional).
  */
 var JSZip = function(data, options) {
@@ -64,7 +64,7 @@ JSZip.prototype = (function () {
    /**
     * Returns the raw data of a ZipObject, decompress the content if necessary.
     * @param {ZipObject} file the file to use.
-    * @return {String|ArrayBuffer|Uint8Array} the data.
+    * @return {String|ArrayBuffer|Uint8Array|Buffer} the data.
     */
    var getRawData = function (file) {
       if (file._data instanceof JSZip.CompressedObject) {
@@ -89,7 +89,7 @@ JSZip.prototype = (function () {
    /**
     * Returns the data of a ZipObject in a binary form. If the content is an unicode string, encode it.
     * @param {ZipObject} file the file to use.
-    * @return {String|ArrayBuffer|Uint8Array} the data.
+    * @return {String|ArrayBuffer|Uint8Array|Buffer} the data.
     */
    var getBinaryData = function (file) {
       var result = getRawData(file), type = JSZip.utils.getTypeOf(result);
@@ -99,6 +99,9 @@ JSZip.prototype = (function () {
             // unicode string => binary string is a painful process, check if we can avoid it.
             if (JSZip.support.uint8array && typeof TextEncoder === "function") {
                return TextEncoder("utf-8").encode(result);
+            }
+            if (JSZip.support.nodebuffer) {
+               return new Buffer(result, "utf-8");
             }
          }
          return file.asBinary();
@@ -138,7 +141,7 @@ JSZip.prototype = (function () {
     * A simple object representing a file in the zip file.
     * @constructor
     * @param {string} name the name of the file
-    * @param {String|ArrayBuffer|Uint8Array} data the data
+    * @param {String|ArrayBuffer|Uint8Array|Buffer} data the data
     * @param {Object} options the options of the file
     */
    var ZipObject = function (name, data, options) {
@@ -161,6 +164,14 @@ JSZip.prototype = (function () {
        */
       asBinary : function () {
          return dataToString.call(this, false);
+      },
+      /**
+       * Returns the content as a nodejs Buffer.
+       * @return {Buffer} the content as a Buffer.
+       */
+      asNodeBuffer : function () {
+         var result = getBinaryData(this);
+         return JSZip.utils.transformTo("nodebuffer", result);
       },
       /**
        * Returns the content as an Uint8Array.
@@ -236,7 +247,7 @@ JSZip.prototype = (function () {
     * Add a file in the current folder.
     * @private
     * @param {string} name the name of the file
-    * @param {String|ArrayBuffer|Uint8Array} data the data of the file
+    * @param {String|ArrayBuffer|Uint8Array|Buffer} data the data of the file
     * @param {Object} o the options of the file
     * @return {Object} the new file.
     */
@@ -265,6 +276,10 @@ JSZip.prototype = (function () {
       } else { // arraybuffer, uint8array, ...
          o.base64 = false;
          o.binary = true;
+
+         if (!dataType && !(data instanceof JSZip.CompressedObject)) {
+            throw new Error("The data of '" + name + "' is in an unsupported format !");
+         }
 
          // special case : it's way easier to work with Uint8Array than with ArrayBuffer
          if (dataType === "arraybuffer") {
@@ -499,7 +514,7 @@ JSZip.prototype = (function () {
       /**
        * Read an existing zip and merge the data in the current JSZip object.
        * The implementation is in jszip-load.js, don't forget to include it.
-       * @param {String|ArrayBuffer|Uint8Array} stream  The stream to load
+       * @param {String|ArrayBuffer|Uint8Array|Buffer} stream  The stream to load
        * @param {Object} options Options for loading the stream.
        *  options.base64 : is the stream in base64 ? default : false
        * @return {JSZip} the current JSZip object
@@ -535,7 +550,7 @@ JSZip.prototype = (function () {
        * Add a file to the zip file, or search a file.
        * @param   {string|RegExp} name The name of the file to add (if data is defined),
        * the name of the file to find (if no data) or a regex to match files.
-       * @param   {String|ArrayBuffer|Uint8Array} data  The file data, either raw or base64 encoded
+       * @param   {String|ArrayBuffer|Uint8Array|Buffer} data  The file data, either raw or base64 encoded
        * @param   {Object} o     File options
        * @return  {JSZip|Object|Array} this JSZip object (when adding a file),
        * a file (when searching by string) or an array of files (when searching by regex).
@@ -625,7 +640,7 @@ JSZip.prototype = (function () {
        * - base64, (deprecated, use type instead) true to generate base64.
        * - compression, "STORE" by default.
        * - type, "base64" by default. Values are : string, base64, uint8array, arraybuffer, blob.
-       * @return {String|Uint8Array|ArrayBuffer|Blob} the zip file
+       * @return {String|Uint8Array|ArrayBuffer|Buffer|Blob} the zip file
        */
       generate : function(options) {
          options = extend(options || {}, {
@@ -684,6 +699,7 @@ JSZip.prototype = (function () {
             case "uint8array" :
             case "arraybuffer" :
             case "blob" :
+            case "nodebuffer" :
                writer = new Uint8ArrayWriter(localDirLength + centralDirLength + dirEnd.length);
                break;
             case "base64" :
@@ -710,6 +726,7 @@ JSZip.prototype = (function () {
             // case "zip is an Uint8Array"
             case "uint8array" :
             case "arraybuffer" :
+            case "nodebuffer" :
                return JSZip.utils.transformTo(options.type.toLowerCase(), zip);
             case "blob" :
                return JSZip.utils.arrayBuffer2Blob(JSZip.utils.transformTo("arraybuffer", zip));
@@ -841,6 +858,9 @@ JSZip.prototype = (function () {
             var u8 = TextEncoder("utf-8").encode(string);
             return JSZip.utils.transformTo("string", u8);
          }
+         if (JSZip.support.nodebuffer) {
+            return JSZip.utils.transformTo("string", new Buffer(string, "utf-8"));
+         }
 
          // array.join may be slower than string concatenation but generates less objects (less time spent garbage collecting).
          // See also http://jsperf.com/array-direct-assignment-vs-push/31
@@ -882,6 +902,9 @@ JSZip.prototype = (function () {
             return TextDecoder("utf-8").decode(
                JSZip.utils.transformTo("uint8array", input)
             );
+         }
+         if (JSZip.support.nodebuffer) {
+            return JSZip.utils.transformTo("nodebuffer", input).toString("utf-8");
          }
 
          while ( i < input.length ) {
@@ -944,6 +967,10 @@ JSZip.support = {
    // contains true if JSZip can read/generate ArrayBuffer, false otherwise.
    arraybuffer : (function(){
       return typeof ArrayBuffer !== "undefined" && typeof Uint8Array !== "undefined";
+   })(),
+   // contains true if JSZip can read/generate nodejs Buffer, false otherwise.
+   nodebuffer : (function(){
+      return typeof Buffer !== "undefined";
    })(),
    // contains true if JSZip can read/generate Uint8Array, false otherwise.
    uint8array : (function(){
@@ -1065,8 +1092,8 @@ JSZip.support = {
    /**
     * Fill in an array with a string.
     * @param {String} str the string to use.
-    * @param {Array|ArrayBuffer|Uint8Array} array the array to fill in (will be mutated).
-    * @return {Array|ArrayBuffer|Uint8Array} the updated array.
+    * @param {Array|ArrayBuffer|Uint8Array|Buffer} array the array to fill in (will be mutated).
+    * @return {Array|ArrayBuffer|Uint8Array|Buffer} the updated array.
     */
    function stringToArrayLike(str, array) {
       for (var i = 0; i < str.length; ++i) {
@@ -1077,7 +1104,7 @@ JSZip.support = {
 
    /**
     * Transform an array-like object to a string.
-    * @param {Array|ArrayBuffer|Uint8Array} array the array to transform.
+    * @param {Array|ArrayBuffer|Uint8Array|Buffer} array the array to transform.
     * @return {String} the result.
     */
    function arrayLikeToString(array) {
@@ -1095,7 +1122,7 @@ JSZip.support = {
 
       while (k < len && chunk > 1) {
          try {
-            if (type === "array") {
+            if (type === "array" || type === "nodebuffer") {
                result.push(String.fromCharCode.apply(null, array.slice(k, Math.max(k + chunk, len))));
             } else {
                result.push(String.fromCharCode.apply(null, array.subarray(k, k + chunk)));
@@ -1110,9 +1137,9 @@ JSZip.support = {
 
    /**
     * Copy the data from an array-like to an other array-like.
-    * @param {Array|ArrayBuffer|Uint8Array} arrayFrom the origin array.
-    * @param {Array|ArrayBuffer|Uint8Array} arrayTo the destination array which will be mutated.
-    * @return {Array|ArrayBuffer|Uint8Array} the updated destination array.
+    * @param {Array|ArrayBuffer|Uint8Array|Buffer} arrayFrom the origin array.
+    * @param {Array|ArrayBuffer|Uint8Array|Buffer} arrayTo the destination array which will be mutated.
+    * @return {Array|ArrayBuffer|Uint8Array|Buffer} the updated destination array.
     */
    function arrayLikeToArrayLike(arrayFrom, arrayTo) {
       for(var i = 0; i < arrayFrom.length; i++) {
@@ -1135,6 +1162,9 @@ JSZip.support = {
       },
       "uint8array" : function (input) {
          return stringToArrayLike(input, new Uint8Array(input.length));
+      },
+      "nodebuffer" : function (input) {
+         return stringToArrayLike(input, new Buffer(input.length));
       }
    };
 
@@ -1147,6 +1177,9 @@ JSZip.support = {
       },
       "uint8array" : function (input) {
          return new Uint8Array(input);
+      },
+      "nodebuffer" : function (input) {
+         return new Buffer(input);
       }
    };
 
@@ -1161,6 +1194,9 @@ JSZip.support = {
       "arraybuffer" : identity,
       "uint8array" : function (input) {
          return new Uint8Array(input);
+      },
+      "nodebuffer" : function (input) {
+         return new Buffer(new Uint8Array(input));
       }
    };
 
@@ -1173,15 +1209,33 @@ JSZip.support = {
       "arraybuffer" : function (input) {
          return input.buffer;
       },
-      "uint8array" : identity
+      "uint8array" : identity,
+      "nodebuffer" : function(input) {
+         return new Buffer(input);
+      }
+   };
+
+   // nodebuffer to ?
+   transform["nodebuffer"] = {
+      "string" : arrayLikeToString,
+      "array" : function (input) {
+         return arrayLikeToArrayLike(input, new Array(input.length));
+      },
+      "arraybuffer" : function (input) {
+         return transform["nodebuffer"]["uint8array"](input).buffer;
+      },
+      "uint8array" : function (input) {
+         return arrayLikeToArrayLike(input, new Uint8Array(input.length));
+      },
+      "nodebuffer" : identity
    };
 
    /**
     * Transform an input into any type.
-    * The supported output type are : string, array, uint8array, arraybuffer.
+    * The supported output type are : string, array, uint8array, arraybuffer, nodebuffer.
     * If no output type is specified, the unmodified input will be returned.
     * @param {String} outputType the output type.
-    * @param {String|Array|ArrayBuffer|Uint8Array} input the input to convert.
+    * @param {String|Array|ArrayBuffer|Uint8Array|Buffer} input the input to convert.
     * @throws {Error} an Error if the browser doesn't support the requested output type.
     */
    JSZip.utils.transformTo = function (outputType, input) {
@@ -1212,6 +1266,9 @@ JSZip.support = {
       if (input instanceof Array) {
          return "array";
       }
+      if (JSZip.support.nodebuffer && Buffer.isBuffer(input)) {
+         return "nodebuffer";
+      }
       if (JSZip.support.uint8array && input instanceof Uint8Array) {
          return "uint8array";
       }
@@ -1233,6 +1290,9 @@ JSZip.support = {
          break;
          case "arraybuffer":
             supported = JSZip.support.arraybuffer;
+         break;
+         case "nodebuffer":
+            supported = JSZip.support.nodebuffer;
          break;
          case "blob":
             supported = JSZip.support.blob;
