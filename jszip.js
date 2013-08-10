@@ -1120,12 +1120,36 @@ JSZip.support = {
       var chunk = 65536;
       var result = [], len = array.length, type = JSZip.utils.getTypeOf(array), k = 0;
 
+      var canUseApply = true;
+      try {
+         switch(type) {
+            case "uint8array":
+               String.fromCharCode.apply(null, new Uint8Array(0));
+               break;
+            case "nodebuffer":
+               String.fromCharCode.apply(null, new Buffer(0));
+               break;
+         }
+      } catch(e) {
+         canUseApply = false;
+      }
+
+      // no apply : slow and painful algorithm
+      // default browser on android 4.*
+      if (!canUseApply) {
+         var resultStr = "";
+         for(var i = 0; i < array.length;i++) {
+            resultStr += String.fromCharCode(array[i]);
+         }
+         return resultStr;
+      }
+
       while (k < len && chunk > 1) {
          try {
             if (type === "array" || type === "nodebuffer") {
-               result.push(String.fromCharCode.apply(null, array.slice(k, Math.max(k + chunk, len))));
+               result.push(String.fromCharCode.apply(null, array.slice(k, Math.min(k + chunk, len))));
             } else {
-               result.push(String.fromCharCode.apply(null, array.subarray(k, k + chunk)));
+               result.push(String.fromCharCode.apply(null, array.subarray(k, Math.min(k + chunk, len))));
             }
             k += chunk;
          } catch (e) {
