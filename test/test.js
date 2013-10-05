@@ -446,7 +446,7 @@ var _actualTestFileDataGetters = {
       if (JSZip.support.arraybuffer) {
          var buffer = opts.zip.file("file.txt").asArrayBuffer();
          ok(buffer instanceof ArrayBuffer, opts.name + " : the result is a instance of ArrayBuffer");
-         var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
+         var actual = JSZip.utils.transformTo("string", buffer);
          equal(actual, opts.rawData, opts.name + " : asArrayBuffer()");
       } else {
          try {
@@ -461,7 +461,7 @@ var _actualTestFileDataGetters = {
       if (JSZip.support.uint8array) {
          var bufferView = opts.zip.file("file.txt").asUint8Array();
          ok(bufferView instanceof Uint8Array, opts.name + " : the result is a instance of Uint8Array");
-         var actual = String.fromCharCode.apply(null, bufferView);
+         var actual = JSZip.utils.transformTo("string", bufferView);
          equal(actual, opts.rawData, opts.name + " : asUint8Array()");
       } else {
          try {
@@ -476,7 +476,7 @@ var _actualTestFileDataGetters = {
       if (JSZip.support.nodebuffer) {
          var buffer = opts.zip.file("file.txt").asNodeBuffer();
          ok(buffer instanceof Buffer, opts.name + " : the result is a instance of Buffer");
-         var actual = String.fromCharCode.apply(null, buffer);
+         var actual = JSZip.utils.transformTo("string", buffer);
          equal(actual, opts.rawData, opts.name + " : .asNodeBuffer()");
       } else {
          try {
@@ -665,7 +665,7 @@ if (JSZip.support.uint8array) {
       ok(array instanceof Uint8Array, "The result is a instance of Uint8Array");
       equal(array.length, expected.length);
 
-      var actual = String.fromCharCode.apply(null, array);
+      var actual = JSZip.utils.transformTo("string", array);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
@@ -689,7 +689,7 @@ if (JSZip.support.arraybuffer) {
       var buffer = zip.generate({type:"arraybuffer"});
       ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
 
-      var actual = String.fromCharCode.apply(null, new Uint8Array(buffer));
+      var actual = JSZip.utils.transformTo("string", buffer);
 
       ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
    });
