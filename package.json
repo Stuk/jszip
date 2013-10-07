@@ -1,0 +1,35 @@
+{
+  "name": "jszip",
+  "version": "1.0.1",
+  "author": "Stuart Knightley <stuart@stuartk.com>",
+  "description": "Create, read and edit .zip files with Javascript http://stuartk.com/jszip",
+  "contributors": [ 
+    { 
+      "name": "Franz Buchinger" 
+    },
+    { 
+      "name": "António Afonso" 
+    },
+    { 
+      "name": "David Duponchel" 
+    },
+    { 
+      "name": "yiminghe" 
+    }
+  ],
+  "main": "./index",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Stuk/jszip.git"
+  },
+  "keywords": [
+    "zip",
+    "deflate",
+    "inflate"
+  ],
+  "dependencies" : {},
+  "devDependencies": {
+    "node-qunit" : "latest"
+  },
+  "license": "MIT or GPLv3" 
+}
