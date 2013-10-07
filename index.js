@@ -3,7 +3,7 @@ var
   VM = require('vm');
 
 var loadVendor = function(js) {
-  VM.runInThisContext( FS.readFileSync('./'+ js), js );
+  VM.runInThisContext( FS.readFileSync(__dirname +'/'+ js), js );
 }.bind(this);
 
 loadVendor('jszip.js');
