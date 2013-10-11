@@ -4,7 +4,9 @@
   "author": "Stuart Knightley <stuart@stuartk.com>",
   "description": "Create, read and edit .zip files with Javascript http://stuartk.com/jszip",
   "scripts": {
-    "test": "cd test && qunit -c node.js -t test.js"
+    "test": "npm run test-node && npm run test-browser",
+    "test-node": "cd test && qunit -c node.js -t test.js",
+    "test-browser": "grunt test"
   },
   "contributors": [
     {
