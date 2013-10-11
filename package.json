@@ -3,18 +3,21 @@
   "version": "1.0.1",
   "author": "Stuart Knightley <stuart@stuartk.com>",
   "description": "Create, read and edit .zip files with Javascript http://stuartk.com/jszip",
-  "contributors": [ 
-    { 
-      "name": "Franz Buchinger" 
+  "scripts": {
+    "test": "cd test && qunit -c node.js -t test.js"
+  },
+  "contributors": [
+    {
+      "name": "Franz Buchinger"
     },
-    { 
-      "name": "António Afonso" 
+    {
+      "name": "António Afonso"
     },
-    { 
-      "name": "David Duponchel" 
+    {
+      "name": "David Duponchel"
     },
-    { 
-      "name": "yiminghe" 
+    {
+      "name": "yiminghe"
     }
   ],
   "main": "./index",
@@ -27,9 +30,8 @@
     "deflate",
     "inflate"
   ],
-  "dependencies" : {},
   "devDependencies": {
-    "node-qunit" : "latest"
+    "qunit": "~0.5.16"
   },
-  "license": "MIT or GPLv3" 
+  "license": "MIT or GPLv3"
 }
