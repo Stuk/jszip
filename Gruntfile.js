@@ -1,14 +1,10 @@
 module.exports = function(grunt) {
   var browsers = [{
       browserName: "firefox",
-      version: "19",
       platform: "XP"
   }, {
       browserName: "chrome",
       platform: "XP"
-  }, {
-      browserName: "chrome",
-      platform: "linux"
   }, {
       browserName: "internet explorer",
       platform: "WIN8",
@@ -18,9 +14,29 @@ module.exports = function(grunt) {
       platform: "VISTA",
       version: "9"
   }, {
+      browserName: "internet explorer",
+      platform: "Windows 7",
+      version: "8"
+  }, {
+      browserName: "internet explorer",
+      platform: "XP",
+      version: "7"
+  }, {
       browserName: "opera",
       platform: "Windows 2008",
       version: "12"
+  }, {
+      browserName: "safari",
+      platform: "OS X 10.8",
+      version: "6"
+  }, {
+      browserName: "iphone",
+      platform: "OS X 10.8",
+      version: "6"
+  }, {
+      browserName: "android",
+      platform: "Linux",
+      version: "4.0"
   }];
 
   grunt.initConfig({
@@ -40,8 +56,7 @@ module.exports = function(grunt) {
                   build: process.env.TRAVIS_JOB_ID,
                   concurrency: 3,
                   browsers: browsers,
-                  testname: "qunit tests",
-                  tags: ["master"]
+                  testname: "qunit tests"
               }
           }
       }
