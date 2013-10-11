@@ -1,0 +1,10 @@
+{
+    "undef": true,
+    "globals": {
+        "Uint8Array": false,
+        "Buffer": false,
+        "ArrayBuffer": false,
+
+        "TextEncoder": false
+    }
+}
