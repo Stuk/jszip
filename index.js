@@ -1,14 +1,16 @@
-var
-  FS = require('fs'),
-  VM = require('vm');
+var PATH = require('path');
+var FS = require('fs');
+var VM = require('vm');
 
-var loadVendor = function(js) {
-  VM.runInThisContext( FS.readFileSync(__dirname +'/'+ js), js );
-}.bind(this);
+var context = VM.createContext();
+function load(filename) {
+    var code = FS.readFileSync(PATH.join(__dirname, filename));
+    VM.runInContext(code, context, filename);
+}
 
-loadVendor('jszip.js');
-loadVendor('jszip-deflate.js');
-loadVendor('jszip-inflate.js');
-loadVendor('jszip-load.js');
+load('jszip.js');
+load('jszip-deflate.js');
+load('jszip-inflate.js');
+load('jszip-load.js');
 
-module.exports = function(data, options) { return new JSZip(data, options); };
+module.exports = context.JSZip;
