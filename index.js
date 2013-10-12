@@ -1,3 +1,4 @@
+/*jshint node:true */
 var PATH = require('path');
 var FS = require('fs');
 var VM = require('vm');

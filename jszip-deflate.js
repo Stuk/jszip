@@ -1,9 +1,11 @@
-"use strict";
-
 (function () {
+   "use strict";
+
    if(!JSZip) {
       throw "JSZip not defined";
    }
+
+   /*jshint -W004, -W018, -W030, -W032, -W033, -W034, -W037,-W040, -W055, -W056, -W061, -W064, -W093, -W117 */
    var context = {};
    (function () {
 
@@ -37,6 +39,7 @@ function pa(e){var d=new (C?Uint16Array:Array)(e.length),c=[],f=[],a=0,b,k,m,g;b
 
 
    }).call(context);
+   /*jshint +W004, +W018, +W030, +W032, +W033, +W034, +W037,+W040, +W055, +W056, +W061, +W064, +W093, +W117 */
 
    var compress = function (input) {
       var deflate = new context.Zlib.RawDeflate(input);
@@ -55,7 +58,7 @@ function pa(e){var d=new (C?Uint16Array:Array)(e.length),c=[],f=[],a=0,b,k,m,g;b
          magic : "\x08\x00",
          compress : compress,
          compressInputType : USE_TYPEDARRAY ? "uint8array" : "array"
-      }
+      };
    } else {
       JSZip.compressions["DEFLATE"].compress = compress;
       JSZip.compressions["DEFLATE"].compressInputType = USE_TYPEDARRAY ? "uint8array" : "array";

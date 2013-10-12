@@ -8,8 +8,8 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
 
 **/
 /*global JSZip */
-"use strict";
 (function (root) {
+  "use strict";
 
    var JSZip = root.JSZip;
 
@@ -308,7 +308,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
             reader.setIndex(previousIndex);
 
             return compressedFileData;
-         }
+         };
       },
       /**
        * Prepare the function used to generate the uncompressed content from this ZipFile.
@@ -330,7 +330,7 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
             }
 
             return uncompressedFileData;
-         }
+         };
       },
       /**
        * Read the local part of a zip file and add the info in this object.
@@ -622,12 +622,12 @@ Dual licenced under the MIT license or GPLv3. See LICENSE.markdown.
                 reside on the same disk when splitting or spanning
                 an archive.
          */
-         if (  this.diskNumber                  === MAX_VALUE_16BITS
-            || this.diskWithCentralDirStart     === MAX_VALUE_16BITS
-            || this.centralDirRecordsOnThisDisk === MAX_VALUE_16BITS
-            || this.centralDirRecords           === MAX_VALUE_16BITS
-            || this.centralDirSize              === MAX_VALUE_32BITS
-            || this.centralDirOffset            === MAX_VALUE_32BITS
+         if (this.diskNumber                 === MAX_VALUE_16BITS ||
+            this.diskWithCentralDirStart     === MAX_VALUE_16BITS ||
+            this.centralDirRecordsOnThisDisk === MAX_VALUE_16BITS ||
+            this.centralDirRecords           === MAX_VALUE_16BITS ||
+            this.centralDirSize              === MAX_VALUE_32BITS ||
+            this.centralDirOffset            === MAX_VALUE_32BITS
          ) {
             this.zip64 = true;
 
