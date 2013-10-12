@@ -1,5 +1,14 @@
+/*jshint node: true */
 module.exports = function(grunt) {
   var browsers = [{
+      browserName: "iphone",
+      platform: "OS X 10.8",
+      version: "6"
+  }, {
+      browserName: "android",
+      platform: "Linux",
+      version: "4.0"
+  }, {
       browserName: "firefox",
       platform: "XP"
   }, {
@@ -29,15 +38,14 @@ module.exports = function(grunt) {
       browserName: "safari",
       platform: "OS X 10.8",
       version: "6"
-  }, {
-      browserName: "iphone",
-      platform: "OS X 10.8",
-      version: "6"
-  }, {
-      browserName: "android",
-      platform: "Linux",
-      version: "4.0"
   }];
+
+  var tags = [];
+  if (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != "false") {
+    tags.push("pr" + process.env.TRAVIS_PULL_REQUEST);
+  } else if (process.env.TRAVIS_BRANCH) {
+    tags.push(process.env.TRAVIS_BRANCH);
+  }
 
   grunt.initConfig({
       connect: {
@@ -56,7 +64,8 @@ module.exports = function(grunt) {
                   build: process.env.TRAVIS_JOB_ID,
                   concurrency: 3,
                   browsers: browsers,
-                  testname: "qunit tests"
+                  testname: "qunit tests",
+                  tags: tags
               }
           }
       }
