@@ -1,3 +1,4 @@
+/*jshint node: true */
 module.exports = function(grunt) {
   var browsers = [{
       browserName: "firefox",
@@ -39,6 +40,13 @@ module.exports = function(grunt) {
       version: "4.0"
   }];
 
+  var tags = [];
+  if (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != "false") {
+    tags.push("pr" + process.env.TRAVIS_PULL_REQUEST);
+  } else if (process.env.TRAVIS_BRANCH) {
+    tags.push(process.env.TRAVIS_BRANCH);
+  }
+
   grunt.initConfig({
       connect: {
           server: {
@@ -56,7 +64,8 @@ module.exports = function(grunt) {
                   build: process.env.TRAVIS_JOB_ID,
                   concurrency: 3,
                   browsers: browsers,
-                  testname: "qunit tests"
+                  testname: "qunit tests",
+                  tags: tags
               }
           }
       }
