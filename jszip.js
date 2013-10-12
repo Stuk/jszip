@@ -557,7 +557,7 @@ JSZip.prototype = (function () {
        */
       file : function(name, data, o) {
          if (arguments.length === 1) {
-            if (name instanceof RegExp) {
+            if (JSZip.utils.isRegExp(name)) {
                var regexp = name;
                return this.filter(function(relativePath, file) {
                   return !file.options.dir && regexp.test(relativePath);
@@ -584,7 +584,7 @@ JSZip.prototype = (function () {
             return this;
          }
 
-         if (arg instanceof RegExp) {
+         if (JSZip.utils.isRegExp(arg)) {
             return this.filter(function(relativePath, file) {
                return file.options.dir && arg.test(relativePath);
             });
@@ -1287,7 +1287,7 @@ JSZip.support = {
       if (typeof input === "string") {
          return "string";
       }
-      if (input instanceof Array) {
+      if (Object.prototype.toString.call(input) === "[object Array]") {
          return "array";
       }
       if (JSZip.support.nodebuffer && Buffer.isBuffer(input)) {
@@ -1299,6 +1299,16 @@ JSZip.support = {
       if (JSZip.support.arraybuffer && input instanceof ArrayBuffer) {
          return "arraybuffer";
       }
+   };
+
+   /**
+    * Cross-window, cross-Node-context regular expression detection
+    * @param  {Object}  object Anything
+    * @return {Boolean}        true if the object is a regular expression,
+    * false otherwise
+    */
+   JSZip.utils.isRegExp = function (object) {
+      return Object.prototype.toString.call(object) === "[object RegExp]";
    };
 
    /**

@@ -1,0 +1,43 @@
+{
+  "name": "jszip",
+  "version": "1.0.1",
+  "author": "Stuart Knightley <stuart@stuartk.com>",
+  "description": "Create, read and edit .zip files with Javascript http://stuartk.com/jszip",
+  "scripts": {
+    "test": "npm run test-node && npm run test-browser",
+    "test-node": "cd test && qunit -c node.js -t test.js",
+    "test-browser": "grunt test"
+  },
+  "contributors": [
+    {
+      "name": "Franz Buchinger"
+    },
+    {
+      "name": "António Afonso"
+    },
+    {
+      "name": "David Duponchel"
+    },
+    {
+      "name": "yiminghe"
+    }
+  ],
+  "main": "./index",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Stuk/jszip.git"
+  },
+  "keywords": [
+    "zip",
+    "deflate",
+    "inflate"
+  ],
+  "devDependencies": {
+    "qunit": "~0.5.16",
+    "grunt": "~0.4.1",
+    "grunt-cli": "~0.1.9",
+    "grunt-saucelabs": "~4.1.2",
+    "grunt-contrib-connect": "~0.5.0"
+  },
+  "license": "MIT or GPLv3"
+}
