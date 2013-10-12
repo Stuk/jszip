@@ -58,8 +58,62 @@ JSZip.defaults = {
    compression: null
 };
 
+/*
+ * List features that require a modern browser, and if the current browser support them.
+ */
+JSZip.support = {
+   // contains true if JSZip can read/generate ArrayBuffer, false otherwise.
+   arraybuffer : (function(){
+      return typeof ArrayBuffer !== "undefined" && typeof Uint8Array !== "undefined";
+   })(),
+   // contains true if JSZip can read/generate nodejs Buffer, false otherwise.
+   nodebuffer : (function(){
+      return typeof Buffer !== "undefined";
+   })(),
+   // contains true if JSZip can read/generate Uint8Array, false otherwise.
+   uint8array : (function(){
+      return typeof Uint8Array !== "undefined";
+   })(),
+   // contains true if JSZip can read/generate Blob, false otherwise.
+   blob : (function(){
+      // the spec started with BlobBuilder then replaced it with a construtor for Blob.
+      // Result : we have browsers that :
+      // * know the BlobBuilder (but with prefix)
+      // * know the Blob constructor
+      // * know about Blob but not about how to build them
+      // About the "=== 0" test : if given the wrong type, it may be converted to a string.
+      // Instead of an empty content, we will get "[object Uint8Array]" for example.
+      if (typeof ArrayBuffer === "undefined") {
+         return false;
+      }
+      var buffer = new ArrayBuffer(0);
+      try {
+         return new Blob([buffer], { type: "application/zip" }).size === 0;
+      }
+      catch(e) {}
+
+      try {
+         var builder = new (window.BlobBuilder || window.WebKitBlobBuilder ||
+                            window.MozBlobBuilder || window.MSBlobBuilder)();
+         builder.append(buffer);
+         return builder.getBlob('application/zip').size === 0;
+      }
+      catch(e) {}
+
+      return false;
+   })()
+};
 
 JSZip.prototype = (function () {
+   var textEncoder, textDecoder;
+   if (
+      JSZip.support.uint8array &&
+      typeof TextEncoder === "function" &&
+      typeof TextDecoder === "function"
+   ) {
+      textEncoder = new TextEncoder("utf-8");
+      textDecoder = new TextDecoder("utf-8");
+   }
 
    /**
     * Returns the raw data of a ZipObject, decompress the content if necessary.
@@ -97,8 +151,8 @@ JSZip.prototype = (function () {
          if (!file.options.binary) {
             // unicode text !
             // unicode string => binary string is a painful process, check if we can avoid it.
-            if (JSZip.support.uint8array && typeof TextEncoder === "function") {
-               return TextEncoder("utf-8").encode(result);
+            if (textEncoder) {
+               return textEncoder.encode(result);
             }
             if (JSZip.support.nodebuffer) {
                return new Buffer(result, "utf-8");
@@ -854,8 +908,8 @@ JSZip.prototype = (function () {
          // TextEncoder + Uint8Array to binary string is faster than checking every bytes on long strings.
          // http://jsperf.com/utf8encode-vs-textencoder
          // On short strings (file names for example), the TextEncoder API is (currently) slower.
-         if (JSZip.support.uint8array && typeof TextEncoder === "function") {
-            var u8 = TextEncoder("utf-8").encode(string);
+         if (textEncoder) {
+            var u8 = textEncoder.encode(string);
             return JSZip.utils.transformTo("string", u8);
          }
          if (JSZip.support.nodebuffer) {
@@ -898,8 +952,8 @@ JSZip.prototype = (function () {
 
          // check if we can use the TextDecoder API
          // see http://encoding.spec.whatwg.org/#api
-         if (JSZip.support.uint8array && typeof TextDecoder === "function") {
-            return TextDecoder("utf-8").decode(
+         if (textDecoder) {
+            return textDecoder.decode(
                JSZip.utils.transformTo("uint8array", input)
             );
          }
@@ -958,52 +1012,6 @@ JSZip.compressions = {
       compressInputType : null,
       uncompressInputType : null
    }
-};
-
-/*
- * List features that require a modern browser, and if the current browser support them.
- */
-JSZip.support = {
-   // contains true if JSZip can read/generate ArrayBuffer, false otherwise.
-   arraybuffer : (function(){
-      return typeof ArrayBuffer !== "undefined" && typeof Uint8Array !== "undefined";
-   })(),
-   // contains true if JSZip can read/generate nodejs Buffer, false otherwise.
-   nodebuffer : (function(){
-      return typeof Buffer !== "undefined";
-   })(),
-   // contains true if JSZip can read/generate Uint8Array, false otherwise.
-   uint8array : (function(){
-      return typeof Uint8Array !== "undefined";
-   })(),
-   // contains true if JSZip can read/generate Blob, false otherwise.
-   blob : (function(){
-      // the spec started with BlobBuilder then replaced it with a construtor for Blob.
-      // Result : we have browsers that :
-      // * know the BlobBuilder (but with prefix)
-      // * know the Blob constructor
-      // * know about Blob but not about how to build them
-      // About the "=== 0" test : if given the wrong type, it may be converted to a string.
-      // Instead of an empty content, we will get "[object Uint8Array]" for example.
-      if (typeof ArrayBuffer === "undefined") {
-         return false;
-      }
-      var buffer = new ArrayBuffer(0);
-      try {
-         return new Blob([buffer], { type: "application/zip" }).size === 0;
-      }
-      catch(e) {}
-
-      try {
-         var builder = new (window.BlobBuilder || window.WebKitBlobBuilder ||
-                            window.MozBlobBuilder || window.MSBlobBuilder)();
-         builder.append(buffer);
-         return builder.getBlob('application/zip').size === 0;
-      }
-      catch(e) {}
-
-      return false;
-   })()
 };
 
 (function () {
