@@ -1,6 +1,14 @@
 /*jshint node: true */
 module.exports = function(grunt) {
   var browsers = [{
+      browserName: "iphone",
+      platform: "OS X 10.8",
+      version: "6"
+  }, {
+      browserName: "android",
+      platform: "Linux",
+      version: "4.0"
+  }, {
       browserName: "firefox",
       platform: "XP"
   }, {
@@ -30,14 +38,6 @@ module.exports = function(grunt) {
       browserName: "safari",
       platform: "OS X 10.8",
       version: "6"
-  }, {
-      browserName: "iphone",
-      platform: "OS X 10.8",
-      version: "6"
-  }, {
-      browserName: "android",
-      platform: "Linux",
-      version: "4.0"
   }];
 
   var tags = [];
