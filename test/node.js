@@ -1,6 +1,6 @@
-var FS = require("fs");
+var fs = require("fs");
 
-global.JSZip = require("../index");
+global.JSZip = require("../lib/index");
 
 global.JSZipTestUtils = {
     loadZipFile: function(name, success, error) {

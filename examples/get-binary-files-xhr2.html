@@ -6,11 +6,20 @@
 
 <link media="screen" href="style.css" type="text/css" rel="stylesheet">
 
-<script type="text/javascript" src="../jszip.js"></script>
-<script type="text/javascript" src="../jszip-load.js"></script>
-<script type="text/javascript" src="../jszip-inflate.js"></script>
+
+</head>
+<body>
+<h1><a href="../">JSZip</a> example : get a file with an ajax call</h1>
+<p>Tip : check the source of the page !</p>
+<h2>The xhr1 way</h2>
+<div id="xhr1_way"></div>
+<h2>The xhr2 way, with arraybuffer</h2>
+<div id="xhr2_way_arraybuffer"></div>
+<h2>The xhr2 way, with blob</h2>
+<div id="xhr2_way_blob"></div>
+<script type="text/javascript" src="../dist/jszip.js"></script>
 <script type="text/javascript">
-window.onload = function () {
+(function () {
 
   //=========================
   // XHR1
@@ -75,17 +84,7 @@ window.onload = function () {
   };
 
   xhr2_blob.send();
-};
+})();
 </script>
-</head>
-<body>
-<h1><a href="../">JSZip</a> example : get a file with an ajax call</h1>
-<p>Tip : check the source of the page !</p>
-<h2>The xhr1 way</h2>
-<div id="xhr1_way"></div>
-<h2>The xhr2 way, with arraybuffer</h2>
-<div id="xhr2_way_arraybuffer"></div>
-<h2>The xhr2 way, with blob</h2>
-<div id="xhr2_way_blob"></div>
 </body>
 </html>
