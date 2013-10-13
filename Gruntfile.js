@@ -68,7 +68,33 @@ module.exports = function(grunt) {
                   tags: tags
               }
           }
+      },
+      jshint: {
+            options: {
+                jshintrc: "./.jshintrc"
+            },
+            all: ['./lib/*.js']
+        },
+    browserify: {
+      all: {
+        files: {
+          'dist/jszip.js': ['lib/index.js'],
+        },
+        options: {
+          standalone: 'JSZip'
+        }
       }
+    },
+    uglify: {
+      options: {
+        report: 'gzip',
+        mangle: true
+      },
+      all: {
+        src: 'dist/jszip.js',
+        dest: 'dist/jszip.min.js'
+      }
+    }
   });
 
   // Loading dependencies
@@ -77,6 +103,11 @@ module.exports = function(grunt) {
   // }
   grunt.loadNpmTasks("grunt-saucelabs");
   grunt.loadNpmTasks("grunt-contrib-connect");
+  grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask("test", ["connect", "saucelabs-qunit"]);
+  grunt.registerTask("build", ["browserify", "uglify"]);
+  grunt.registerTask("default", ["jshint", "build"]);
 };

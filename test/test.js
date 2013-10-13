@@ -1,4 +1,5 @@
-
+'use strict';
+//var JSZip = require('../lib');
 function similar(actual, expected, mistakes) {
    // actual is the generated zip, expected is what we got from the xhr.
    // Be sure to have a well formatted string

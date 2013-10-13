@@ -6,9 +6,23 @@
 
 <link media="screen" href="style.css" type="text/css" rel="stylesheet">
 
-<script type="text/javascript" src="../jszip.js"></script>
+
+
+</head>
+<body>
+<h1><a href="../">JSZip</a> example : download the generated zip file</h1>
+<p>Tip : check the source of the page !</p>
+<h2>The data URL</h2>
+<div>
+  <a href="#" id="data_uri">click to download</a>
+</div>
+<h2>The Blob URL</h2>
+<div>
+  <a href="#" id="blob">click to download</a>
+</div>
+<script type="text/javascript" src="../dist/jszip.js"></script>
 <script type="text/javascript">
-window.onload = function () {
+(function () {
   var zip = new JSZip();
   zip.file("Hello.txt", "Hello world\n");
 
@@ -23,19 +37,7 @@ window.onload = function () {
   } catch(e) {
     blobLink.innerHTML += " (not supported on this browser)";
   }
-};
+})();
 </script>
-</head>
-<body>
-<h1><a href="../">JSZip</a> example : download the generated zip file</h1>
-<p>Tip : check the source of the page !</p>
-<h2>The data URL</h2>
-<div>
-  <a href="#" id="data_uri">click to download</a>
-</div>
-<h2>The Blob URL</h2>
-<div>
-  <a href="#" id="blob">click to download</a>
-</div>
 </body>
 </html>
