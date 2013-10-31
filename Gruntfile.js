@@ -81,7 +81,8 @@ module.exports = function(grunt) {
           'dist/jszip.js': ['lib/index.js'],
         },
         options: {
-          standalone: 'JSZip'
+          standalone: 'JSZip',
+          ignore:['./lib/nodeBuffer.js','./lib/nodeBufferReader']
         }
       }
     },

@@ -45,5 +45,8 @@
     "grunt-contrib-jshint": "~0.6.4",
     "grunt-contrib-uglify": "~0.2.4"
   },
+  "dependencies":{
+       "zlib.js" : "git://github.com/imaya/zlib.js#0.1.7"
+  },
   "license": "MIT or GPLv3"
 }
