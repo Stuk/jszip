@@ -1,4 +1,5 @@
 # v2.0.0, 2013-10-20
+=======
 
  - `JSZipBase64` has been renamed to `JSZip.base64`.
  - The `data` attribute on the object returned by `zip.file(name)` has been removed. Use `asText()`, `asBinary()`, `asUint8Array()`, `asArrayBuffer()` or `asNodeBuffer()`.

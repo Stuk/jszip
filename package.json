@@ -7,7 +7,7 @@
     "test": "npm run test-node && npm run test-browser",
     "test-node": "cd test && qunit -c node.js -t test.js",
     "test-browser": "grunt test",
-    "lint": "jshint ."
+    "lint": "grunt jshint"
   },
   "contributors": [
     {
@@ -23,7 +23,7 @@
       "name": "yiminghe"
     }
   ],
-  "main": "./index",
+  "main": "./lib/index",
   "repository": {
     "type": "git",
     "url": "https://github.com/Stuk/jszip.git"
@@ -39,7 +39,14 @@
     "grunt-cli": "~0.1.9",
     "grunt-saucelabs": "~4.1.2",
     "grunt-contrib-connect": "~0.5.0",
-    "jshint": "~2.1.11"
+    "jshint": "~2.1.11",
+    "browserify": "~2.33.1",
+    "grunt-browserify": "~1.2.8",
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-uglify": "~0.2.4"
+  },
+  "dependencies":{
+       "zlib.js" : "git://github.com/imaya/zlib.js#0.1.7"
   },
   "license": "MIT or GPLv3"
 }
