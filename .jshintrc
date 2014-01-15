@@ -1,21 +1,12 @@
 {
     "undef": true,
-
+    "strict": true,
     "sub": true,
 
     "globals": {
-        "JSZip": true,
-
-        "Blob": false,
-        "Buffer": false,
-        "Uint8Array": false,
-        "Uint16Array": false,
-        "Uint32Array": false,
-        "ArrayBuffer": false,
-
-        "window": false,
-
         "TextEncoder": false,
         "TextDecoder": false
-    }
+    },
+    "browser": true,
+    "node": true
 }
