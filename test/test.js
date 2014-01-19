@@ -146,7 +146,11 @@ testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name
       zip.file("€15.txt", "€15\n");
       var actual = zip.generate({type:"string"});
 
-      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+      // zip doesn't generate a strange file like us (utf8 flag AND unicode path extra field)
+      // if one of the files has more data than the other, the bytes are no more aligned and the
+      // error count goes through the roof. The parsing is checked on a other test so I'll
+      // comment this one for now.
+      // ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       equal(reload(actual), actual, "Generated ZIP can be parsed");
       });
 
@@ -1091,6 +1095,15 @@ testZipFile("nested zip 64", "ref/nested_zip64.zip", function(file) {
 
 // zip -X -0 utf8_in_name.zip €15.txt
 testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(file) {
+   var zip = new JSZip(file);
+   ok(zip.file("€15.txt") !== null, "the utf8 file is here.");
+   equal(zip.file("€15.txt").asText(), "€15\n", "the utf8 content was correctly read (with file().asText).");
+   equal(zip.files["€15.txt"].asText(), "€15\n", "the utf8 content was correctly read (with files[].astext).");
+});
+
+// Created with winrar
+// winrar will replace the euro symbol with a '_' but set the correct unicode path in an extra field.
+testZipFile("Zip text file with UTF-8 characters in filename and windows compatibility", "ref/winrar_utf8_in_name.zip", function(file) {
    var zip = new JSZip(file);
    ok(zip.file("€15.txt") !== null, "the utf8 file is here.");
    equal(zip.file("€15.txt").asText(), "€15\n", "the utf8 content was correctly read (with file().asText).");
