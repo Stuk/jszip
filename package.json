@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npm run test-node && npm run test-browser",
     "test-node": "cd test && qunit -c node.js -t test.js",
-    "test-browser": "grunt test",
+    "test-browser": "grunt build && grunt test",
     "lint": "grunt jshint"
   },
   "contributors": [
