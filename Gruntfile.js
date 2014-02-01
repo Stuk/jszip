@@ -82,14 +82,19 @@ module.exports = function(grunt) {
         },
         options: {
           standalone: 'JSZip',
-          ignore:['./lib/nodeBuffer.js','./lib/nodeBufferReader']
+          ignore:['./lib/nodeBuffer.js','./lib/nodeBufferReader'],
+          postBundleCB: function(err, src, done) {
+            var license = require('fs').readFileSync('lib/license_header.js');
+            done(err, license + src);
+          }
         }
       }
     },
     uglify: {
       options: {
         report: 'gzip',
-        mangle: true
+        mangle: true,
+        preserveComments: 'some'
       },
       all: {
         src: 'dist/jszip.js',
