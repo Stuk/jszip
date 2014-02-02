@@ -1,5 +1,12 @@
+### v2.1.0, 2013-02-06
+ - split the files and use Browserify to generate the final file (see [#74](https://github.com/Stuk/jszip/pull/74))
+ - packaging change : instead of 4 files (jszip.js, jszip-load.js, jszip-inflate.js, jszip-deflate.js) we now have 2 files : dist/jszip.js and dist/jszip.min.js
+ - add component/bower support
+ - rename variable: 'byte' is a reserved word (see [#76](https://github.com/Stuk/jszip/pull/76))
+ - add support for the unicode path extra field (see [#82](https://github.com/Stuk/jszip/pull/82))
+ - ensure that the generated files have a header with the licenses (see [#80](https://github.com/Stuk/jszip/pull/80))
+
 # v2.0.0, 2013-10-20
-=======
 
  - `JSZipBase64` has been renamed to `JSZip.base64`.
  - The `data` attribute on the object returned by `zip.file(name)` has been removed. Use `asText()`, `asBinary()`, `asUint8Array()`, `asArrayBuffer()` or `asNodeBuffer()`.
