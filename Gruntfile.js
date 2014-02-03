@@ -84,8 +84,11 @@ module.exports = function(grunt) {
           standalone: 'JSZip',
           ignore:['./lib/nodeBuffer.js','./lib/nodeBufferReader'],
           postBundleCB: function(err, src, done) {
+            // add the license
             var license = require('fs').readFileSync('lib/license_header.js');
-            done(err, license + src);
+            // remove the source mapping of zlib.js, see #75
+            var srcWithoutSourceMapping = src.replace(/\/\/@ sourceMappingURL=raw..flate.min.js.map/g, '');
+            done(err, license + srcWithoutSourceMapping);
           }
         }
       }
