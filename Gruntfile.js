@@ -82,7 +82,6 @@ module.exports = function(grunt) {
         },
         options: {
           standalone: 'JSZip',
-          ignore:['./lib/nodeBuffer.js','./lib/nodeBufferReader'],
           postBundleCB: function(err, src, done) {
             // add the license
             var license = require('fs').readFileSync('lib/license_header.js');
