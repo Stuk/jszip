@@ -1,6 +1,6 @@
 {
   "name": "jszip",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": "Stuart Knightley <stuart@stuartk.com>",
   "description": "Create, read and edit .zip files with Javascript http://stuartk.com/jszip",
   "scripts": {
