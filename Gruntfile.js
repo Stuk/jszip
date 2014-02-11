@@ -105,17 +105,17 @@ module.exports = function(grunt) {
     }
   });
 
-  // Loading dependencies
-  // for (var key in grunt.file.readJSON("package.json").devDependencies) {
-  //   if (key !== "grunt" && key.indexOf("grunt") === 0) grunt.loadNpmTasks(key);
-  // }
   grunt.loadNpmTasks("grunt-saucelabs");
   grunt.loadNpmTasks("grunt-contrib-connect");
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
-  grunt.registerTask("test", ["connect", "saucelabs-qunit"]);
+  if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
+    grunt.registerTask("test", ["connect", "saucelabs-qunit"]);
+  } else {
+    grunt.registerTask("test", []);
+  }
   grunt.registerTask("build", ["browserify", "uglify"]);
   grunt.registerTask("default", ["jshint", "build"]);
 };
