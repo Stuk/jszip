@@ -1,3 +1,6 @@
+### v2.1.1, 2012-02-13
+ - use the npm package for zlib.js instead of the github url.
+
 ### v2.1.0, 2013-02-06
  - split the files and use Browserify to generate the final file (see [#74](https://github.com/Stuk/jszip/pull/74))
  - packaging change : instead of 4 files (jszip.js, jszip-load.js, jszip-inflate.js, jszip-deflate.js) we now have 2 files : dist/jszip.js and dist/jszip.min.js
