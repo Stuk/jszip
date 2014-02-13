@@ -1,4 +1,4 @@
-### v2.1.1, 2012-02-13
+### v2.1.1, 2014-02-13
  - use the npm package for zlib.js instead of the github url.
 
 ### v2.1.0, 2013-02-06
