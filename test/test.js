@@ -58,10 +58,10 @@ test("JSZip", function(){
    ok(JSZip, "JSZip exists");
 
    var zip = new JSZip();
-   ok(zip, "Constructor works");
+   ok(zip instanceof JSZip, "Constructor works");
 
    var zipNoNew = JSZip();
-   ok(zipNoNew.file, "Constructor adds `new` before itself where necessary");
+   ok(zipNoNew instanceof JSZip, "Constructor adds `new` before itself where necessary");
 });
 
 QUnit.module("Essential"); // {{{
