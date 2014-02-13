@@ -59,6 +59,9 @@ test("JSZip", function(){
 
    var zip = new JSZip();
    ok(zip, "Constructor works");
+
+   var zipNoNew = JSZip();
+   ok(zipNoNew.file, "Constructor adds `new` before itself where necessary");
 });
 
 QUnit.module("Essential"); // {{{
