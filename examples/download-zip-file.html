@@ -14,10 +14,12 @@
 <p>Tip : check the source of the page !</p>
 <h2>The data URL</h2>
 <div>
+  Does not work in IE, has restrictions on the length.<br/>
   <a href="#" id="data_uri">click to download</a>
 </div>
-<h2>The Blob URL</h2>
+<h2>The Blob URL / saveAs</h2>
 <div>
+  Works on firefox, chrome , opera &gt;= 15 and IE &gt;= 10.<br/>
   <a href="#" id="blob">click to download</a>
 </div>
 <script type="text/javascript" src="../dist/jszip.js"></script>
@@ -27,14 +29,32 @@
   zip.file("Hello.txt", "Hello world\n");
 
   // data URI
-  document.getElementById('data_uri').href = "data:application/zip;base64," + zip.generate();
+  var dataUriLink = document.getElementById('data_uri');
+  dataUriLink.onclick = function () {
+    dataUriLink.href = "data:application/zip;base64," + zip.generate({type:"base64"});
+    dataUriLink.download = "hello.zip";
+  }
 
   // Blob
   var blobLink = document.getElementById('blob');
-  try {
-    blobLink.download = "hello.zip";
-    blobLink.href = window.URL.createObjectURL(zip.generate({type:"blob"}));
-  } catch(e) {
+  var saveAs = window.saveAs || (navigator.msSaveBlob && navigator.msSaveBlob.bind(navigator))
+  var blobDownloadSupported = JSZip.support.blob && (saveAs || window.URL && window.URL.createObjectURL);
+  if (blobDownloadSupported) {
+    blobLink.onclick = function () {
+      try {
+        var blob = zip.generate({type:"blob"});
+        if (saveAs) {
+          saveAs(blob, "hello.zip");
+        } else {
+          blobLink.download = "hello.zip";
+          blobLink.href = window.URL.createObjectURL(blob);
+        }
+      } catch(e) {
+        blobLink.innerHTML += " " + e;
+      }
+      return false;
+    };
+  } else {
     blobLink.innerHTML += " (not supported on this browser)";
   }
 })();
