@@ -1,0 +1,25 @@
+# will be overwritten by github, see https://help.github.com/articles/using-jekyll-with-pages
+safe: true
+lsi: false
+pygments: true
+source: ./
+# /overwritten
+
+baseurl: /jszip
+
+layouts: ./documentation/_layouts
+permalink: none
+exclude: ['bin', 'README.md', 'node_modules']
+
+markdown: redcarpet
+redcarpet:
+    extensions: [
+        'no_intra_emphasis',
+        'fenced_code_blocks',
+        'autolink',
+        'strikethrough',
+        'superscript',
+        'with_toc_data',
+        'tables',
+        'hardwrap'
+    ]
