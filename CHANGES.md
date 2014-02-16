@@ -1,3 +1,10 @@
+---
+title: Changelog
+layout: default
+section: main
+---
+
+
 ### v2.2.0, 2014-02-25
  - make the `new` operator optional before the `JSZip` constructor (see [#93](https://github.com/Stuk/jszip/pull/93)).
  - update zlibjs to v0.2.0.
