@@ -631,10 +631,14 @@ zip.filter(function (relativePath, file){
          <pre>// before
 zip.file("test.txt").data;
 zip.files["test.txt"].data;
+zip.file("image.png").data;
+zip.files["image.png"].data;
 
 // after
 zip.file("test.txt").asText();
 zip.files["test.txt"].asText();
+zip.file("image.png").asBinary();
+zip.files["image.png"].asBinary();
       </p>
    </div>
 
