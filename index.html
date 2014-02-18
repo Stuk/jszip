@@ -228,7 +228,7 @@ var blob = zip.generate({type:"blob"});
 myLink.href = window.URL.createObjectURL(blob);
 myLink.download = "myFile.zip";</pre>
 
-      <p>An other solution is the <a href="http://www.w3.org/TR/file-writer-api/#the-filesaver-interface">FileSaver</a> interface, created (at the time of writing) with <code>saveAs</code>. This works on Chrome and IE &gt;= 10 but not Firefox.</p>
+      <p>An other solution is the <a href="http://www.w3.org/TR/file-writer-api/#the-filesaver-interface">FileSaver</a> interface, created (at the time of writing) with <code>saveAs</code>. This works on Chrome and IE &gt;= 10 (not in compatibility view) but not Firefox.</p>
       <pre class="example">
 var blob = zip.generate({type:"blob"});
 window.saveAs(blob, "hello.zip");</pre>
