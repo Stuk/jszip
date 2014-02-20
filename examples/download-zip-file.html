@@ -28,19 +28,30 @@
   var zip = new JSZip();
   zip.file("Hello.txt", "Hello world\n");
 
+  function bindEvent(el, eventName, eventHandler) {
+    if (el.addEventListener){
+      // standard way
+      el.addEventListener(eventName, eventHandler, false);
+    } else if (el.attachEvent){
+      // old IE
+      el.attachEvent('on'+eventName, eventHandler);
+    }
+  }
+
   // data URI
-  var dataUriLink = document.getElementById('data_uri');
-  dataUriLink.onclick = function () {
+  function downloadWithDataURI() {
     dataUriLink.href = "data:application/zip;base64," + zip.generate({type:"base64"});
     dataUriLink.download = "hello.zip";
   }
+  var dataUriLink = document.getElementById('data_uri');
+  bindEvent(dataUriLink, 'click', downloadWithDataURI);
 
   // Blob
   var blobLink = document.getElementById('blob');
   var saveAs = window.saveAs || (navigator.msSaveBlob && navigator.msSaveBlob.bind(navigator))
   var blobDownloadSupported = JSZip.support.blob && (saveAs || window.URL && window.URL.createObjectURL);
   if (blobDownloadSupported) {
-    blobLink.onclick = function () {
+    function downloadWithBlob() {
       try {
         var blob = zip.generate({type:"blob"});
         if (saveAs) {
@@ -53,7 +64,8 @@
         blobLink.innerHTML += " " + e;
       }
       return false;
-    };
+    }
+    bindEvent(blobLink, 'click', downloadWithBlob);
   } else {
     blobLink.innerHTML += " (not supported on this browser)";
   }
