@@ -85,11 +85,15 @@ module.exports = function(grunt) {
             standalone: 'JSZip'
           },
           postBundleCB: function(err, src, done) {
-            // add the license
-            var license = require('fs').readFileSync('lib/license_header.js');
-            // remove the source mapping of zlib.js, see #75
-            var srcWithoutSourceMapping = src.replace(/\/\/@ sourceMappingURL=raw..flate.min.js.map/g, '');
-            done(err, license + srcWithoutSourceMapping);
+            if (!err) {
+              // add the license
+              var license = require('fs').readFileSync('lib/license_header.js');
+              // remove the source mapping of zlib.js, see #75
+              var srcWithoutSourceMapping = src.replace(/\/\/@ sourceMappingURL=raw..flate.min.js.map/g, '');
+              done(err, license + srcWithoutSourceMapping);
+            } else {
+              done(err);
+            }
           }
         }
       }
