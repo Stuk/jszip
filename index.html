@@ -221,12 +221,19 @@ Downloadify.create('downloadify',{
   dataType: 'base64'
 });</pre>
 
-      <h4>Other solution-ish: Blob URL</h4>
-      <p>With <a href="http://caniuse.com/bloburls">some recent browsers</a> come a new way to download Blobs (a zip file for example) : blob urls. The <a href="http://updates.html5rocks.com/2011/08/Downloading-resources-in-HTML5-a-download">download attribute on &lt;a&gt;</a> allows you to give the name of the file. Blob urls start to be widely supported but this attribute is currently only supported in Chrome and Firefox (>= 20). See <a href="examples/download-zip-file.html">the example</a>.</p>
+      <h4>Other solution-ish: Blob URL / FileSaver / FileSaver.js</h4>
+      <p>With <a href="http://caniuse.com/bloburls">some recent browsers</a> come a new way to download Blobs (a zip file for example) : blob urls. The <a href="http://updates.html5rocks.com/2011/08/Downloading-resources-in-HTML5-a-download">download attribute on &lt;a&gt;</a> allows you to give the name of the file. Blob urls start to be widely supported but this attribute is currently only supported in Chrome and Firefox (>= 20). See <a href="examples/download-zip-file.html">the example</a>. Note : on IE 10/11, using a blob url as a href doesn't seem to work.</p>
       <pre class="example">
 var blob = zip.generate({type:"blob"});
 myLink.href = window.URL.createObjectURL(blob);
 myLink.download = "myFile.zip";</pre>
+
+      <p>An other solution is the <a href="http://www.w3.org/TR/file-writer-api/#the-filesaver-interface">FileSaver</a> interface, created (at the time of writing) with <code>saveAs</code>. This works on Chrome and IE &gt;= 10 (not in compatibility view) but not Firefox.</p>
+      <pre class="example">
+var blob = zip.generate({type:"blob"});
+window.saveAs(blob, "hello.zip");</pre>
+
+      <p>Finally, you can use the polyfill <a href="https://github.com/eligrey/FileSaver.js">FileSaver.js</a> which will use a FileSaver if present or else a blob url.</p>
 
       <h3>Usage with Google Gears</h3>
       <p>
@@ -245,15 +252,19 @@ myLink.download = "myFile.zip";</pre>
 
       <h2 style="margin-top: 2em;">Documentation</h2>
 
-      <h4 id="doc_new_JSZip">new JSZip()</h4>
+      <h4 id="doc_new_JSZip">new JSZip() or JSZip()</h4>
       <dl>
         <dt>Description : </dt>
         <dd>The default constructor.</dd>
         <dt>Returns : </dt>
         <dd>A new JSZip.</dd>
       </dl>
+      <pre class="example">
+var zip = new JSZip();
+// same as
+var zip = JSZip();</pre>
 
-      <h4 id="doc_new_JSZip_data_options">new JSZip(data [,options])</h4>
+      <h4 id="doc_new_JSZip_data_options">new JSZip(data [,options]) or JSZip(data [,options])</h4>
       <dl>
         <dt>Description : </dt>
         <dd>Create a new JSZip file and load an existing zip file. See the documentation of <a href="#doc_load_data_options"><code>load()</code></a> for more details and <a href="#zip_load_limits">this</a> for the limitations.</dd>
@@ -265,6 +276,8 @@ myLink.download = "myFile.zip";</pre>
       </dl>
       <pre class="example">
 new JSZip(zipDataFromXHR, {base64:false});
+// same as
+JSZip(zipDataFromXHR, {base64:false});
 // same as
 var zip = new JSZip();
 zip.load(zipDataFromXHR, {base64:false});</pre>
@@ -624,10 +637,14 @@ zip.filter(function (relativePath, file){
          <pre>// before
 zip.file("test.txt").data;
 zip.files["test.txt"].data;
+zip.file("image.png").data;
+zip.files["image.png"].data;
 
 // after
 zip.file("test.txt").asText();
 zip.files["test.txt"].asText();
+zip.file("image.png").asBinary();
+zip.files["image.png"].asBinary();
       </p>
    </div>
 
