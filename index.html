@@ -252,15 +252,19 @@ window.saveAs(blob, "hello.zip");</pre>
 
       <h2 style="margin-top: 2em;">Documentation</h2>
 
-      <h4 id="doc_new_JSZip">new JSZip()</h4>
+      <h4 id="doc_new_JSZip">new JSZip() or JSZip()</h4>
       <dl>
         <dt>Description : </dt>
         <dd>The default constructor.</dd>
         <dt>Returns : </dt>
         <dd>A new JSZip.</dd>
       </dl>
+      <pre class="example">
+var zip = new JSZip();
+// same as
+var zip = JSZip();</pre>
 
-      <h4 id="doc_new_JSZip_data_options">new JSZip(data [,options])</h4>
+      <h4 id="doc_new_JSZip_data_options">new JSZip(data [,options]) or JSZip(data [,options])</h4>
       <dl>
         <dt>Description : </dt>
         <dd>Create a new JSZip file and load an existing zip file. See the documentation of <a href="#doc_load_data_options"><code>load()</code></a> for more details and <a href="#zip_load_limits">this</a> for the limitations.</dd>
@@ -272,6 +276,8 @@ window.saveAs(blob, "hello.zip");</pre>
       </dl>
       <pre class="example">
 new JSZip(zipDataFromXHR, {base64:false});
+// same as
+JSZip(zipDataFromXHR, {base64:false});
 // same as
 var zip = new JSZip();
 zip.load(zipDataFromXHR, {base64:false});</pre>
