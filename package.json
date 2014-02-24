@@ -50,7 +50,7 @@
     "grunt-contrib-uglify": "~0.2.4"
   },
   "dependencies":{
-    "zlibjs": "~0.1.7"
+    "zlibjs": "~0.2.0"
   },
   "license": "MIT or GPLv3"
 }
