@@ -1,3 +1,7 @@
+### v2.2.0, 2014-02-25
+ - make the `new` operator optional before the `JSZip` constructor (see [#93](https://github.com/Stuk/jszip/pull/93)).
+ - update zlibjs to v0.2.0.
+
 ### v2.1.1, 2014-02-13
  - use the npm package for zlib.js instead of the github url.
 
