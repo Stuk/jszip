@@ -25,6 +25,13 @@ images/
 */
 ```
 
+Test status
+-----------
+
+[![Build Status](https://secure.travis-ci.org/Stuk/jszip.png?branch=master)](http://travis-ci.org/Stuk/jszip)
+
+[![Selenium Test Status](https://saucelabs.com/browser-matrix/jszip.svg)](https://saucelabs.com/u/jszip)
+
 License
 =======
 
