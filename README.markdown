@@ -4,7 +4,7 @@ JSZip
 A library for creating, reading and editing .zip files with Javascript, with a
 lovely and simple API.
 
-See http://stuartk.com/jszip for all the documentation
+See http://stuartk.com/jszip for all the documentation.
 
 ```javascript
 var zip = new JSZip();
