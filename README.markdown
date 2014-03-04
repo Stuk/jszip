@@ -25,13 +25,15 @@ images/
 */
 ```
 
-### Test status
+Test status
+-----------
 
 [![Build Status](https://secure.travis-ci.org/Stuk/jszip.png?branch=master)](http://travis-ci.org/Stuk/jszip)
 
 [![Selenium Test Status](https://saucelabs.com/browser-matrix/jszip.svg)](https://saucelabs.com/u/jszip)
 
-### License
+License
+-------
 
 JSZip is dual-licensed. You may use it under the MIT license *or* the GPLv3
 license. See [LICENSE.markdown](LICENSE.markdown).
