@@ -4,7 +4,7 @@ JSZip
 A library for creating, reading and editing .zip files with Javascript, with a
 lovely and simple API.
 
-See http://stuartk.com/jszip for all the documentation
+See http://stuartk.com/jszip for all the documentation.
 
 ```javascript
 var zip = new JSZip();
@@ -33,7 +33,7 @@ Test status
 [![Selenium Test Status](https://saucelabs.com/browser-matrix/jszip.svg)](https://saucelabs.com/u/jszip)
 
 License
-=======
+-------
 
 JSZip is dual-licensed. You may use it under the MIT license *or* the GPLv3
-license. See LICENSE.markdown.
+license. See [LICENSE.markdown](LICENSE.markdown).
