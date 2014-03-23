@@ -86,7 +86,7 @@ recommend having a look at some of his [examples](http://picurl.org/gears/zipper
 
 ### In nodejs
 
-JSZip can read Buffers so you can do the following :
+JSZip can generate Buffers so you can do the following :
 
 ```js
 var fs = require("fs");
