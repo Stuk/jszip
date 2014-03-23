@@ -14,11 +14,11 @@ attribute name       | type        | description
 ---------------------|-------------|-------------
 `name`               | string      | the absolute path of the file
 `options`            | object      | the options of the file. The available options are :
-`options.base64`     | boolean     | cf [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
-`options.binary`     | boolean     | cf [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
+`options.base64`     | boolean     | see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
+`options.binary`     | boolean     | see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
 `options.dir`        | boolean     | true if this is a directory
-`options.date`       | date        | cf [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
-`options.compression`| compression | cf [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
+`options.date`       | date        | see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
+`options.compression`| compression | see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
 
 
 ### Getters
