@@ -1,3 +1,7 @@
+### v2.2.1, 2014-04-23
+ - fix unreadable generated file on Windows 8 (see [#112](https://github.com/Stuk/jszip/issues/112)).
+ - replace zlibjs with pako.
+
 ### v2.2.0, 2014-02-25
  - make the `new` operator optional before the `JSZip` constructor (see [#93](https://github.com/Stuk/jszip/pull/93)).
  - update zlibjs to v0.2.0.
