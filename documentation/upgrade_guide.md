@@ -4,7 +4,7 @@ layout: default
 section: main
 ---
 
-### Fromt 2.0.0 to 2.1.0
+### From 2.0.0 to 2.1.0
 
 * The packaging changed : instead of loading jszip.js, jszip-load.js,
   jszip-inflate.js, jszip-deflate.js, just include dist/jszip.js or
