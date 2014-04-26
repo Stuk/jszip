@@ -161,6 +161,28 @@ testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name
       equal(reload(actual), actual, "Generated ZIP can be parsed");
       });
 
+// zip -X -0 pile_of_poo.zip Iñtërnâtiônàlizætiøn☃💩.txt
+testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pile_of_poo.zip", function(expected) {
+      var zip = new JSZip();
+      // this is the string "Iñtërnâtiônàlizætiøn☃💩",
+      // see http://mathiasbynens.be/notes/javascript-unicode
+      // but escaped, to avoid troubles
+      // thanks http://mothereff.in/js-escapes#1I%C3%B1t%C3%ABrn%C3%A2ti%C3%B4n%C3%A0liz%C3%A6ti%C3%B8n%E2%98%83%F0%9F%92%A9
+      var text = 'I\xF1t\xEBrn\xE2ti\xF4n\xE0liz\xE6ti\xF8n\u2603\uD83D\uDCA9';
+      zip.file(text + ".txt", text + "\n");
+      var actual = zip.generate({type:"string"});
+
+      equal(reload(actual), actual, "Generated ZIP can be parsed");
+
+      ok(new JSZip(expected).file(text + ".txt"), "JSZip finds the unicode file name on the external file");
+      ok(new JSZip(actual).file(text + ".txt"), "JSZip finds the unicode file name on its own file");
+      var textFromExpected = new JSZip(expected).file(text + ".txt").asText();
+      var textFromActual = new JSZip(actual).file(text + ".txt").asText();
+
+      equal(textFromExpected, text + "\n", "JSZip can decode the external file");
+      equal(textFromActual, text + "\n", "JSZip can decode its own file");
+});
+
 testZipFile("Zip text file with date", "ref/text.zip", function(expected) {
       var zip = new JSZip();
       zip.file("Hello.txt", "Hello World\n", {date : new Date("July 17, 2009 14:36:57")});
