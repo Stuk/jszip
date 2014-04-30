@@ -37,15 +37,19 @@ function testZipFile(testName, zipName, testFunction) {
          testFunction.call(this, refZips[zipName]);
       } else {
          stop();
-         JSZipTestUtils.loadZipFile(zipName, function (file) {
-            start();
-            refZips[zipName] = file;
-            testFunction.call(this, file);
-         }, function(error){
+         JSZipTestUtils.loadZipFile(zipName, function (err, file) {
             if (QUnit.config.semaphore) {
                start();
             }
-            ok(false, error);
+
+            if(err) {
+               ok(false, err);
+               return;
+            }
+
+            file = JSZip.utils.transformTo("string", file);
+            refZips[zipName] = file;
+            testFunction.call(this, file);
          });
       }
    });

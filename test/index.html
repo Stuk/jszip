@@ -16,14 +16,23 @@
    });
 </script>
 
-<script type="text/javascript" src="browser-test-utils.js"></script>
+<script type="text/javascript" src="//stuk.github.io/jszip-utils/dist/jszip-utils.js"></script>
 <!--
 Mandatory in IE 6, 7, 8 and 9.
-Adapted from http://stackoverflow.com/questions/1095102/how-do-i-load-binary-image-data-using-javascript-and-xmlhttprequest
 -->
 <!--[if IE]>
-<script type="text/javascript" src="browser-ie-test-utils.js"></script>
+<script type="text/javascript" src="//stuk.github.io/jszip-utils/dist/jszip-utils-ie.js"></script>
 <![endif]-->
+
+<script>
+// no CDN, fallback on the npm version
+if(!window.JSZipUtils) {
+   document.write('<script type="text/javascript" src="../node_modules/jszip-utils/dist/jszip-utils.js"><\/script>');
+   document.write('<!--[if IE]><script type="text/javascript" src="../node_modules/jszip-utils/dist/jszip-utils-ie.js"><\/script><![endif]-->');
+}
+</script>
+
+<script type="text/javascript" src="browser-test-utils.js"></script>
 
 <script type="text/javascript" src="test.js"></script>
 
