@@ -4,6 +4,9 @@ layout: default
 section: main
 ---
 
+### v2.2.2, 2014-05-01
+ - update pako to v0.2.1, fix an error when decompressing some files (see [#126](https://github.com/Stuk/jszip/issues/126)).
+
 ### v2.2.1, 2014-04-23
  - fix unreadable generated file on Windows 8 (see [#112](https://github.com/Stuk/jszip/issues/112)).
  - replace zlibjs with pako.
