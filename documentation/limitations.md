@@ -26,19 +26,23 @@ limitation).
 ### Performance issues
 
 An other limitation comes from the browser (and the machine running the
-browser). A compressed zip file of 10MB is "easily" opened by firefox / chrome
+browser). A compressed zip file of 10MB is easily opened by firefox / chrome
 / opera / IE10+ but will crash older IE. Also keep in mind that strings in
 javascript are encoded in UTF-16 : a 10MB ascii text file will take 20MB of
 memory.
 
 If you're having performance issues, please consider the following :
 
+* Use the asynchronous methods (`asTextAsync()`, `generateAsync()`, etc)
 * Don't use IE &lt;= 9. Everything is better with typed arrays.
 * Use typed arrays (Uint8Array, ArrayBuffer, etc) if possible :
   * If you generate a zip file, you should use `type:"uint8array"`
     (or blob, arraybuffer, nodebuffer).
   * If you load the file from an ajax call, ask your XHR an ArrayBuffer.
     Loading a string is asking for troubles.
+
+If you're still having performance issues :
+
 * Don't use compression (see below).
 * If you want to get the content of an ASCII file as a string, consider using
   `asBinary()` instead of `asText()`. The transformation

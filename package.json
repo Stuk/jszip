@@ -10,7 +10,7 @@
     "lint": "grunt jshint"
   },
   "browser": {
-    "./nodeBuffer": false,
+    "./nodejsUtils": false,
     "./nodeBufferReader": false
   },
   "contributors": [
