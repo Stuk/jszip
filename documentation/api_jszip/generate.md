@@ -15,6 +15,7 @@ options.base64      | boolean | false   | **deprecated**, use `type` instead. If
 options.compression | string  | `STORE` (no compression) | the default file compression method to use. Available methods are `STORE` and `DEFLATE`. You can also provide your own compression method.
 options.type        | string  | `base64` | The type of zip to return, see below for the other types.
 options.comment     | string  |          | The comment to use for the zip file.
+options.streamFiles | boolean | false    | Stream the files and create file descriptors, see below.
 
 Possible values for `type` :
 
@@ -32,6 +33,15 @@ Note for the `comment` option : the zip format has no flag or field to give the
 encoding of this field and JSZip will use UTF-8. With non ASCII characters you
 might get encoding issues if the file archiver doesn't use UTF-8 to decode the
 comment.
+
+Note for the `streamFiles` option : in a zip file, the size and the crc32 of
+the content are placed before the actual content : to write it we must process
+the whole file. When this option is `false` (the default) the processed file is
+held in memory. It takes more memory but generates a zip file which should be
+read by every program.
+When this options is `true`, we stream the file and use data descriptors at the
+end of the entry. This option uses less memory but some program might not
+support data descriptors (and won't accept the generated zip file).
 
 If not set, JSZip will use the field `comment` on its `options`.
 

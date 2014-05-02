@@ -7,3 +7,6 @@ global.JSZipTestUtils = {
         fs.readFile(name, "binary", callback);
     }
 };
+process.on('uncaughtException', function(err) {
+      console.log('uncaughtException: ' + err, err.stack);
+});

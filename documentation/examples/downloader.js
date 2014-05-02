@@ -29,6 +29,18 @@ jQuery(function ($) {
         .addClass("alert alert-danger")
         .text(text);
     }
+    /**
+     * Update the progress bar.
+     * @param {Integer} percent the current percent
+     */
+    function updatePercent(percent) {
+        $("#progress_bar").removeClass("hide")
+        .find(".progress-bar")
+        .attr("aria-valuenow", percent)
+        .css({
+            width : percent + "%"
+        });
+    }
 
     /**
      * Fetch the content, add it to the JSZip object
@@ -73,12 +85,25 @@ jQuery(function ($) {
 
         // when everything has been downloaded, we can trigger the dl
         $.when.apply($, deferreds).done(function () {
-            var blob = zip.generate({type:"blob"});
+            zip.generateStream({type:"blob"})
+            .accumulate(function callback(err, blob) {
+                if(err) {
+                    showError(err);
+                }
 
-            // see FileSaver.js
-            saveAs(blob, "example.zip");
+                // see FileSaver.js
+                saveAs(blob, "example.zip");
 
-            showMessage("done !");
+                showMessage("done !");
+            }, function updateCallback(metadata) {
+                var msg = "progression : " + metadata.percent.toFixed(2) + " %";
+                if(metadata.currentFile) {
+                    msg += ", current file = " + metadata.currentFile;
+                }
+                showMessage(msg);
+                updatePercent(metadata.percent|0);
+            });
+
         }).fail(function (err) {
             showError(err);
         });

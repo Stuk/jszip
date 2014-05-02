@@ -29,7 +29,34 @@ attribute name              | type        | description
 method            | return type   | description
 ------------------|---------------|-------------
 `asText()`        | string        | the content as an unicode string.
+`asTextStream()`        | [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html) | the content as an unicode string, asynchronous version.
 `asBinary()`      | string        | the content as binary string.
+`asBinaryStream()`      | [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html) | the content as binary string, asynchronous version.
 `asArrayBuffer()` | ArrayBuffer   | need a [compatible browser]({{site.baseurl}}/documentation/api_jszip/support.html).
+`asArrayBufferStream()` | [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html) | asynchronous version, need a [compatible browser]({{site.baseurl}}/documentation/api_jszip/support.html).
 `asUint8Array()`  | Uint8Array    | need a [compatible browser]({{site.baseurl}}/documentation/api_jszip/support.html).
+`asUint8ArrayStream()`  | [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html) | asynchronous version, need a [compatible browser]({{site.baseurl}}/documentation/api_jszip/support.html).
 `asNodeBuffer()`  | nodejs Buffer | need [nodejs]({{site.baseurl}}/documentation/api_jszip/support.html).
+`asNodeBufferStream()`  | [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html) | asynchronous version, need [nodejs]({{site.baseurl}}/documentation/api_jszip/support.html).
+
+__Metadata__ : the `as*Stream()` methods generate the following metadata :
+
+name        | type   | description
+------------|--------|------------
+percent     | number | the percent of completion (a double between 0 and 100)
+
+__Example__
+
+```js
+var txt = zip.file("my_text.txt").asText();
+
+zip.file("my_text.txt").asTextStream().accumulate(function callback(err, content) {
+  if (err) {
+    // handle error
+  }
+  // the content var contains the text
+}, function updateCallback(metadata) {
+  // print progression with metadata.percent
+});
+```
+

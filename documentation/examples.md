@@ -66,10 +66,26 @@ You can access the file content with `.file(name)` and
 [its getters]({{site.baseurl}}/documentation/api_zipobject.html) :
 
 ```js
+/*
+ * sync version
+ */
 zip.file("hello.txt").asText(); // "Hello World\n"
 
 if (JSZip.support.uint8array) {
   zip.file("hello.txt").asUint8Array(); // Uint8Array { 0=72, 1=101, 2=108, more...}
+}
+
+/*
+ * async version
+ */
+zip.file("hello.txt").asTextStream().accumulate(function (err, data) {
+  // data is "Hello World\n"
+});
+
+if (JSZip.support.uint8array) {
+  zip.file("hello.txt").asUint8ArrayStream().accumulate(function (err, data) {
+    // data is Uint8Array { 0=72, 1=101, 2=108, more...}
+  });
 }
 ```
 
@@ -96,6 +112,15 @@ if (JSZip.support.uint8array) {
 } else {
   content = zip.generate({type : "string"});
 }
+```
+
+This method is synchronous and will freeze the browser until completion. To
+avoid that, you can/should use the async version :
+
+```js
+zip.generateStream({type : "uint8array"}).accumulate(function (err, data) {
+    // data contains the zip file
+});
 ```
 
 ### Read a zip file
