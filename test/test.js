@@ -911,20 +911,8 @@ test("unknown compression throws an exception", function () {
       ok(true, "an exception were thrown");
    }
 });
+
 // }}} More advanced
-
-QUnit.module("Load file, not supported features"); // {{{
-
-// zip -0 -X -e encrypted.zip Hello.txt
-testZipFile("basic encryption", "ref/encrypted.zip", function(file) {
-   try {
-      var zip = new JSZip(file);
-      ok(false, "Encryption is not supported, but no exception were thrown");
-   } catch(e) {
-      equal(e.message, "Encrypted zip are not supported", "the error message is useful");
-   }
-});
-// }}} Load file, not supported features
 
 QUnit.module("Load file, corrupted zip"); // {{{
 
@@ -1132,6 +1120,31 @@ test("A folder stays a folder", function () {
    ok(zip.files['folder/'].options.dir, "the folder is marked as a folder");
    var reloaded = new JSZip(zip.generate({base64:false}));
    ok(reloaded.files['folder/'].options.dir, "the folder is marked as a folder");
+});
+
+// zip -0 -X -e encrypted.zip Hello.txt (password: test)
+testZipFile("ZipCrypto encryption", "ref/encrypted.zip", function(file) {
+   var zip = new JSZip(file, {
+      retrievePasswordCallback: function() {
+         return 'test'
+      }
+   });
+   equal(zip.file("Hello.txt").asText(), "Hello World\n", "ZipCrypto-encrypted file was correctly read.");
+});
+
+// zip -0 -X -e encrypted.zip Hello.txt (password: test)
+testZipFile("ZipCrypto encryption: wrong password", "ref/encrypted.zip", function(file) {
+   var zip = new JSZip(file, {
+      retrievePasswordCallback: function() {
+         return 'wrong'
+      }
+   });
+   try {
+      zip.file("Hello.txt").asText();
+      ok(false, "no exception was thrown");
+   } catch(e) {
+      ok(e.message.match("Supplied password is invalid"), "expected exception was thrown");
+   }
 });
 
 // }}} Load file
