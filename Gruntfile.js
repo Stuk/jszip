@@ -81,7 +81,9 @@ module.exports = function(grunt) {
           'dist/jszip.js': ['lib/index.js'],
         },
         options: {
-          standalone: 'JSZip',
+          bundleOptions: {
+            standalone: 'JSZip'
+          },
           postBundleCB: function(err, src, done) {
             // add the license
             var license = require('fs').readFileSync('lib/license_header.js');
