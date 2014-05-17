@@ -31,6 +31,11 @@ lovely and simple API.
 imgData = "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=";
 
 jQuery(function($) {
+  if(!JSZip.support.blob) {
+      $("#demo-not-supported").removeClass("hidden");
+      $("#demo").hide();
+      return;
+  }
   $("#demo").click(function () {
       try {
           eval($("#demo-code").val());
@@ -59,7 +64,10 @@ var content = zip.generate({type:"blob"});
 saveAs(content, "example.zip");</textarea>
 <button id="demo" class="btn btn-primary">Run!</button>
 <span id="status"></span>
-
+<div id="demo-not-supported" class="alert alert-danger hidden">
+  This browser doesn't support blobs, this demo won't work :(
+  See <a href="{{site.baseurl}}/documentation/howto/write_zip.html" class="alert-link">here for more info</a>.
+</div>
 </div>
 <div class="col-md-7">
 
