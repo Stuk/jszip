@@ -7,6 +7,27 @@ section: example
 An instance of JSZip represents a set of files. You can add them, remove them,
 modify them. You can also import an existing zip file or generate one.
 
+### Getting the object
+
+#### In a browser
+
+For a browser, there are two interesting files : `dist/jszip.js` and
+`dist/jszip.min.js` (include just one).
+
+If you use an AMD loader (RequireJS for example) JSZip will register itself :
+you just have to put the js file at the right place, or configure the loader
+(see [here for RequireJS](http://requirejs.org/docs/api.html#config-paths)).
+
+Without any loader, JSZip will declare in the global scope a variable named `JSZip`.
+
+#### In nodejs
+
+In nodejs, you can `require` it :
+
+```js
+var JSZip = require("jszip");
+```
+
 ### Basic manipulations
 
 The first step is to create an instance of JSZip :

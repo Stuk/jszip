@@ -9,7 +9,7 @@ section: example
 With only javascript, this part won't work in old browsers, including IE < 10.
 For those browsers, you can use a flash polyfill, see below.
 
-To get a complete, working example, see this
+You can also see this
 [example]({{site.baseurl}}/documentation/examples/download-zip-file.html).
 
 #### Blob URL / FileSaver

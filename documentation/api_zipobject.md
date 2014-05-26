@@ -5,8 +5,8 @@ section: api
 ---
 
 This represents an entry in the zip file. If the entry comes from an existing
-archive previously [loaded]({{site.baseurl}}/documentation/api_jszip/load.html), the content may need to be
-decompressed/converted first.
+archive previously [loaded]({{site.baseurl}}/documentation/api_jszip/load.html), the content
+will be automatically decompressed/converted first.
 
 ### Attributes
 
