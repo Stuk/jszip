@@ -1039,10 +1039,19 @@ testZipFile("zip with DEFLATE", "ref/deflate.zip", function(file) {
    equal(zip.file("Hello.txt").asText(), "This a looong file : we need to see the difference between the different compression methods.\n", "the zip was correctly read.");
 });
 
-// zip -0 -z -c archive_comment.zip Hello.txt
-testZipFile("zip with comment", "ref/archive_comment.zip", function(file) {
+// zip -0 -X -z -c archive_comment.zip Hello.txt
+testZipFile("read zip with comment", "ref/archive_comment.zip", function(file) {
    var zip = new JSZip(file);
+   equal(zip.options.comment, "file comment", "the archive comment was correctly read.");
    equal(zip.file("Hello.txt").asText(), "Hello World\n", "the zip was correctly read.");
+   equal(zip.file("Hello.txt").options.comment, "entry comment", "the entry comment was correctly read.");
+});
+testZipFile("generate zip with comment", "ref/archive_comment.zip", function(file) {
+   var zip = new JSZip();
+   zip.file("Hello.txt", "Hello World\n", {comment:"entry comment"});
+   var generated = zip.generate({type:"string", comment:"file comment"});
+   ok(similar(generated, file, 18) , "Generated ZIP matches reference ZIP");
+   equal(reload(generated), generated, "Generated ZIP can be parsed");
 });
 
 // zip -0 extra_attributes.zip Hello.txt
