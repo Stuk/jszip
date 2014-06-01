@@ -12,5 +12,4 @@ modify them. You can also import an existing zip file or generate one.
 attribute name       | type        | description
 ---------------------|-------------|-------------
 `files`              | object      | the [ZipObject]({{site.baseurl}}/documentation/api_zipobject.html)s inside the zip with the name as key. See [file(name)]({{site.baseurl}}/documentation/api_jszip/file_name.html).
-`options`            | object      | the options of the zip. The available options are :
-`options.comment`    | string      | the comment of the zip file.
+`comment`            | string      | the comment of the zip file.

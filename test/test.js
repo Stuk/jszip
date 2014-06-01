@@ -253,7 +253,7 @@ testZipFile("Finding a file : modifying the result doesn't alter the zip", "ref/
    var zip = new JSZip();
    zip.file("Hello.txt", "Hello World\n");
    zip.file("Hello.txt").name = "Hello2.txt";
-   zip.file("Hello.txt").options.dir = true;
+   zip.file("Hello.txt").dir = true;
    // these changes won't be used
    var content = zip.generate();
 
@@ -308,6 +308,31 @@ test("Finding folders with relative path", function () {
    equal(root.folder(/^subsub1/).length, 1, "relative folder path is used");
    equal(root.folder(/root/).length, 0, "parent folder is not matched");
 });
+
+function zipObjectsAssertions(zipObject) {
+   var date = new Date("July 17, 2009 14:36:57");
+
+   equal(zipObject.name, "Hello.txt", "ZipObject#name is here");
+
+   equal(zipObject.comment, "my comment", "ZipObject#comment is here");
+
+   // the zip date has a 2s resolution
+   var delta = Math.abs(zipObject.date.getTime() - date.getTime());
+   ok(delta < 2000/* ms */, date, "ZipObject#date is here");
+   var deltaOptions = Math.abs(zipObject.options.date.getTime() - date.getTime());
+   ok(deltaOptions < 2000/* ms */, date, "ZipObject#options.date is here (deprecated API)");
+}
+test("ZipObject attributes", function () {
+   var date = new Date("July 17, 2009 14:36:57");
+   var zip = new JSZip();
+   zip.file("Hello.txt", "Hello World\n", {comment:"my comment", date:date});
+   zipObjectsAssertions(zip.file("Hello.txt"));
+   zipObjectsAssertions(zip.files["Hello.txt"]);
+   var reloaded = new JSZip(zip.generate({base64:false}));
+   zipObjectsAssertions(reloaded.file("Hello.txt"));
+   zipObjectsAssertions(reloaded.files["Hello.txt"]);
+});
+
 // }}} module Essential
 
 QUnit.module("More advanced"); // {{{
@@ -818,7 +843,7 @@ testZipFile("Filtering a zip : the filter function can't alter the data", "ref/t
    zip.filter(function (relativeFilename, file) {
       file.name = "bye.txt";
       file.data = "good bye";
-      file.options.dir = true;
+      file.dir = true;
    });
    var content = zip.generate();
 
@@ -1042,9 +1067,9 @@ testZipFile("zip with DEFLATE", "ref/deflate.zip", function(file) {
 // zip -0 -X -z -c archive_comment.zip Hello.txt
 testZipFile("read zip with comment", "ref/archive_comment.zip", function(file) {
    var zip = new JSZip(file);
-   equal(zip.options.comment, "file comment", "the archive comment was correctly read.");
+   equal(zip.comment, "file comment", "the archive comment was correctly read.");
    equal(zip.file("Hello.txt").asText(), "Hello World\n", "the zip was correctly read.");
-   equal(zip.file("Hello.txt").options.comment, "entry comment", "the entry comment was correctly read.");
+   equal(zip.file("Hello.txt").comment, "entry comment", "the entry comment was correctly read.");
 });
 testZipFile("generate zip with comment", "ref/archive_comment.zip", function(file) {
    var zip = new JSZip();
@@ -1138,9 +1163,11 @@ testZipFile("Zip text file from windows with \\ in central dir", "ref/slashes_an
 test("A folder stays a folder", function () {
    var zip = new JSZip();
    zip.folder("folder/");
-   ok(zip.files['folder/'].options.dir, "the folder is marked as a folder");
+   ok(zip.files['folder/'].dir, "the folder is marked as a folder");
+   ok(zip.files['folder/'].options.dir, "the folder is marked as a folder, deprecated API");
    var reloaded = new JSZip(zip.generate({base64:false}));
-   ok(reloaded.files['folder/'].options.dir, "the folder is marked as a folder");
+   ok(reloaded.files['folder/'].dir, "the folder is marked as a folder");
+   ok(reloaded.files['folder/'].options.dir, "the folder is marked as a folder, deprecated API");
 });
 
 // }}} Load file
