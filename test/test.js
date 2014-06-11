@@ -332,6 +332,24 @@ test("ZipObject attributes", function () {
    zipObjectsAssertions(reloaded.file("Hello.txt"));
    zipObjectsAssertions(reloaded.files["Hello.txt"]);
 });
+test("generate uses updated ZipObject date attribute", function () {
+   var date = new Date("July 17, 2009 14:36:57");
+   var zip = new JSZip();
+   zip.file("Hello.txt", "Hello World\n", {comment:"my comment"}); // date = now
+   zip.files["Hello.txt"].date = date;
+   var reloaded = new JSZip(zip.generate({type:"string"}));
+   zipObjectsAssertions(reloaded.file("Hello.txt"));
+   zipObjectsAssertions(reloaded.files["Hello.txt"]);
+});
+test("generate uses updated ZipObject options.date attribute (deprecated)", function () {
+   var date = new Date("July 17, 2009 14:36:57");
+   var zip = new JSZip();
+   zip.file("Hello.txt", "Hello World\n", {comment:"my comment"}); // date = now
+   zip.files["Hello.txt"].options.date = date;
+   var reloaded = new JSZip(zip.generate({type:"string"}));
+   zipObjectsAssertions(reloaded.file("Hello.txt"));
+   zipObjectsAssertions(reloaded.files["Hello.txt"]);
+});
 
 // }}} module Essential
 
