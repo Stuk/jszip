@@ -14,6 +14,7 @@ options             | object  |         | the options to generate the zip file :
 options.base64      | boolean | false   | **deprecated**, use `type` instead. If `type` is not used, set to `false` to get the result as a raw byte string, `true` to encode it as base64.
 options.compression | string  | `STORE` (no compression) | the default file compression method to use. Available methods are `STORE` and `DEFLATE`. You can also provide your own compression method.
 options.type        | string  | `base64` | The type of zip to return, see below for the other types.
+options.comment     | string  |          | The comment to use for the zip file.
 
 Possible values for `type` :
 
@@ -26,6 +27,13 @@ Possible values for `type` :
 
 Note : when using type = "uint8array", "arraybuffer" or "blob", be sure to
 check if the browser supports it (you can use [`JSZip.support`]({{site.baseurl}}/documentation/api_jszip/support.html)).
+
+Note for the `comment` option : the zip format has no flag or field to give the
+encoding of this field and JSZip will use UTF-8. With non ASCII characters you
+might get encoding issues if the file archiver doesn't use UTF-8 to decode the
+comment.
+
+If not set, JSZip will use the field `comment` on its `options`.
 
 __Returns__ : The generated zip file.
 
