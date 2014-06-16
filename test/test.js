@@ -1,3 +1,5 @@
+/* global QUnit,test,ok,equal,start,stop */
+/* global JSZip,JSZipTestUtils */
 'use strict';
 //var JSZip = require('../lib');
 function similar(actual, expected, mistakes) {
@@ -38,9 +40,7 @@ function testZipFile(testName, zipName, testFunction) {
       } else {
          stop();
          JSZipTestUtils.loadZipFile(zipName, function (err, file) {
-            if (QUnit.config.semaphore) {
-               start();
-            }
+            start();
 
             if(err) {
                ok(false, err);
@@ -64,7 +64,7 @@ test("JSZip", function(){
    var zip = new JSZip();
    ok(zip instanceof JSZip, "Constructor works");
 
-   var zipNoNew = JSZip();
+   var zipNoNew = JSZip(); // jshint ignore:line
    ok(zipNoNew instanceof JSZip, "Constructor adds `new` before itself where necessary");
 });
 
@@ -160,6 +160,28 @@ testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name
       // ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       equal(reload(actual), actual, "Generated ZIP can be parsed");
       });
+
+// zip -X -0 pile_of_poo.zip Iñtërnâtiônàlizætiøn☃💩.txt
+testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pile_of_poo.zip", function(expected) {
+      var zip = new JSZip();
+      // this is the string "Iñtërnâtiônàlizætiøn☃💩",
+      // see http://mathiasbynens.be/notes/javascript-unicode
+      // but escaped, to avoid troubles
+      // thanks http://mothereff.in/js-escapes#1I%C3%B1t%C3%ABrn%C3%A2ti%C3%B4n%C3%A0liz%C3%A6ti%C3%B8n%E2%98%83%F0%9F%92%A9
+      var text = 'I\xF1t\xEBrn\xE2ti\xF4n\xE0liz\xE6ti\xF8n\u2603\uD83D\uDCA9';
+      zip.file(text + ".txt", text + "\n");
+      var actual = zip.generate({type:"string"});
+
+      equal(reload(actual), actual, "Generated ZIP can be parsed");
+
+      ok(new JSZip(expected).file(text + ".txt"), "JSZip finds the unicode file name on the external file");
+      ok(new JSZip(actual).file(text + ".txt"), "JSZip finds the unicode file name on its own file");
+      var textFromExpected = new JSZip(expected).file(text + ".txt").asText();
+      var textFromActual = new JSZip(actual).file(text + ".txt").asText();
+
+      equal(textFromExpected, text + "\n", "JSZip can decode the external file");
+      equal(textFromActual, text + "\n", "JSZip can decode its own file");
+});
 
 testZipFile("Zip text file with date", "ref/text.zip", function(expected) {
       var zip = new JSZip();
@@ -467,15 +489,15 @@ function testFileDataGetters (opts) {
    if (typeof opts.rawData === "undefined") {
       opts.rawData = opts.textData;
    }
-   _actualTestFileDataGetters.asText(opts);
-   _actualTestFileDataGetters.asBinary(opts);
-   _actualTestFileDataGetters.asArrayBuffer(opts);
-   _actualTestFileDataGetters.asUint8Array(opts);
-   _actualTestFileDataGetters.asNodeBuffer(opts);
+   _actualTestFileDataGetters.testGetter(opts, "asText");
+   _actualTestFileDataGetters.testGetter(opts, "asBinary");
+   _actualTestFileDataGetters.testGetter(opts, "asArrayBuffer");
+   _actualTestFileDataGetters.testGetter(opts, "asUint8Array");
+   _actualTestFileDataGetters.testGetter(opts, "asNodeBuffer");
 
    var reload = function () {
       return {
-         name : "reloaded, " + opts.name,
+         name : "(reloaded) " + opts.name,
          // no check of crc32, we want to test the CompressedObject code.
          zip : new JSZip(opts.zip.generate({type:"string"}, {checkCRC32:false})),
          textData : opts.textData,
@@ -483,63 +505,77 @@ function testFileDataGetters (opts) {
       };
    };
 
-   _actualTestFileDataGetters.asText(reload());
-   _actualTestFileDataGetters.asBinary(reload());
-   _actualTestFileDataGetters.asArrayBuffer(reload());
-   _actualTestFileDataGetters.asUint8Array(reload());
-   _actualTestFileDataGetters.asNodeBuffer(reload());
+   _actualTestFileDataGetters.testGetter(reload(), "asText");
+   _actualTestFileDataGetters.testGetter(reload(), "asBinary");
+   _actualTestFileDataGetters.testGetter(reload(), "asArrayBuffer");
+   _actualTestFileDataGetters.testGetter(reload(), "asUint8Array");
+   _actualTestFileDataGetters.testGetter(reload(), "asNodeBuffer");
+
+   opts.zip.file("file.txt", "changing the content after the call won't change the result");
 }
 
 var _actualTestFileDataGetters = {
-   asText : function (opts) {
-      equal(opts.zip.file("file.txt").asText(), opts.textData, opts.name + " : asText()");
+   testGetter : function (opts, getterName) {
+      var asyncGetterName = getterName + "Async";
+      var testName = "test = " + opts.name + ", method = " + getterName + "()";
+      var asyncTestName = "test = " + opts.name + ", method = async " + getterName + "()";
+
+      var err = null, content = null;
+      try {
+         content = opts.zip.file("file.txt")[getterName]();
+      } catch(e) {
+         err = e;
+      }
+      _actualTestFileDataGetters["assert_" + getterName](opts, err, content, testName);
+
+      stop();
+      var triggered = false;
+      opts.zip.file("file.txt")[asyncGetterName](function (err, content) {
+         triggered = true;
+         start();
+         _actualTestFileDataGetters["assert_" + getterName](opts, err, content, asyncTestName);
+      });
+      ok(!triggered, "the async callback is async");
    },
-   asBinary : function (opts) {
-      equal(opts.zip.file("file.txt").asBinary(), opts.rawData, opts.name + " : asBinary()");
+   assert_asText : function (opts, err, txt, testName) {
+      equal(err, null, testName + ", no error");
+      equal(txt, opts.textData, testName + ", content ok");
    },
-   asArrayBuffer : function (opts) {
+   assert_asBinary : function (opts, err, bin, testName) {
+      equal(err, null, testName + ", no error");
+      equal(bin, opts.rawData, testName + ", content ok");
+   },
+   assert_asArrayBuffer : function (opts, err, buffer, testName) {
       if (JSZip.support.arraybuffer) {
-         var buffer = opts.zip.file("file.txt").asArrayBuffer();
-         ok(buffer instanceof ArrayBuffer, opts.name + " : the result is a instance of ArrayBuffer");
+         equal(err, null, testName + ", no error");
+         ok(buffer instanceof ArrayBuffer, testName + ", the result is a instance of ArrayBuffer");
          var actual = JSZip.utils.transformTo("string", buffer);
-         equal(actual, opts.rawData, opts.name + " : asArrayBuffer()");
+         equal(actual, opts.rawData, testName + ", content ok");
       } else {
-         try {
-            opts.zip.file("file.txt").asArrayBuffer();
-            ok(false, "no exception thrown");
-         } catch (e) {
-            ok(e.message.match("not supported by this browser"), opts.name + " : the error message is useful");
-         }
+         equal(buffer, null, testName + ", no data");
+         ok(err.message.match("not supported by this browser"), testName + ", the error message is useful");
       }
    },
-   asUint8Array : function (opts) {
+   assert_asUint8Array : function (opts, err, bufferView, testName) {
       if (JSZip.support.uint8array) {
-         var bufferView = opts.zip.file("file.txt").asUint8Array();
-         ok(bufferView instanceof Uint8Array, opts.name + " : the result is a instance of Uint8Array");
+         equal(err, null, testName + ", no error");
+         ok(bufferView instanceof Uint8Array, testName+ ", the result is a instance of Uint8Array");
          var actual = JSZip.utils.transformTo("string", bufferView);
-         equal(actual, opts.rawData, opts.name + " : asUint8Array()");
+         equal(actual, opts.rawData, testName + ", content ok");
       } else {
-         try {
-            opts.zip.file("file.txt").asUint8Array();
-            ok(false, "no exception thrown");
-         } catch (e) {
-            ok(e.message.match("not supported by this browser"), opts.name + " : the error message is useful");
-         }
+         equal(bufferView, null, testName + ", no data");
+         ok(err.message.match("not supported by this browser"), testName + ", the error message is useful");
       }
    },
-   asNodeBuffer : function (opts) {
+   assert_asNodeBuffer : function (opts, err, buffer, testName) {
       if (JSZip.support.nodebuffer) {
-         var buffer = opts.zip.file("file.txt").asNodeBuffer();
-         ok(buffer instanceof Buffer, opts.name + " : the result is a instance of Buffer");
+         equal(err, null, testName + ", no error");
+         ok(buffer instanceof Buffer, testName + ", the result is a instance of Buffer");
          var actual = JSZip.utils.transformTo("string", buffer);
-         equal(actual, opts.rawData, opts.name + " : .asNodeBuffer()");
+         equal(actual, opts.rawData, testName + ", content ok");
       } else {
-         try {
-            opts.zip.file("file.txt").asNodeBuffer();
-            ok(false, "no exception thrown");
-         } catch (e) {
-            ok(e.message.match("not supported by this browser"), opts.name + " : the error message is useful");
-         }
+         equal(buffer, null, testName + ", no data");
+         ok(err.message.match("not supported by this browser"), testName + ", the error message is useful");
       }
    }
 };
@@ -548,30 +584,35 @@ test("add file: file(name, undefined)", function() {
    var zip = new JSZip(), undef;
    zip.file("file.txt", undef);
    testFileDataGetters({name : "undefined", zip : zip, textData : ""});
+
    zip = new JSZip();
    zip.file("file.txt", undef, {binary:true});
-   testFileDataGetters({name : "undefined", zip : zip, textData : ""});
+   testFileDataGetters({name : "undefined as binary", zip : zip, textData : ""});
+
    zip = new JSZip();
    zip.file("file.txt", undef, {base64:true});
-   testFileDataGetters({name : "undefined", zip : zip, textData : ""});
+   testFileDataGetters({name : "undefined as base64", zip : zip, textData : ""});
 });
 
 test("add file: file(name, null)", function() {
    var zip = new JSZip();
    zip.file("file.txt", null);
    testFileDataGetters({name : "null", zip : zip, textData : ""});
+
    zip = new JSZip();
    zip.file("file.txt", null, {binary:true});
-   testFileDataGetters({name : "null", zip : zip, textData : ""});
+   testFileDataGetters({name : "null as binary", zip : zip, textData : ""});
+
    zip = new JSZip();
    zip.file("file.txt", null, {base64:true});
-   testFileDataGetters({name : "null", zip : zip, textData : ""});
+   testFileDataGetters({name : "null as base64", zip : zip, textData : ""});
 });
 
 test("add file: file(name, stringAsText)", function() {
    var zip = new JSZip();
    zip.file("file.txt", "€15\n", {binary:false});
    testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
    zip = new JSZip();
    zip.file("file.txt", "test\r\ntest\r\n", {binary:false});
    testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
@@ -581,6 +622,7 @@ test("add file: file(name, stringAsBinary)", function() {
    var zip = new JSZip();
    zip.file("file.txt", "\xE2\x82\xAC15\n", {binary:true});
    testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
    zip = new JSZip();
    zip.file("file.txt", "test\r\ntest\r\n", {binary:true});
    testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
@@ -590,6 +632,7 @@ test("add file: file(name, base64)", function() {
    var zip = new JSZip();
    zip.file("file.txt", "4oKsMTUK", {base64:true});
    testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
    zip = new JSZip();
    zip.file("file.txt", "dGVzdA0KdGVzdA0K", {base64:true});
    testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
@@ -626,9 +669,11 @@ if (JSZip.support.uint8array) {
       var zip = new JSZip();
       zip.file("file.txt", str2array("\xE2\x82\xAC15\n"));
       testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
       zip = new JSZip();
       zip.file("file.txt", str2array("test\r\ntest\r\n"));
       testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+
       zip = new JSZip();
       zip.file("file.txt", str2array(""));
       testFileDataGetters({name : "empty content", zip : zip, textData : ""});
@@ -647,9 +692,11 @@ if (JSZip.support.arraybuffer) {
       var zip = new JSZip();
       zip.file("file.txt", str2buffer("\xE2\x82\xAC15\n"));
       testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
       zip = new JSZip();
       zip.file("file.txt", str2buffer("test\r\ntest\r\n"));
       testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+
       zip = new JSZip();
       zip.file("file.txt", str2buffer(""));
       testFileDataGetters({name : "empty content", zip : zip, textData : ""});
@@ -668,147 +715,173 @@ if (JSZip.support.nodebuffer) {
       var zip = new JSZip();
       zip.file("file.txt", str2buffer("\xE2\x82\xAC15\n"));
       testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
       zip = new JSZip();
       zip.file("file.txt", str2buffer("test\r\ntest\r\n"));
       testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+
       zip = new JSZip();
       zip.file("file.txt", str2buffer(""));
       testFileDataGetters({name : "empty content", zip : zip, textData : ""});
    });
 }
 
-testZipFile("generate : base64:false. Deprecated, but it still works", "ref/text.zip", function(expected) {
+function createZipAll() {
    var zip = new JSZip();
    zip.file("Hello.txt", "Hello World\n");
-   var actual = zip.generate({base64:false});
+   zip.folder("images").file("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
+   return zip;
+}
+function testGenerate(options) {
+   // sync
+   var zip = options.prepare();
+   var err = null, result = null;
+   try {
+      result = zip.generate(options.options);
+   } catch (e) {
+      err = e;
+   }
+   options.assertions(err, result);
 
-   ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-});
-
-testZipFile("generate : base64:true. Deprecated, but it still works", "ref/text.zip", function(expected) {
-   var zip = new JSZip();
-   zip.file("Hello.txt", "Hello World\n");
-   var content = zip.generate({base64:true});
-   var actual = JSZip.base64.decode(content);
-
-   ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-});
-
-testZipFile("generate : type:string", "ref/text.zip", function(expected) {
-   var zip = new JSZip();
-   zip.file("Hello.txt", "Hello World\n");
-   var actual = zip.generate({type:"string"});
-
-   ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-});
-
-testZipFile("generate : type:base64", "ref/text.zip", function(expected) {
-   var zip = new JSZip();
-   zip.file("Hello.txt", "Hello World\n");
-   var content = zip.generate({type:"base64"});
-
-   var actual = JSZip.base64.decode(content);
-
-   ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-});
-
-if (JSZip.support.uint8array) {
-   testZipFile("generate : type:uint8array", "ref/text.zip", function(expected) {
-      var zip = new JSZip();
-      zip.file("Hello.txt", "Hello World\n");
-      var array = zip.generate({type:"uint8array"});
-      ok(array instanceof Uint8Array, "The result is a instance of Uint8Array");
-      equal(array.length, expected.length);
-
-      var actual = JSZip.utils.transformTo("string", array);
-
-      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   // async
+   zip = options.prepare();
+   stop();
+   var triggered = false;
+   zip.generateAsync(options.options, function (err, result) {
+      triggered = true;
+      start();
+      options.assertions(err, result);
    });
-} else {
-   testZipFile("generate : type:uint8array", "ref/text.zip", function(expected) {
-      var zip = new JSZip();
-      zip.file("Hello.txt", "Hello World\n");
-      try {
-         var blob = zip.generate({type:"uint8array"});
-         ok(false, "Uint8Array is not supported, but no exception thrown");
-      } catch(e) {
-         ok(e.message.match("not supported by this browser"), "the error message is useful");
-      }
-   });
+   ok(!triggered, "the async callback is async");
+
+   zip.file("Hello.txt", "updating the zip file after the call won't change the result");
 }
 
-if (JSZip.support.arraybuffer) {
-   testZipFile("generate : type:arraybuffer", "ref/text.zip", function(expected) {
-      var zip = new JSZip();
-      zip.file("Hello.txt", "Hello World\n");
-      var buffer = zip.generate({type:"arraybuffer"});
-      ok(buffer instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
-
-      var actual = JSZip.utils.transformTo("string", buffer);
-
-      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-   });
-} else {
-   testZipFile("generate : type:arraybuffer", "ref/text.zip", function(expected) {
-      var zip = new JSZip();
-      zip.file("Hello.txt", "Hello World\n");
-      try {
-         var blob = zip.generate({type:"arraybuffer"});
-         ok(false, "ArrayBuffer is not supported, but no exception thrown");
-      } catch(e) {
-         ok(e.message.match("not supported by this browser"), "the error message is useful");
+testZipFile("generate : base64:false. Deprecated, but it still works", "ref/all.zip", function(expected) {
+   testGenerate({
+      prepare : createZipAll,
+      options : {base64:false},
+      assertions : function (err, result) {
+         equal(err, null, "no error");
+         ok(similar(result, expected, 54) , "Generated ZIP matches reference ZIP");
       }
    });
-}
+});
 
-if (JSZip.support.nodebuffer) {
-   testZipFile("generate : type:nodebuffer", "ref/text.zip", function(expected) {
-      var zip = new JSZip();
-      zip.file("Hello.txt", "Hello World\n");
-      var buffer = zip.generate({type:"nodebuffer"});
-      ok(buffer instanceof Buffer, "The result is a instance of ArrayBuffer");
-
-      var actual = "";
-      for (var i = 0; i < buffer.length; i++) {
-         actual += String.fromCharCode(buffer[i]);
-      }
-
-      ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
-   });
-} else {
-   testZipFile("generate : type:nodebuffer", "ref/text.zip", function(expected) {
-      var zip = new JSZip();
-      zip.file("Hello.txt", "Hello World\n");
-      try {
-         var blob = zip.generate({type:"nodebuffer"});
-         ok(false, "Buffer is not supported, but no exception thrown");
-      } catch(e) {
-         ok(e.message.match("not supported by this browser"), "the error message is useful");
+testZipFile("generate : base64:true. Deprecated, but it still works", "ref/all.zip", function(expected) {
+   testGenerate({
+      prepare : createZipAll,
+      options : {base64:true},
+      assertions : function (err, result) {
+         equal(err, null, "no error");
+         var actual = JSZip.base64.decode(result);
+         ok(similar(actual, expected, 54) , "Generated ZIP matches reference ZIP");
       }
    });
-}
+});
 
-if (JSZip.support.blob) {
-   testZipFile("generate : type:blob", "ref/text.zip", function(expected) {
-      var zip = new JSZip();
-      zip.file("Hello.txt", "Hello World\n");
-      var blob = zip.generate({type:"blob"});
-      ok(blob instanceof Blob, "The result is a instance of Blob");
-      equal(blob.type, "application/zip");
-      equal(blob.size, expected.length);
-   });
-} else {
-   testZipFile("generate : type:blob", "ref/text.zip", function(expected) {
-      var zip = new JSZip();
-      zip.file("Hello.txt", "Hello World\n");
-      try {
-         var blob = zip.generate({type:"blob"});
-         ok(false, "Blob is not supported, but no exception thrown");
-      } catch(e) {
-         ok(e.message.match("not supported by this browser"), "the error message is useful");
+testZipFile("generate : type:string", "ref/all.zip", function(expected) {
+   testGenerate({
+      prepare : createZipAll,
+      options : {type:"string"},
+      assertions : function (err, result) {
+         equal(err, null, "no error");
+         ok(similar(result, expected, 54) , "Generated ZIP matches reference ZIP");
       }
    });
-}
+});
+
+testZipFile("generate : type:base64", "ref/all.zip", function(expected) {
+   testGenerate({
+      prepare : createZipAll,
+      options : {type:"base64"},
+      assertions : function (err, result) {
+         equal(err, null, "no error");
+         var actual = JSZip.base64.decode(result);
+         ok(similar(actual, expected, 54) , "Generated ZIP matches reference ZIP");
+      }
+   });
+});
+
+testZipFile("generate : type:uint8array", "ref/all.zip", function(expected) {
+   testGenerate({
+      prepare : createZipAll,
+      options : {type:"uint8array"},
+      assertions : function (err, result) {
+         if (JSZip.support.uint8array) {
+            equal(err, null, "no error");
+            ok(result instanceof Uint8Array, "The result is a instance of Uint8Array");
+            equal(result.length, expected.length);
+
+            var actual = JSZip.utils.transformTo("string", result);
+
+            ok(similar(actual, expected, 54) , "Generated ZIP matches reference ZIP");
+         } else {
+            equal(result, null, "no data");
+            ok(err.message.match("not supported by this browser"), "the error message is useful");
+         }
+      }
+   });
+});
+
+testZipFile("generate : type:arraybuffer", "ref/all.zip", function(expected) {
+   testGenerate({
+      prepare : createZipAll,
+      options : {type:"arraybuffer"},
+      assertions : function (err, result) {
+         if (JSZip.support.arraybuffer) {
+            equal(err, null, "no error");
+            ok(result instanceof ArrayBuffer, "The result is a instance of ArrayBuffer");
+
+            var actual = JSZip.utils.transformTo("string", result);
+
+            ok(similar(actual, expected, 54) , "Generated ZIP matches reference ZIP");
+         } else {
+            equal(result, null, "no data");
+            ok(err.message.match("not supported by this browser"), "the error message is useful");
+         }
+      }
+   });
+});
+
+
+testZipFile("generate : type:nodebuffer", "ref/all.zip", function(expected) {
+   testGenerate({
+      prepare : createZipAll,
+      options : {type:"nodebuffer"},
+      assertions : function (err, result) {
+         if (JSZip.support.nodebuffer) {
+            equal(err, null, "no error");
+            ok(result instanceof Buffer, "The result is a instance of ArrayBuffer");
+
+            var actual = JSZip.utils.transformTo("string", result);
+
+            ok(similar(actual, expected, 54) , "Generated ZIP matches reference ZIP");
+         } else {
+            equal(result, null, "no data");
+            ok(err.message.match("not supported by this browser"), "the error message is useful");
+         }
+      }
+   });
+});
+
+testZipFile("generate : type:blob", "ref/all.zip", function(expected) {
+   testGenerate({
+      prepare : createZipAll,
+      options : {type:"blob"},
+      assertions : function (err, result) {
+         if (JSZip.support.blob) {
+            equal(err, null, "no error");
+            ok(result instanceof Blob, "The result is a instance of Blob");
+            equal(result.type, "application/zip");
+            equal(result.size, expected.length);
+         } else {
+            equal(result, null, "no data");
+            ok(err.message.match("not supported by this browser"), "the error message is useful");
+         }
+      }
+   });
+});
 
 test("Filtering a zip", function() {
    var zip = new JSZip();
@@ -874,85 +947,104 @@ testZipFile("Filtering a zip : the filter function can't alter the data", "ref/t
 testZipFile("STORE is the default method", "ref/text.zip", function(expected) {
    var zip = new JSZip();
    zip.file("Hello.txt", "Hello World\n");
-      var content = zip.generate({compression:'STORE'});
-
-   var actual = JSZip.base64.decode(content);
+      var content = zip.generate({type:"string", compression:'STORE'});
 
    // no difference with the "Zip text file" test.
-   ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   ok(similar(content, expected, 18) , "Generated ZIP matches reference ZIP");
 });
 
 // zip -0 -X store.zip Hello.txt
 testZipFile("STORE doesn't compress", "ref/store.zip", function(expected) {
-   var zip = new JSZip();
-   zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
-   var content = zip.generate({compression:'STORE'});
-
-   var actual = JSZip.base64.decode(content);
-
-   ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   testGenerate({
+      prepare : function () {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
+         return zip;
+      },
+      options : {type:"string", compression:"STORE"},
+      assertions : function (err, result) {
+         equal(err, null, "no error");
+         ok(similar(result, expected, 18) , "Generated ZIP matches reference ZIP");
+      }
+   });
 });
 
 // zip -6 -X deflate.zip Hello.txt
 testZipFile("DEFLATE compress", "ref/deflate.zip", function(expected) {
-   var zip = new JSZip();
-   zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
-   var content = zip.generate({compression:'DEFLATE'});
-
-   var actual = JSZip.base64.decode(content);
-
-   ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
+   testGenerate({
+      prepare : function () {
+         var zip = new JSZip();
+         zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
+         return zip;
+      },
+      options : {type:"string", compression:"DEFLATE"},
+      assertions : function (err, result) {
+         equal(err, null, "no error");
+         ok(similar(result, expected, 18) , "Generated ZIP matches reference ZIP");
+      }
+   });
 });
 
-test("Lazy decompression works", function () {
-   var zip = new JSZip();
-   zip.folder("test/").file("Hello.txt", "hello !");
-
-   var expected = zip.generate({type:"string", compression:"STORE"});
-
-   zip = new JSZip(expected); // lazy
-   equal(zip.generate({type:"string", compression:"STORE"}), expected, "Reloading file, same compression");
-
-   zip = new JSZip(zip.generate({type:"string", compression:"DEFLATE"}));
-   zip = new JSZip(zip.generate({type:"string", compression:"STORE"}));
-
-   var zipData = zip.generate({type:"string", compression:"STORE"});
-   equal(zipData, expected, "Reloading file, different compression");
-
-   // check CRC32
-   new JSZip(zipData, {checkCRC32:true}).generate({type:"string"});
+function testLazyDecompression(from, to) {
+   testGenerate({
+      prepare : function () {
+         var zip = createZipAll();
+         // the zip object will contain compressed objects
+         return new JSZip(zip.generate({type:"string", compression:from}));
+      },
+      options : {type:"string", compression:to},
+      assertions : function (err, result) {
+         equal(err, null, "no error");
+      }
+   });
+}
+test("Lazy decompression works", function() {
+   testLazyDecompression("STORE", "STORE");
+   testLazyDecompression("DEFLATE", "STORE");
+   testLazyDecompression("STORE", "DEFLATE");
+   testLazyDecompression("DEFLATE", "DEFLATE");
 });
 
 test("Empty files / folders are not compressed", function() {
-   var zip = new JSZip();
-   zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
-   zip.folder("folder").file("empty", "");
-
    var deflateCount = 0, emptyDeflateCount = 0;
    var oldDeflateCompress = JSZip.compressions.DEFLATE.compress;
-   JSZip.compressions.DEFLATE.compress = function (str) {
-      deflateCount++;
-      if (!str) {
-         emptyDeflateCount++;
+   testGenerate({
+      prepare : function () {
+
+         JSZip.compressions.DEFLATE.compress = function (str) {
+            deflateCount++;
+            if (!str) {
+               emptyDeflateCount++;
+            }
+            return str;
+         };
+
+         var zip = new JSZip();
+         zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
+         zip.folder("folder").file("empty", "");
+         return zip;
+      },
+      options : {type:"string", compression:"DEFLATE"},
+      assertions : function (err, result) {
+         equal(err, null, "no error");
+
+         equal(deflateCount, 1, "The file has been compressed");
+         equal(emptyDeflateCount, 0, "The file without content and the folder has not been compressed.");
+
+         JSZip.compressions.DEFLATE.compress = oldDeflateCompress;
       }
-      return str;
-   };
-   zip.generate({compression:'DEFLATE'});
-
-   equal(deflateCount, 1, "The file has been compressed");
-   equal(emptyDeflateCount, 0, "The file without content and the folder has not been compressed.");
-
-   JSZip.compressions.DEFLATE.compress = oldDeflateCompress;
+   });
 });
 
 test("unknown compression throws an exception", function () {
-   var zip = new JSZip().file("file.txt", "test");
-   try {
-      zip.generate({compression:'MAYBE'});
-      ok(false, "no exception");
-   } catch (e) {
-      ok(true, "an exception were thrown");
-   }
+   testGenerate({
+      prepare : createZipAll,
+      options : {compression:'MAYBE'},
+      assertions : function (err, result) {
+         equal(result, null, "no data");
+         ok(err.message.match("not a valid compression"), "the error message is useful");
+      }
+   });
 });
 // }}} More advanced
 
@@ -1179,13 +1271,22 @@ testZipFile("Zip text file from windows with \\ in central dir", "ref/slashes_an
 });
 
 test("A folder stays a folder", function () {
-   var zip = new JSZip();
-   zip.folder("folder/");
-   ok(zip.files['folder/'].dir, "the folder is marked as a folder");
-   ok(zip.files['folder/'].options.dir, "the folder is marked as a folder, deprecated API");
-   var reloaded = new JSZip(zip.generate({base64:false}));
-   ok(reloaded.files['folder/'].dir, "the folder is marked as a folder");
-   ok(reloaded.files['folder/'].options.dir, "the folder is marked as a folder, deprecated API");
+   testGenerate({
+      prepare : function () {
+         var zip = new JSZip();
+         zip.folder("folder/");
+         ok(zip.files['folder/'].dir, "the folder is marked as a folder");
+         ok(zip.files['folder/'].options.dir, "the folder is marked as a folder, deprecated API");
+         return zip;
+      },
+      options : {type:"string"},
+      assertions : function (err, result) {
+         equal(err, null, "no error");
+         var reloaded = new JSZip(result);
+         ok(reloaded.files['folder/'].dir, "the folder is marked as a folder");
+         ok(reloaded.files['folder/'].options.dir, "the folder is marked as a folder, deprecated API");
+      }
+   });
 });
 
 // }}} Load file

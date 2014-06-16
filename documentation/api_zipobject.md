@@ -29,7 +29,30 @@ attribute name       | type        | description
 method            | return type   | description
 ------------------|---------------|-------------
 `asText()`        | string        | the content as an unicode string.
+`asTextAsync(callback)`        | - | the content as an unicode string, asynchronous version.
 `asBinary()`      | string        | the content as binary string.
+`asBinaryAsync(callback)`      | - | the content as binary string, asynchronous version.
 `asArrayBuffer()` | ArrayBuffer   | need a [compatible browser]({{site.baseurl}}/documentation/api_jszip/support.html).
+`asArrayBufferAsync(callback)` | - | asynchronous version, need a [compatible browser]({{site.baseurl}}/documentation/api_jszip/support.html).
 `asUint8Array()`  | Uint8Array    | need a [compatible browser]({{site.baseurl}}/documentation/api_jszip/support.html).
+`asUint8ArrayAsync(callback)`  | - | asynchronous version, need a [compatible browser]({{site.baseurl}}/documentation/api_jszip/support.html).
 `asNodeBuffer()`  | nodejs Buffer | need [nodejs]({{site.baseurl}}/documentation/api_jszip/support.html).
+`asNodeBufferAsync(callback)`  | - | asynchronous version, need [nodejs]({{site.baseurl}}/documentation/api_jszip/support.html).
+
+The *Async() methods take a function as callback. The callback has the following
+signature : `function(err, content) {...}`
+
+
+__Example__
+
+```js
+var txt = zip.file("my_text.txt").asText();
+
+zip.file("my_text.txt").asTextAsync(function (err, content) {
+  if (err) {
+    // handle error
+  }
+  // the content var contains the text
+});
+```
+
