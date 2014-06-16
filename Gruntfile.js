@@ -82,7 +82,14 @@ module.exports = function(grunt) {
         },
         options: {
           bundleOptions: {
-            standalone: 'JSZip'
+            standalone: 'JSZip',
+            insertGlobalVars : {
+              Buffer: function () {
+                // instead of the full polyfill, we just use the raw value
+                // (or undefined).
+                return '(typeof Buffer !== "undefined" ? Buffer : undefined)';
+              }
+            }
           },
           postBundleCB: function(err, src, done) {
             // add the license
