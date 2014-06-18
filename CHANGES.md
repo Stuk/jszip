@@ -4,6 +4,14 @@ layout: default
 section: main
 ---
 
+### v2.3.0 2014-06-18
+- don't generate subfolders (see [#130](https://github.com/Stuk/jszip/issues/130)).
+- add comment support (see [#134](https://github.com/Stuk/jszip/issues/134)).
+- on `ZipObject#options`, the attributes `date` and `dir` have been deprecated and are now on `ZipObject` (see [the upgrade guide](http://stuk.github.io/jszip/documentation/upgrade_guide.html)).
+- on `ZipObject#options`, the attributes `base64` and `binary` have been deprecated (see [the upgrade guide](http://stuk.github.io/jszip/documentation/upgrade_guide.html)).
+- deprecate internal functions exposed in the public API (see [#123](https://github.com/Stuk/jszip/issues/123)).
+- improve UTF-8 support (see [#142](https://github.com/Stuk/jszip/issues/142)).
+
 ### v2.2.2, 2014-05-01
  - update pako to v0.2.1, fix an error when decompressing some files (see [#126](https://github.com/Stuk/jszip/issues/126)).
 

@@ -4,6 +4,25 @@ layout: default
 section: main
 ---
 
+### From 2.2.2 to 2.3.0
+
+* On `ZipObject#options`, the attributes `date` and `dir` have been
+  deprecated and are now on `ZipObject`.
+* On `ZipObject#options`, the attributes `base64` and `binary` have been
+  deprecated.
+* `JSZip.base64`, `JSZip.prototype.crc32`, `JSZip.prototype.utf8decode`,
+  `JSZip.prototype.utf8encode` and `JSZip.utils` have been deprecated.
+
+```js
+// deprecated
+zip.file("test.txt").options.date
+zip.file("test.txt").options.dir
+// new API
+zip.file("test.txt").date
+zip.file("test.txt").dir
+```
+
+
 ### From 2.0.0 to 2.1.0
 
 * The packaging changed : instead of loading jszip.js, jszip-load.js,
