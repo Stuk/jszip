@@ -22,6 +22,7 @@ name                          | type    | default | description
 options.base64                | boolean | false   | set to `true` if the data is base64 encoded, `false` for binary.
 options.checkCRC32            | boolean | false   | set to `true` if the read data should be checked against its CRC32.
 options.optimizedBinaryString | boolean | false   | set to true if (and only if) the input is a string and has already been prepared with a 0xFF mask.
+options.createSubFolders      | boolean | false   | set to true to create folders in the file path automatically. Leaving it false will result in only virtual folders (i.e. folders that merely represent part of the file path) being created.
 
 You shouldn't update the data given to this method : it is kept as it so any
 update will impact the stored data.

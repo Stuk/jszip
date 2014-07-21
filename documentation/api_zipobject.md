@@ -10,18 +10,18 @@ will be automatically decompressed/converted first.
 
 ### Attributes
 
-attribute name       | type        | description
----------------------|-------------|-------------
-`name`               | string      | the absolute path of the file
-`dir`                | boolean     | true if this is a directory
-`date`               | date        | the last modification date
-`comment`            | string      | the comment for this file
-`options`            | object      | the options of the file. The available options are :
-`options.base64`     | boolean     | **Deprecated**, see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
-`options.binary`     | boolean     | **Deprecated**, see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
-`options.dir`        | boolean     | **Deprecated**, use `dir`. True if this is a directory
-`options.date`       | date        | **Deprecated**, use `date`. See [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
-`options.compression`| compression | see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
+attribute name              | type        | description
+----------------------------|-------------|-------------
+`name`                      | string      | the absolute path of the file
+`dir`                       | boolean     | true if this is a directory
+`date`                      | date        | the last modification date
+`comment`                   | string      | the comment for this file
+`options`                   | object      | the options of the file. The available options are :
+`options.base64`            | boolean     | **Deprecated**, see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
+`options.binary`            | boolean     | **Deprecated**, see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
+`options.dir`               | boolean     | **Deprecated**, use `dir`. True if this is a directory
+`options.date`              | date        | **Deprecated**, use `date`. See [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
+`options.compression`       | compression | see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
 
 
 ### Getters

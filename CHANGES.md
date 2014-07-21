@@ -3,7 +3,6 @@ title: Changelog
 layout: default
 section: main
 ---
-
 ### v2.3.0 2014-06-18
 - don't generate subfolders (see [#130](https://github.com/Stuk/jszip/issues/130)).
 - add comment support (see [#134](https://github.com/Stuk/jszip/issues/134)).
