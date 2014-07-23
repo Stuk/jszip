@@ -24,7 +24,7 @@ date        | date    | the current date | the last modification date.
 compression | string  | null    | If set, specifies compression method to use for this specific file. If not, the default file compression will be used, see [generate(options)]({{site.baseurl}}/documentation/api_jszip/generate.html).
 comment     | string  | null    | The comment for this file.
 optimizedBinaryString | boolean | `false` | Set to true if (and only if) the input is a "binary string" and has already been prepared with a 0xFF mask.
-createSubFolders | boolean | `false` | Set to true if folders in the file path should be automatically created, otherwise there will only be virtual folders that represent the path to the file.
+createFolders | boolean | `false` | Set to true if folders in the file path should be automatically created, otherwise there will only be virtual folders that represent the path to the file.
 
 You shouldn't update the data given to this method : it is kept as it so any
 update will impact the stored data.
@@ -62,7 +62,7 @@ zip.file("animals.txt", "dog,platypus\n").file("people.txt", "james,sebastian\n"
 // In the above case, the "folder" folder will not have a 'D'irectory attribute or Method property. The
 // folder only exists as part of the path to "file.txt".
 
-zip.file("folder/file.txt", "file in folder", {createSubFolders: true});
+zip.file("folder/file.txt", "file in folder", {createFolders: true});
 // In this case, the "folder" folder WILL have a 'D'irectory attribute and a Method property of "store".
 // It will exist whether or not "file.txt" is present.
 ```

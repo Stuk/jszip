@@ -1233,9 +1233,9 @@ if (QUnit.urlParams.complexfiles) {
       ok(zip.file("[Content_Types].xml").asText().indexOf("application/vnd.ms-package.xps-fixeddocument+xml") !== -1, "the zip was correctly read.");
    });
 
-    // Same test as above, but with createSubFolders option set to true
+    // Same test as above, but with createFolders option set to true
     testZipFile("Outlook2007_Calendar.xps", "ref/complex_files/Outlook2007_Calendar.xps", function(file) {
-        var zip = new JSZip(file, {createSubFolders: true});
+        var zip = new JSZip(file, {createFolders: true});
         // the zip file contains 15 entries, but we get 23 when creating all the sub-folders.
         equal(zip.filter(function(){return true;}).length, 23, "the zip contains the good number of elements.");
         ok(zip.file("[Content_Types].xml").asText().indexOf("application/vnd.ms-package.xps-fixeddocument+xml") !== -1, "the zip was correctly read.");
@@ -1250,9 +1250,9 @@ if (QUnit.urlParams.complexfiles) {
       ok(zip.file("[Content_Types].xml").asText().indexOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml") !== -1, "the zip was correctly read.");
    });
 
-   // Same test as above, but with createSubFolders option set to true
+   // Same test as above, but with createFolders option set to true
    testZipFile("AntarcticaTemps.xlsx", "ref/complex_files/AntarcticaTemps.xlsx", function(file) {
-       var zip = new JSZip(file, {createSubFolders: true});
+       var zip = new JSZip(file, {createFolders: true});
        // the zip file contains 16 entries, but we get 27 when creating all the sub-folders.
        equal(zip.filter(function(){return true;}).length, 27, "the zip contains the good number of elements.");
        ok(zip.file("[Content_Types].xml").asText().indexOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml") !== -1, "the zip was correctly read.");
@@ -1268,7 +1268,7 @@ if (QUnit.urlParams.complexfiles) {
 
    // same as above, but in the Open Document format
    testZipFile("AntarcticaTemps.ods", "ref/complex_files/AntarcticaTemps.ods", function (file) {
-       var zip = new JSZip(file, {createSubFolders: true});
+       var zip = new JSZip(file, {createFolders: true});
        // the zip file contains 19 entries, but we get 27 when creating all the sub-folders.
        equal(zip.filter(function () {return true;}).length, 27, "the zip contains the good number of elements.");
        ok(zip.file("META-INF/manifest.xml").asText().indexOf("application/vnd.oasis.opendocument.spreadsheet") !== -1, "the zip was correctly read.");
