@@ -9,10 +9,6 @@
     "test-browser": "grunt build && grunt test",
     "lint": "grunt jshint"
   },
-  "browser": {
-    "./nodeBuffer": false,
-    "./nodeBufferReader": false
-  },
   "contributors": [
     {
       "name": "Franz Buchinger"
