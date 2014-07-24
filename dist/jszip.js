@@ -230,7 +230,7 @@ module.exports = function crc32(input, crc) {
 };
 // vim: set shiftwidth=4 softtabstop=4:
 
-},{"./utils":19}],5:[function(_dereq_,module,exports){
+},{"./utils":21}],5:[function(_dereq_,module,exports){
 'use strict';
 var utils = _dereq_('./utils');
 
@@ -339,11 +339,12 @@ DataReader.prototype = {
 };
 module.exports = DataReader;
 
-},{"./utils":19}],6:[function(_dereq_,module,exports){
+},{"./utils":21}],6:[function(_dereq_,module,exports){
 'use strict';
 exports.base64 = false;
 exports.binary = false;
 exports.dir = false;
+exports.createFolders = false;
 exports.date = null;
 exports.compression = null;
 exports.comment = null;
@@ -455,7 +456,7 @@ exports.isRegExp = function (object) {
 };
 
 
-},{"./utils":19}],8:[function(_dereq_,module,exports){
+},{"./utils":21}],8:[function(_dereq_,module,exports){
 'use strict';
 var USE_TYPEDARRAY = (typeof Uint8Array !== 'undefined') && (typeof Uint16Array !== 'undefined') && (typeof Uint32Array !== 'undefined');
 
@@ -552,7 +553,7 @@ JSZip.base64 = {
 JSZip.compressions = _dereq_('./compressions');
 module.exports = JSZip;
 
-},{"./base64":1,"./compressions":3,"./defaults":6,"./deprecatedPublicUtils":7,"./load":10,"./object":11,"./support":15}],10:[function(_dereq_,module,exports){
+},{"./base64":1,"./compressions":3,"./defaults":6,"./deprecatedPublicUtils":7,"./load":10,"./object":13,"./support":17}],10:[function(_dereq_,module,exports){
 'use strict';
 var base64 = _dereq_('./base64');
 var ZipEntries = _dereq_('./zipEntries');
@@ -572,7 +573,8 @@ module.exports = function(data, options) {
             optimizedBinaryString: true,
             date: input.date,
             dir: input.dir,
-            comment : input.fileComment.length ? input.fileComment : null
+            comment : input.fileComment.length ? input.fileComment : null,
+            createFolders: options.createFolders
         });
     }
     if (zipEntries.zipComment.length) {
@@ -582,7 +584,39 @@ module.exports = function(data, options) {
     return this;
 };
 
-},{"./base64":1,"./zipEntries":20}],11:[function(_dereq_,module,exports){
+},{"./base64":1,"./zipEntries":22}],11:[function(_dereq_,module,exports){
+(function (Buffer){
+'use strict';
+module.exports = function(data, encoding){
+    return new Buffer(data, encoding);   
+};
+module.exports.test = function(b){
+    return Buffer.isBuffer(b);
+};
+}).call(this,(typeof Buffer !== "undefined" ? Buffer : undefined))
+},{}],12:[function(_dereq_,module,exports){
+'use strict';
+var Uint8ArrayReader = _dereq_('./uint8ArrayReader');
+
+function NodeBufferReader(data) {
+    this.data = data;
+    this.length = this.data.length;
+    this.index = 0;
+}
+NodeBufferReader.prototype = new Uint8ArrayReader();
+
+/**
+ * @see DataReader.readData
+ */
+NodeBufferReader.prototype.readData = function(size) {
+    this.checkOffset(size);
+    var result = this.data.slice(this.index, this.index + size);
+    this.index += size;
+    return result;
+};
+module.exports = NodeBufferReader;
+
+},{"./uint8ArrayReader":18}],13:[function(_dereq_,module,exports){
 'use strict';
 var support = _dereq_('./support');
 var utils = _dereq_('./utils');
@@ -596,11 +630,6 @@ var nodeBuffer = _dereq_('./nodeBuffer');
 var utf8 = _dereq_('./utf8');
 var StringWriter = _dereq_('./stringWriter');
 var Uint8ArrayWriter = _dereq_('./uint8ArrayWriter');
-
-var textEncoder;
-if (support.uint8array && typeof TextEncoder === "function") {
-    textEncoder = new TextEncoder("utf-8");
-}
 
 /**
  * Returns the raw data of a ZipObject, decompress the content if necessary.
@@ -639,9 +668,6 @@ var getBinaryData = function(file) {
         if (!file.options.binary) {
             // unicode text !
             // unicode string => binary string is a painful process, check if we can avoid it.
-            if (textEncoder) {
-                return textEncoder.encode(result);
-            }
             if (support.nodebuffer) {
                 return nodeBuffer(result, "utf-8");
             }
@@ -811,9 +837,14 @@ var prepareFileAttrs = function(o) {
  */
 var fileAdd = function(name, data, o) {
     // be sure sub folders exist
-    var dataType = utils.getTypeOf(data);
+    var dataType = utils.getTypeOf(data),
+        parent;
 
     o = prepareFileAttrs(o);
+
+    if (o.createFolders && (parent = parentFolder(name))) {
+        folderAdd.call(this, parent, true);
+    }
 
     if (o.dir || data === null || typeof data === "undefined") {
         o.base64 = false;
@@ -850,21 +881,40 @@ var fileAdd = function(name, data, o) {
 };
 
 /**
+ * Find the parent folder of the path.
+ * @private
+ * @param {string} path the path to use
+ * @return {string} the parent folder, or ""
+ */
+var parentFolder = function (path) {
+    if (path.slice(-1) == '/') {
+        path = path.substring(0, path.length - 1);
+    }
+    var lastSlash = path.lastIndexOf('/');
+    return (lastSlash > 0) ? path.substring(0, lastSlash) : "";
+};
+
+/**
  * Add a (sub) folder in the current folder.
  * @private
  * @param {string} name the folder's name
+ * @param {boolean=} [createFolders] If true, automatically create sub 
+ *  folders. Defaults to false.
  * @return {Object} the new folder.
  */
-var folderAdd = function(name) {
+var folderAdd = function(name, createFolders) {
     // Check the name ends with a /
     if (name.slice(-1) != "/") {
         name += "/"; // IE doesn't like substr(-1)
     }
 
+    createFolders = (typeof createFolders !== 'undefined') ? createFolders : false;
+
     // Does this folder already exist?
     if (!this.files[name]) {
         fileAdd.call(this, name, null, {
-            dir: true
+            dir: true,
+            createFolders: createFolders
         });
     }
     return this.files[name];
@@ -1336,7 +1386,7 @@ var out = {
 };
 module.exports = out;
 
-},{"./base64":1,"./compressedObject":2,"./compressions":3,"./crc32":4,"./defaults":6,"./nodeBuffer":22,"./signature":12,"./stringWriter":14,"./support":15,"./uint8ArrayWriter":17,"./utf8":18,"./utils":19}],12:[function(_dereq_,module,exports){
+},{"./base64":1,"./compressedObject":2,"./compressions":3,"./crc32":4,"./defaults":6,"./nodeBuffer":11,"./signature":14,"./stringWriter":16,"./support":17,"./uint8ArrayWriter":19,"./utf8":20,"./utils":21}],14:[function(_dereq_,module,exports){
 'use strict';
 exports.LOCAL_FILE_HEADER = "PK\x03\x04";
 exports.CENTRAL_FILE_HEADER = "PK\x01\x02";
@@ -1345,7 +1395,7 @@ exports.ZIP64_CENTRAL_DIRECTORY_LOCATOR = "PK\x06\x07";
 exports.ZIP64_CENTRAL_DIRECTORY_END = "PK\x06\x06";
 exports.DATA_DESCRIPTOR = "PK\x07\x08";
 
-},{}],13:[function(_dereq_,module,exports){
+},{}],15:[function(_dereq_,module,exports){
 'use strict';
 var DataReader = _dereq_('./dataReader');
 var utils = _dereq_('./utils');
@@ -1383,7 +1433,7 @@ StringReader.prototype.readData = function(size) {
 };
 module.exports = StringReader;
 
-},{"./dataReader":5,"./utils":19}],14:[function(_dereq_,module,exports){
+},{"./dataReader":5,"./utils":21}],16:[function(_dereq_,module,exports){
 'use strict';
 
 var utils = _dereq_('./utils');
@@ -1415,15 +1465,17 @@ StringWriter.prototype = {
 
 module.exports = StringWriter;
 
-},{"./utils":19}],15:[function(_dereq_,module,exports){
-(function (process){
+},{"./utils":21}],17:[function(_dereq_,module,exports){
+(function (Buffer){
 'use strict';
 exports.base64 = true;
 exports.array = true;
 exports.string = true;
 exports.arraybuffer = typeof ArrayBuffer !== "undefined" && typeof Uint8Array !== "undefined";
-// contains true if JSZip can read/generate nodejs Buffer, false otherwise, aka checks if we arn't in a browser.
-exports.nodebuffer = !process.browser;
+// contains true if JSZip can read/generate nodejs Buffer, false otherwise.
+// Browserify will provide a Buffer implementation for browsers, which is
+// an augmented Uint8Array (i.e., can be used as either Buffer or U8).
+exports.nodebuffer = typeof Buffer !== "undefined";
 // contains true if JSZip can read/generate Uint8Array, false otherwise.
 exports.uint8array = typeof Uint8Array !== "undefined";
 
@@ -1450,8 +1502,8 @@ else {
     }
 }
 
-}).call(this,_dereq_("FWaASH"))
-},{"FWaASH":23}],16:[function(_dereq_,module,exports){
+}).call(this,(typeof Buffer !== "undefined" ? Buffer : undefined))
+},{}],18:[function(_dereq_,module,exports){
 'use strict';
 var DataReader = _dereq_('./dataReader');
 
@@ -1500,7 +1552,7 @@ Uint8ArrayReader.prototype.readData = function(size) {
 };
 module.exports = Uint8ArrayReader;
 
-},{"./dataReader":5}],17:[function(_dereq_,module,exports){
+},{"./dataReader":5}],19:[function(_dereq_,module,exports){
 'use strict';
 
 var utils = _dereq_('./utils');
@@ -1538,22 +1590,12 @@ Uint8ArrayWriter.prototype = {
 
 module.exports = Uint8ArrayWriter;
 
-},{"./utils":19}],18:[function(_dereq_,module,exports){
+},{"./utils":21}],20:[function(_dereq_,module,exports){
 'use strict';
 
 var utils = _dereq_('./utils');
 var support = _dereq_('./support');
 var nodeBuffer = _dereq_('./nodeBuffer');
-
-var textEncoder, textDecoder;
-if (
-    support.uint8array &&
-    typeof TextEncoder === "function" &&
-    typeof TextDecoder === "function"
-) {
-    textEncoder = new TextEncoder("utf-8");
-    textDecoder = new TextDecoder("utf-8");
-}
 
 /**
  * The following functions come from pako, from pako/lib/utils/strings
@@ -1717,12 +1759,6 @@ var buf2string = function (buf) {
  * @return {Array|Uint8Array|Buffer} the UTF-8 encoded string.
  */
 exports.utf8encode = function utf8encode(str) {
-    // TextEncoder + Uint8Array to binary string is faster than checking every bytes on long strings.
-    // http://jsperf.com/utf8encode-vs-textencoder
-    // On short strings (file names for example), the TextEncoder API is (currently) slower.
-    if (textEncoder) {
-        return textEncoder.encode(str);
-    }
     if (support.nodebuffer) {
         return nodeBuffer(str, "utf-8");
     }
@@ -1738,13 +1774,6 @@ exports.utf8encode = function utf8encode(str) {
  * @return {String} the decoded string.
  */
 exports.utf8decode = function utf8decode(buf) {
-    // check if we can use the TextDecoder API
-    // see http://encoding.spec.whatwg.org/#api
-    if (textDecoder) {
-        return textDecoder.decode(
-            utils.transformTo("uint8array", buf)
-        );
-    }
     if (support.nodebuffer) {
         return utils.transformTo("nodebuffer", buf).toString("utf-8");
     }
@@ -1770,7 +1799,7 @@ exports.utf8decode = function utf8decode(buf) {
 };
 // vim: set shiftwidth=4 softtabstop=4:
 
-},{"./nodeBuffer":22,"./support":15,"./utils":19}],19:[function(_dereq_,module,exports){
+},{"./nodeBuffer":11,"./support":17,"./utils":21}],21:[function(_dereq_,module,exports){
 'use strict';
 var support = _dereq_('./support');
 var compressions = _dereq_('./compressions');
@@ -2097,7 +2126,7 @@ exports.isRegExp = function (object) {
 };
 
 
-},{"./compressions":3,"./nodeBuffer":22,"./support":15}],20:[function(_dereq_,module,exports){
+},{"./compressions":3,"./nodeBuffer":11,"./support":17}],22:[function(_dereq_,module,exports){
 'use strict';
 var StringReader = _dereq_('./stringReader');
 var NodeBufferReader = _dereq_('./nodeBufferReader');
@@ -2302,7 +2331,7 @@ ZipEntries.prototype = {
 // }}} end of ZipEntries
 module.exports = ZipEntries;
 
-},{"./nodeBufferReader":22,"./object":11,"./signature":12,"./stringReader":13,"./support":15,"./uint8ArrayReader":16,"./utils":19,"./zipEntry":21}],21:[function(_dereq_,module,exports){
+},{"./nodeBufferReader":12,"./object":13,"./signature":14,"./stringReader":15,"./support":17,"./uint8ArrayReader":18,"./utils":21,"./zipEntry":23}],23:[function(_dereq_,module,exports){
 'use strict';
 var StringReader = _dereq_('./stringReader');
 var utils = _dereq_('./utils');
@@ -2583,74 +2612,7 @@ ZipEntry.prototype = {
 };
 module.exports = ZipEntry;
 
-},{"./compressedObject":2,"./object":11,"./stringReader":13,"./utils":19}],22:[function(_dereq_,module,exports){
-
-},{}],23:[function(_dereq_,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            var source = ev.source;
-            if ((source === window || source === null) && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-}
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],24:[function(_dereq_,module,exports){
+},{"./compressedObject":2,"./object":13,"./stringReader":15,"./utils":21}],24:[function(_dereq_,module,exports){
 // Top level file is just a mixin of submodules & constants
 'use strict';
 
@@ -3255,7 +3217,7 @@ Inflate.prototype.push = function(data, mode) {
         }
       }
     }
-  } while ((strm.avail_in > 0 || strm.avail_out === 0) && status !== c.Z_STREAM_END);
+  } while ((strm.avail_in > 0) && status !== c.Z_STREAM_END);
 
   if (status === c.Z_STREAM_END) {
     _mode = c.Z_FINISH;
@@ -7638,19 +7600,18 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
    */
 
   /* set up for code type */
-  switch (type) {
-    case CODES:
+  // poor man optimization - use if-else instead of switch,
+  // to avoid deopts in old v8
+  if (type === CODES) {
       base = extra = work;    /* dummy value--not used */
       end = 19;
-      break;
-    case LENS:
+  } else if (type === LENS) {
       base = lbase;
       base_index -= 257;
       extra = lext;
       extra_index -= 257;
       end = 256;
-      break;
-    default:            /* DISTS */
+  } else {                    /* DISTS */
       base = dbase;
       extra = dext;
       end = -1;
@@ -7715,7 +7676,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
 
     /* go to next symbol, update count, len */
     sym++;
-    if (--(count[len]) === 0) {
+    if (--count[len] === 0) {
       if (len === max) { break; }
       len = lens[lens_index + work[sym]];
     }
@@ -7771,6 +7732,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   opts.bits = root;
   return 0;
 };
+
 },{"../utils/common":27}],37:[function(_dereq_,module,exports){
 'use strict';
 

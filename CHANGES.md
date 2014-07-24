@@ -3,6 +3,13 @@ title: Changelog
 layout: default
 section: main
 ---
+
+### v2.4.0 2014-07-24
+- update pako to 0.2.5 (see [#156](https://github.com/Stuk/jszip/issues/156)).
+- make JSZip work in a Firefox addon context (see [#151](https://github.com/Stuk/jszip/issues/151)).
+- add an option (`createFolders`) to control the subfolder generation (see [#154](https://github.com/Stuk/jszip/issues/154)).
+- allow `Buffer` polyfill in the browser (see [#139](https://github.com/Stuk/jszip/issues/139)).
+
 ### v2.3.0 2014-06-18
 - don't generate subfolders (see [#130](https://github.com/Stuk/jszip/issues/130)).
 - add comment support (see [#134](https://github.com/Stuk/jszip/issues/134)).
