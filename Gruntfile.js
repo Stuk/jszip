@@ -78,7 +78,7 @@ module.exports = function(grunt) {
     browserify: {
       all: {
         files: {
-          'dist/jszip.js': ['lib/index.js'],
+          'dist/jszip.js': ['lib/index.js']
         },
         options: {
           bundleOptions: {
