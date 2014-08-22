@@ -22,6 +22,7 @@ base64      | boolean | `false` | set to `true` if the data is base64 encoded. F
 binary      | boolean | `false` | set to `true` if the data should be treated as raw content, `false` if this is a text. If base64 is used, this defaults to `true`, if the data is not a string, this will be set to `true`.
 date        | date    | the current date | the last modification date.
 compression | string  | null    | If set, specifies compression method to use for this specific file. If not, the default file compression will be used, see [generate(options)]({{site.baseurl}}/documentation/api_jszip/generate.html).
+compressionOptions | object | `null` | the options to use when compressing the file, see [generate(options)]({{site.baseurl}}/documentation/api_jszip/generate.html).
 comment     | string  | null    | The comment for this file.
 optimizedBinaryString | boolean | `false` | Set to true if (and only if) the input is a "binary string" and has already been prepared with a 0xFF mask.
 createFolders | boolean | `false` | Set to true if folders in the file path should be automatically created, otherwise there will only be virtual folders that represent the path to the file.
