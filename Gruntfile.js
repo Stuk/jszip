@@ -16,6 +16,10 @@ module.exports = function(grunt) {
       platform: "XP"
   }, {
       browserName: "internet explorer",
+      platform: "WIN8.1",
+      version: "11"
+  }, {
+      browserName: "internet explorer",
       platform: "WIN8",
       version: "10"
   }, {
@@ -31,6 +35,10 @@ module.exports = function(grunt) {
       platform: "XP",
       version: "7"
   }, {
+      browserName: "internet explorer",
+      platform: "XP",
+      version: "6"
+  }, {
       browserName: "opera",
       platform: "Windows 2008",
       version: "12"
@@ -38,6 +46,14 @@ module.exports = function(grunt) {
       browserName: "safari",
       platform: "OS X 10.8",
       version: "6"
+  }, {
+      browserName: "safari",
+      platform: "OS X 10.9",
+      version: "7"
+  }, {
+      browserName: "safari",
+      platform: "OS X 10.10",
+      version: "8"
   }];
 
   var tags = [];
@@ -60,9 +76,9 @@ module.exports = function(grunt) {
           all: {
               options: {
                   urls: ["http://127.0.0.1:9999/test/index.html"],
-                  tunnelTimeout: 5,
                   build: process.env.TRAVIS_JOB_ID,
-                  concurrency: 3,
+                  throttled: 3,
+                  "max-duration" : 600, // seconds, IE6 is slow
                   browsers: browsers,
                   testname: "qunit tests",
                   tags: tags
