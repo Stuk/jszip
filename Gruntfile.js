@@ -1,4 +1,5 @@
 /*jshint node: true */
+'use strict';
 module.exports = function(grunt) {
   var browsers = [{
       browserName: "iphone",
@@ -97,7 +98,7 @@ module.exports = function(grunt) {
           'dist/jszip.js': ['lib/index.js']
         },
         options: {
-          bundleOptions: {
+          browserifyOptions: {
             standalone: 'JSZip',
             insertGlobalVars : {
               Buffer: function () {
@@ -107,17 +108,8 @@ module.exports = function(grunt) {
               }
             }
           },
-          postBundleCB: function(err, src, done) {
-            if (!err) {
-              // add the license
-              var license = require('fs').readFileSync('lib/license_header.js');
-              // remove the source mapping of zlib.js, see #75
-              var srcWithoutSourceMapping = src.replace(/\/\/@ sourceMappingURL=raw..flate.min.js.map/g, '');
-              done(err, license + srcWithoutSourceMapping);
-            } else {
-              done(err);
-            }
-          }
+          ignore : ["./lib/nodejs/*"],
+          banner : require('fs').readFileSync('lib/license_header.js')
         }
       }
     },
