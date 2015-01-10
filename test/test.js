@@ -411,19 +411,6 @@ test("Finding a file", function() {
    equal(zip.file(/pirate/i).length, 1, "Match regex 1 result");
 });
 
-testZipFile("Finding a file : modifying the result doesn't alter the zip", "ref/text.zip", function(expected) {
-   var zip = new JSZip();
-   zip.file("Hello.txt", "Hello World\n");
-   zip.file("Hello.txt").name = "Hello2.txt";
-   zip.file("Hello.txt").dir = true;
-   // these changes won't be used
-   stop();
-   zip.generateAsync({type:"binarystring"}).then(function(actual) {
-      ok(similar(actual, expected, MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-      start();
-   })['catch'](assertNoError);
-});
-
 test("Finding a file (text search) with a relative folder", function() {
    var zip = new JSZip();
    zip.folder("files/default").file("Readme", "Hello World!\n");
@@ -1235,21 +1222,6 @@ test("Filtering a zip : the full path is still accessible", function() {
    });
    equal(result.length, 1, "the filter only match files/folders in the current folder");
    equal(result[0].name, "foo/3.log", "filter has filtered the good file");
-});
-
-testZipFile("Filtering a zip : the filter function can't alter the data", "ref/text.zip", function(expected) {
-   var zip = new JSZip();
-   zip.file("Hello.txt", "Hello World\n");
-   zip.filter(function (relativeFilename, file) {
-      file.name = "bye.txt";
-      file.data = "good bye";
-      file.dir = true;
-   });
-   stop();
-   zip.generateAsync({type:"binarystring"}).then(function(actual) {
-      ok(similar(actual, expected, MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-      start();
-   })['catch'](assertNoError);
 });
 
 
