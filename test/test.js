@@ -1231,6 +1231,83 @@ test("A folder stays a folder", function () {
    ok(reloaded.files['folder/'].options.dir, "the folder is marked as a folder, deprecated API");
 });
 
+// mkdir dir dir_ro
+// touch file file_ro file_exe file_ro_exe
+// chmod -w dir_ro file_ro file_ro_exe
+// chmod +x file_exe file_ro_exe
+// then :
+// zip -r linux_zip.zip .
+// 7z a -r linux_7z.zip .
+// ...
+function assertUnixPermissions(file){
+   function doAsserts(fileName, dir, exec, ro) {
+      equal(zip.files[fileName].dosPermissions, null, fileName + ", no DOS permissions");
+      equal(zip.files[fileName].dir, dir, fileName + " dir flag");
+      equal(zip.files[fileName].unixPermissions.executable, exec, fileName + " executable flag");
+      equal(zip.files[fileName].unixPermissions.readOnly, ro, fileName + " readOnly flag");
+   }
+
+   var zip = new JSZip(file);
+   doAsserts("dir/",        true,  true,  false);
+   doAsserts("dir_ro/",     true,  true,  true);
+   doAsserts("file",        false, false, false);
+   doAsserts("file_ro",     false, false, true);
+   doAsserts("file_exe",    false, true,  false);
+   doAsserts("file_ro_exe", false, true,  true);
+}
+
+function assertDosPermissions(file){
+   function doAsserts(fileName, dir, hidden, ro) {
+      equal(zip.files[fileName].unixPermissions, null, fileName + ", no UNIX permissions");
+      equal(zip.files[fileName].dir, dir, fileName + " dir flag");
+      equal(zip.files[fileName].dosPermissions.hidden, hidden, fileName + " hidden flag");
+      equal(zip.files[fileName].dosPermissions.readOnly, ro, fileName + " readOnly flag");
+   }
+
+   var zip = new JSZip(file);
+   if (zip.files["dir/"]) {
+      doAsserts("dir/",           true,  false, false);
+   }
+   if (zip.files["dir_hidden/"]) {
+      doAsserts("dir_hidden/",    true,  true,  false);
+   }
+   doAsserts("file",           false, false, false);
+   doAsserts("file_ro",        false, false, true);
+   doAsserts("file_hidden",    false, true,  false);
+   doAsserts("file_ro_hidden", false, true,  true);
+}
+function reloadAndAssertUnixPermissions(file){
+   var zip = new JSZip(file);
+   assertUnixPermissions(zip.generate({type:"string", platform:"UNIX"}));
+}
+function reloadAndAssertDosPermissions(file){
+   var zip = new JSZip(file);
+   assertDosPermissions(zip.generate({type:"string", platform:"DOS"}));
+}
+testZipFile("permissions on linux : file created by zip", "ref/permissions/linux_zip.zip", assertUnixPermissions);
+testZipFile("permissions on linux : file created by zip, reloaded", "ref/permissions/linux_zip.zip", reloadAndAssertUnixPermissions);
+testZipFile("permissions on linux : file created by 7z", "ref/permissions/linux_7z.zip", assertUnixPermissions);
+testZipFile("permissions on linux : file created by 7z, reloaded", "ref/permissions/linux_7z.zip", reloadAndAssertUnixPermissions);
+testZipFile("permissions on linux : file created by file-roller on ubuntu", "ref/permissions/linux_file_roller-ubuntu.zip", assertUnixPermissions);
+testZipFile("permissions on linux : file created by file-roller on ubuntu, reloaded", "ref/permissions/linux_file_roller-ubuntu.zip", reloadAndAssertUnixPermissions);
+testZipFile("permissions on linux : file created by file-roller on xubuntu", "ref/permissions/linux_file_roller-xubuntu.zip", assertUnixPermissions);
+testZipFile("permissions on linux : file created by file-roller on xubuntu, reloaded", "ref/permissions/linux_file_roller-xubuntu.zip", reloadAndAssertUnixPermissions);
+testZipFile("permissions on linux : file created by ark", "ref/permissions/linux_ark.zip", assertUnixPermissions);
+testZipFile("permissions on linux : file created by ark, reloaded", "ref/permissions/linux_ark.zip", reloadAndAssertUnixPermissions);
+testZipFile("permissions on mac : file created by finder", "ref/permissions/mac_finder.zip", assertUnixPermissions);
+testZipFile("permissions on mac : file created by finder, reloaded", "ref/permissions/mac_finder.zip", reloadAndAssertUnixPermissions);
+
+
+
+testZipFile("permissions on windows : file created by the compressed folders feature", "ref/permissions/windows_compressed_folders.zip", assertDosPermissions);
+testZipFile("permissions on windows : file created by the compressed folders feature, reloaded", "ref/permissions/windows_compressed_folders.zip", reloadAndAssertDosPermissions);
+testZipFile("permissions on windows : file created by 7z", "ref/permissions/windows_7z.zip", assertDosPermissions);
+testZipFile("permissions on windows : file created by 7z, reloaded", "ref/permissions/windows_7z.zip", reloadAndAssertDosPermissions);
+testZipFile("permissions on windows : file created by izarc", "ref/permissions/windows_izarc.zip", assertDosPermissions);
+testZipFile("permissions on windows : file created by izarc, reloaded", "ref/permissions/windows_izarc.zip", reloadAndAssertDosPermissions);
+testZipFile("permissions on windows : file created by winrar", "ref/permissions/windows_winrar.zip", assertDosPermissions);
+testZipFile("permissions on windows : file created by winrar, reloaded", "ref/permissions/windows_winrar.zip", reloadAndAssertDosPermissions);
+
 // }}} Load file
 
 QUnit.module("Load complex files"); // {{{
