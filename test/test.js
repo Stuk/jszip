@@ -832,6 +832,27 @@ if (JSZip.support.blob) {
    });
 }
 
+if (JSZip.support.blob) {
+   test("generate : type:blob mimeType:application/ods", function() {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "Hello World\n");
+      var blob = zip.generate({type:"blob", mimeType: "application/ods"});
+      ok(blob instanceof Blob, "The result is a instance of Blob");
+      equal(blob.type, "application/ods", "mime-type is application/ods");
+   });
+} else {
+   test("generate : type:blob  mimeType:application/ods", function() {
+      var zip = new JSZip();
+      zip.file("Hello.txt", "Hello World\n");
+      try {
+         var blob = zip.generate({type:"blob", mimeType: "application/ods"});
+         ok(false, "Blob is not supported, but no exception thrown");
+      } catch(e) {
+         ok(e.message.match("not supported by this browser"), "the error message is useful");
+      }
+   });
+}
+
 test("Filtering a zip", function() {
    var zip = new JSZip();
    zip.file("1.txt", "1\n");
