@@ -15,6 +15,7 @@ options.base64      | boolean | false   | **deprecated**, use `type` instead. If
 options.compression | string  | `STORE` (no compression) | the default file compression method to use. Available methods are `STORE` and `DEFLATE`. You can also provide your own compression method.
 options.type        | string  | `base64` | The type of zip to return, see below for the other types.
 options.comment     | string  |          | The comment to use for the zip file.
+options.mimeType    | string  | `application/zip` | mime-type for the generated file. Useful when you need to generate a file with a different extension, ie: ".ods".
 
 Possible values for `type` :
 
@@ -58,6 +59,44 @@ location.href="data:application/zip;base64,"+content;
 ```js
 var content = zip.generate({type:"nodebuffer"});
 require("fs").writeFile("hello.zip", content, function(err){/*...*/});
+```
+
+```js
+//This example will Generate a Open Document Spreasheet, with the correct mime type
+var zip = new JSZip();
+zip.file("mimetype", "application/vnd.oasis.opendocument.spreadsheet");
+var conf2 = zip.folder("Configurations2");
+conf2.folder("acceleator");
+conf2.folder("images");
+conf2.folder("popupmenu");
+conf2.folder("statusbar");
+conf2.folder("floater");
+conf2.folder("menubar");
+conf2.folder("progressbar");
+conf2.folder("toolbar");
+
+var manifest = "<..."; //xml containing manifest.xml 
+var styles = "<..."; //xml containing styles.xml
+var settings = "<..."; //xml containing settings.xml
+var meta = "<..."; //xml containing meta.xml
+var content = "<..."; //xml containing content.xml
+
+var metaInf = zip.folder("META-INF");
+metaInf.file("manifest.xml", manifest);
+zip.file("styles.xml", styles);
+zip.file("settings.xml", settings); 
+zip.file("meta.xml", meta);
+zip.file("content.xml", content);
+
+//Generate the file
+var odsFile = zip.generate({type: "blob", mimeType: "application/ods", compression: "DEFLATE"});
+
+var url = window.URL.createObjectURL(odsFile);
+var link = document.getElementById("link"); //I suppose you'll have a link with this id :)
+link.download = "testjs.ods";
+link.href = url;
+
+
 ```
 
 
