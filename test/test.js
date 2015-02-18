@@ -1049,6 +1049,24 @@ testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file) {
       ok(e.message.match("Corrupted zip"), "the error message is useful");
    }
 });
+
+test("truncated zip file", function() {
+   try {
+      var zip = new JSZip("PK\x03\x04\x0A\x00\x00\x00<cut>");
+      ok(false, "no exception were thrown");
+   } catch(e) {
+      ok(e.message.match("Corrupted zip"), "the error message is useful");
+   }
+});
+
+test("not a zip file", function() {
+   try {
+      var zip = new JSZip("I'm not a zip file");
+      ok(false, "no exception were thrown");
+   } catch(e) {
+      ok(e.message.match("stuk.github.io/jszip/documentation"), "the error message is useful");
+   }
+});
 // }}} Load file, corrupted zip
 
 QUnit.module("Load file"); // {{{
