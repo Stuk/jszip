@@ -16,6 +16,7 @@ options.compression | string  | `STORE` (no compression) | the default file comp
 options.type        | string  | `base64` | The type of zip to return, see below for the other types.
 options.comment     | string  |          | The comment to use for the zip file.
 options.mimeType    | string  | `application/zip` | mime-type for the generated file. Useful when you need to generate a file with a different extension, ie: ".ods".
+options.platform    | string  | `DOS`    | The platform to use when generating the zip file.
 
 Possible values for `type` :
 
@@ -35,6 +36,11 @@ might get encoding issues if the file archiver doesn't use UTF-8 to decode the
 comment.
 
 If not set, JSZip will use the field `comment` on its `options`.
+
+Possible values for `platform` : `DOS` and `UNIX`. It also accepts nodejs
+`process.platform` values.
+When using `DOS`, the attribute `dosPermissions` of each file is used.
+When using `UNIX`, the attribute `unixPermissions` of each file is used.
 
 __Returns__ : The generated zip file.
 

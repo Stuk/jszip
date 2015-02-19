@@ -25,9 +25,34 @@ compression | string  | null    | If set, specifies compression method to use fo
 comment     | string  | null    | The comment for this file.
 optimizedBinaryString | boolean | `false` | Set to true if (and only if) the input is a "binary string" and has already been prepared with a 0xFF mask.
 createFolders | boolean | `false` | Set to true if folders in the file path should be automatically created, otherwise there will only be virtual folders that represent the path to the file.
+unixPermissions | object | null    | The UNIX permissions of the file, if any.
+dosPermissions  | object | null    | The DOS permissions of the file, if any.
 
 You shouldn't update the data given to this method : it is kept as it so any
 update will impact the stored data.
+
+__For the permissions__ :
+
+The `*Permissions` fields has the following structure (the value is the default behavior) :
+
+```js
+unixPermissions : {
+    executable : false,
+    readOnly : false
+}
+
+dosPermissions : {
+    hidden : false,
+    readOnly : false
+}
+```
+
+The field `unixPermissions` also accepts a number (the 2 bytes file attributes) :
+you can use the `mode` attribute of [nodejs' fs.Stats](http://nodejs.org/api/fs.html#fs_class_fs_stats).
+In that case, the executable/readOnly boolean will be extracted from the "user"
+part (ignoring the "group" and "other").
+
+See also  [the platform option of generate()]({{site.baseurl}}/documentation/api_jszip/generate.html).
 
 __Returns__ : The current JSZip object, for chaining.
 
@@ -65,6 +90,11 @@ zip.file("animals.txt", "dog,platypus\n").file("people.txt", "james,sebastian\n"
 zip.file("folder/file.txt", "file in folder", {createFolders: true});
 // In this case, the "folder" folder WILL have a 'D'irectory attribute and a Method property of "store".
 // It will exist whether or not "file.txt" is present.
+
+zip.file("script.sh", "echo 'hello world'", {
+  unixPermissions : {
+    executable : true
+  }
+});
+// when generated with platform:UNIX, the script.sh file will be executable
 ```
-
-
