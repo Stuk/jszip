@@ -37,7 +37,7 @@ between 1 (best speed) and 9 (best compression)).
 
 Note : if the entry is *already* compressed (coming from a compressed zip file),
 calling `generate()` with a different compression level won't update the entry.
-The reason is simple : JSZip doesn't know how was compressed the content and
+The reason is simple : JSZip doesn't know how compressed the content was and
 how to match the compression level with the implementation we use.
 
 Note for the `comment` option : the zip format has no flag or field to give the
