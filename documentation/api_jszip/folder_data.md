@@ -4,7 +4,10 @@ layout: default
 section: api
 ---
 
-__Description__ : Add a directory to the zip file.
+__Description__ : Create a directory if it doesn't exist, return a new JSZip
+object with the new folder as root.
+
+See also [the `dir` option of file()]({{site.baseurl}}/documentation/api_jszip/file_data.html).
 
 __Arguments__
 

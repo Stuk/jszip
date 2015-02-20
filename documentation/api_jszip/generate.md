@@ -53,6 +53,11 @@ Possible values for `platform` : `DOS` and `UNIX`. It also accepts nodejs
 When using `DOS`, the attribute `dosPermissions` of each file is used.
 When using `UNIX`, the attribute `unixPermissions` of each file is used.
 
+If you set the platform value on nodejs, be sure to use `process.platform`.
+`fs.stats` returns a non executable mode for folders on windows, if you
+force the platform to `UNIX` the generated zip file will have a strange
+behavior on UNIX platforms.
+
 __Returns__ : The generated zip file.
 
 __Throws__ : An exception if the asked `type` is not available in the browser,
@@ -76,6 +81,21 @@ location.href="data:application/zip;base64,"+content;
 ```js
 var content = zip.generate({type:"nodebuffer"});
 require("fs").writeFile("hello.zip", content, function(err){/*...*/});
+```
+
+```js
+// on nodejs
+zip.file(pathname, content, {
+    date: stat.mtime,
+    unixPermissions: stat.mode
+});
+
+// ...
+
+zip.generate({
+    type: 'nodebuffer',
+    platform: process.platform
+});
 ```
 
 ```js

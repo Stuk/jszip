@@ -26,34 +26,25 @@ compressionOptions | object | `null` | the options to use when compressing the f
 comment     | string  | null    | The comment for this file.
 optimizedBinaryString | boolean | `false` | Set to true if (and only if) the input is a "binary string" and has already been prepared with a 0xFF mask.
 createFolders | boolean | `false` | Set to true if folders in the file path should be automatically created, otherwise there will only be virtual folders that represent the path to the file.
-unixPermissions | object | null    | The UNIX permissions of the file, if any.
-dosPermissions  | object | null    | The DOS permissions of the file, if any.
+unixPermissions | 16 bits number | null    | The UNIX permissions of the file, if any.
+dosPermissions  | 6 bits number  | null    | The DOS permissions of the file, if any.
+dir             | boolean        | false   | Set to true if this is a directory and content should be ignored.
 
 You shouldn't update the data given to this method : it is kept as it so any
 update will impact the stored data.
 
 __For the permissions__ :
 
-The `*Permissions` fields has the following structure (the value is the default behavior) :
+The field `unixPermissions` also accepts a string representing the octal value :
+"644", "755", etc. On nodejs you can use the `mode` attribute of
+[nodejs' fs.Stats](http://nodejs.org/api/fs.html#fs_class_fs_stats).
 
-```js
-unixPermissions : {
-    executable : false,
-    readOnly : false
-}
+See also [the platform option of generate()]({{site.baseurl}}/documentation/api_jszip/generate.html).
 
-dosPermissions : {
-    hidden : false,
-    readOnly : false
-}
-```
+__About `dir`__ :
 
-The field `unixPermissions` also accepts a number (the 2 bytes file attributes) :
-you can use the `mode` attribute of [nodejs' fs.Stats](http://nodejs.org/api/fs.html#fs_class_fs_stats).
-In that case, the executable/readOnly boolean will be extracted from the "user"
-part (ignoring the "group" and "other").
-
-See also  [the platform option of generate()]({{site.baseurl}}/documentation/api_jszip/generate.html).
+If `dir` is true or if a permission says it's a folder, this entry be flagged
+as a folder and the content will be ignored.
 
 __Returns__ : The current JSZip object, for chaining.
 
@@ -93,9 +84,7 @@ zip.file("folder/file.txt", "file in folder", {createFolders: true});
 // It will exist whether or not "file.txt" is present.
 
 zip.file("script.sh", "echo 'hello world'", {
-  unixPermissions : {
-    executable : true
-  }
+  unixPermissions : "755"
 });
 // when generated with platform:UNIX, the script.sh file will be executable
 ```
