@@ -988,6 +988,34 @@ test("Empty files / folders are not compressed", function() {
    JSZip.compressions.DEFLATE.compress = oldDeflateCompress;
 });
 
+test("DEFLATE level on generate()", function() {
+   var zip = new JSZip();
+   zip.file("Hello.txt", "world");
+
+   var oldDeflateCompress = JSZip.compressions.DEFLATE.compress;
+   JSZip.compressions.DEFLATE.compress = function (str, options) {
+      equal(options.level, 5);
+      return str;
+   };
+   zip.generate({compression:'DEFLATE', compressionOptions : {level:5}});
+
+   JSZip.compressions.DEFLATE.compress = oldDeflateCompress;
+});
+
+test("DEFLATE level on file() takes precedence", function() {
+   var zip = new JSZip();
+   zip.file("Hello.txt", "world", {compressionOptions:{level:9}});
+
+   var oldDeflateCompress = JSZip.compressions.DEFLATE.compress;
+   JSZip.compressions.DEFLATE.compress = function (str, options) {
+      equal(options.level, 9);
+      return str;
+   };
+   zip.generate({compression:'DEFLATE', compressionOptions : {level:5}});
+
+   JSZip.compressions.DEFLATE.compress = oldDeflateCompress;
+});
+
 test("unknown compression throws an exception", function () {
    var zip = new JSZip().file("file.txt", "test");
    try {
