@@ -95,6 +95,22 @@ function checkBasicStreamBehavior(stream, testName) {
    ok(!triggeredStream, testName + "basic check stream, the stream callback is async");
 }
 
+function toString(obj) {
+   if(typeof obj === "string" || !obj) {
+      return obj;
+   }
+
+   if(obj instanceof ArrayBuffer) {
+      obj = new Uint8Array(obj);
+   }
+
+   var res = "";
+   for(var i = 0; i < obj.length; i++) {
+      res += String.fromCharCode(obj[i]);
+   }
+   return res;
+}
+
 // cache for files
 var refZips = {};
 
@@ -105,7 +121,7 @@ function fetchFile(index, url, callback) {
       }, 0);
    } else {
       JSZipTestUtils.loadZipFile(url, function (err, res) {
-         var file = JSZip.utils.transformTo("string", res);
+         var file = toString(res);
          refZips[url] = file;
          callback(index, err, file);
       });
@@ -174,30 +190,6 @@ test("JSZip", function(){
 });
 
 QUnit.module("Essential"); // {{{
-
-test("JSZip.utils.transformTo", function () {
-   var supportedArgs = ['string', 'array'];
-   if (JSZip.support.arraybuffer) {
-      supportedArgs.push("arraybuffer");
-   }
-   if (JSZip.support.uint8array) {
-      supportedArgs.push("uint8array");
-   }
-   if (JSZip.support.nodebuffer) {
-      supportedArgs.push("nodebuffer");
-   }
-
-   var txt = 'test text !';
-
-   for (var i = 0; i < supportedArgs.length; i++) {
-      for (var j = 0; j < supportedArgs.length; j++) {
-         var step1 = JSZip.utils.transformTo(supportedArgs[i], txt);
-         var step2 = JSZip.utils.transformTo(supportedArgs[j], step1);
-         var result = JSZip.utils.transformTo("string", step2);
-         equal(result, txt, "The transformation string -> " + supportedArgs[i] + " -> " + supportedArgs[j] + " -> string works");
-      }
-   }
-});
 
 testZipFile("Zip text file !", "ref/text.zip", function(expected) {
    stop();
@@ -480,8 +472,6 @@ function zipObjectsAssertions(zipObject) {
    // the zip date has a 2s resolution
    var delta = Math.abs(zipObject.date.getTime() - date.getTime());
    ok(delta < 2000/* ms */, date, "ZipObject#date is here");
-   var deltaOptions = Math.abs(zipObject.options.date.getTime() - date.getTime());
-   ok(deltaOptions < 2000/* ms */, date, "ZipObject#options.date is here (deprecated API)");
 }
 test("ZipObject attributes", function () {
    var date = new Date("July 17, 2009 14:36:57");
@@ -503,20 +493,6 @@ test("generate uses updated ZipObject date attribute", function () {
    var zip = new JSZip();
    zip.file("Hello.txt", "Hello World\n", {comment:"my comment"}); // date = now
    zip.files["Hello.txt"].date = date;
-   stop();
-   zip.generateAsync({type:"binarystring"})
-   .then(JSZip.loadAsync)
-   .then(function(reloaded) {
-      zipObjectsAssertions(reloaded.file("Hello.txt"));
-      zipObjectsAssertions(reloaded.files["Hello.txt"]);
-      start();
-   })['catch'](assertNoError);
-});
-test("generate uses updated ZipObject options.date attribute (deprecated)", function () {
-   var date = new Date("July 17, 2009 14:36:57");
-   var zip = new JSZip();
-   zip.file("Hello.txt", "Hello World\n", {comment:"my comment"}); // date = now
-   zip.files["Hello.txt"].options.date = date;
    stop();
    zip.generateAsync({type:"binarystring"})
    .then(JSZip.loadAsync)
@@ -739,7 +715,7 @@ var _actualTestFileDataGetters = {
       if (JSZip.support.arraybuffer) {
          equal(err, null, testName + "no error");
          ok(buffer instanceof ArrayBuffer, testName + "the result is a instance of ArrayBuffer");
-         var actual = JSZip.utils.transformTo("string", buffer);
+         var actual = toString(buffer);
          equal(actual, opts.rawData, testName + "content ok");
       } else {
          equal(buffer, null, testName + "no data");
@@ -750,7 +726,7 @@ var _actualTestFileDataGetters = {
       if (JSZip.support.uint8array) {
          equal(err, null, testName + "no error");
          ok(bufferView instanceof Uint8Array, testName+ "the result is a instance of Uint8Array");
-         var actual = JSZip.utils.transformTo("string", bufferView);
+         var actual = toString(bufferView);
          equal(actual, opts.rawData, testName + "content ok");
       } else {
          equal(bufferView, null, testName + "no data");
@@ -761,7 +737,7 @@ var _actualTestFileDataGetters = {
       if (JSZip.support.nodebuffer) {
          equal(err, null, testName + "no error");
          ok(buffer instanceof Buffer, testName + "the result is a instance of Buffer");
-         var actual = JSZip.utils.transformTo("string", buffer);
+         var actual = toString(buffer);
          equal(actual, opts.rawData, testName + "content ok");
       } else {
          equal(buffer, null, testName + "no data");
@@ -978,30 +954,6 @@ testGenerateFor([{
    streamFiles : true
 }], function(testName, file, streamFiles) {
 
-   testZipFile("generate : base64:false. Deprecated, but it still works. " + testName, file, function(expected) {
-      testGenerate({
-         prepare : createZipAll,
-         options : {base64:false, streamFiles:streamFiles},
-         assertions : function (err, result) {
-            equal(err, null, "no error");
-            ok(similar(result, expected, 3 * MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
-         }
-      });
-   });
-
-   testZipFile("generate : base64:true. Deprecated, but it still works. " + testName, file, function(expected) {
-      testGenerate({
-         prepare : createZipAll,
-         skipReloadTest : true,
-         options : {base64:true,streamFiles:streamFiles},
-         assertions : function (err, result) {
-            equal(err, null, "no error");
-            var actual = JSZip.base64.decode(result);
-            ok(similar(actual, expected, 3 * MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
-         }
-      });
-   });
-
    testZipFile("generate : type:string. " + testName, file, function(expected) {
       testGenerate({
          prepare : createZipAll,
@@ -1034,7 +986,7 @@ testGenerateFor([{
                equal(err, null, "no error");
                ok(result instanceof Uint8Array, "the result is a instance of Uint8Array");
 
-               // var actual = JSZip.utils.transformTo("string", result);
+               // var actual = toString(result);
 
                ok(similar(result, expected, 3 * MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
             } else {
@@ -1073,7 +1025,7 @@ testGenerateFor([{
                equal(err, null, "no error");
                ok(result instanceof Buffer, "the result is a instance of ArrayBuffer");
 
-               var actual = JSZip.utils.transformTo("string", result);
+               var actual = toString(result);
 
                ok(similar(actual, expected, 3 * MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
             } else {
@@ -1832,7 +1784,6 @@ test("A folder stays a folder", function () {
          var zip = new JSZip();
          zip.folder("folder/");
          ok(zip.files['folder/'].dir, "the folder is marked as a folder");
-         ok(zip.files['folder/'].options.dir, "the folder is marked as a folder, deprecated API");
          return zip;
       },
       options : {type:"binarystring"},
@@ -1842,7 +1793,6 @@ test("A folder stays a folder", function () {
          JSZip.loadAsync(result)
          .then(function (reloaded) {
             ok(reloaded.files['folder/'].dir, "the folder is marked as a folder");
-            ok(reloaded.files['folder/'].options.dir, "the folder is marked as a folder, deprecated API");
             start();
          })['catch'](assertNoError);
       }
@@ -1925,7 +1875,6 @@ test("A folder stays a folder when created with file", function () {
    });
 
    ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
-   ok(zip.files['folder/'].options.dir, "the folder with options is marked as a folder, deprecated API");
    equal(zip.files['folder/'].date.getMilliseconds(), referenceDate.getMilliseconds(), "the folder with options has the correct date");
    equal(zip.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
    equal(zip.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
@@ -1934,10 +1883,8 @@ test("A folder stays a folder when created with file", function () {
    .then(JSZip.loadAsync)
    .then(function (reloaded) {
       ok(reloaded.files['folder/'].dir, "the folder with options is marked as a folder");
-      ok(reloaded.files['folder/'].options.dir, "the folder with options is marked as a folder, deprecated API");
 
       ok(reloaded.files['folder/'].dir, "the folder with options is marked as a folder");
-      ok(reloaded.files['folder/'].options.dir, "the folder with options is marked as a folder, deprecated API");
       equal(reloaded.files['folder/'].date.getMilliseconds(), referenceDate.getMilliseconds(), "the folder with options has the correct date");
       equal(reloaded.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
       equal(reloaded.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
