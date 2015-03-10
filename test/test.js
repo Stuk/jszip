@@ -1277,50 +1277,155 @@ test("A folder stays a folder", function () {
    ok(reloaded.files['folder/'].options.dir, "the folder is marked as a folder, deprecated API");
 });
 
-// mkdir dir dir_ro
-// touch file file_ro file_exe file_ro_exe
-// chmod -w dir_ro file_ro file_ro_exe
-// chmod +x file_exe file_ro_exe
+test("file() creates a folder with dir:true", function () {
+   var zip = new JSZip();
+   zip.file("folder", null, {
+      dir : true
+   });
+   ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
+});
+
+test("file() creates a folder with the right unix permissions", function () {
+   var zip = new JSZip();
+   zip.file("folder", null, {
+      unixPermissions : parseInt("40500", 8)
+   });
+   ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
+});
+
+test("file() creates a folder with the right dos permissions", function () {
+   var zip = new JSZip();
+   zip.file("folder", null, {
+      dosPermissions : parseInt("010000", 2)
+   });
+   ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
+});
+
+test("A folder stays a folder when created with file", function () {
+   var referenceDate = new Date("July 17, 2009 14:36:56");
+   var referenceComment = "my comment";
+   var zip = new JSZip();
+   zip.file("folder", null, {
+      dir : true,
+      date : referenceDate,
+      comment : referenceComment,
+      unixPermissions : parseInt("40500", 8)
+   });
+
+   ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
+   ok(zip.files['folder/'].options.dir, "the folder with options is marked as a folder, deprecated API");
+   equal(zip.files['folder/'].date.getMilliseconds(), referenceDate.getMilliseconds(), "the folder with options has the correct date");
+   equal(zip.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
+   equal(zip.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
+
+   var reloaded = new JSZip(zip.generate({type:"string", platform:"UNIX"}));
+
+   ok(reloaded.files['folder/'].dir, "the folder with options is marked as a folder");
+   ok(reloaded.files['folder/'].options.dir, "the folder with options is marked as a folder, deprecated API");
+
+   ok(reloaded.files['folder/'].dir, "the folder with options is marked as a folder");
+   ok(reloaded.files['folder/'].options.dir, "the folder with options is marked as a folder, deprecated API");
+   equal(reloaded.files['folder/'].date.getMilliseconds(), referenceDate.getMilliseconds(), "the folder with options has the correct date");
+   equal(reloaded.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
+   equal(reloaded.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
+
+});
+
+test("file() adds a slash for directories", function () {
+   var zip = new JSZip();
+   zip.file("folder_without_slash", null, {
+      dir : true
+   });
+   zip.file("folder_with_slash/", null, {
+      dir : true
+   });
+   ok(zip.files['folder_without_slash/'], "added a slash if not provided");
+   ok(zip.files['folder_with_slash/'], "keep the existing slash");
+});
+
+test("folder() doesn't overwrite existing entries", function () {
+   var referenceComment = "my comment";
+   var zip = new JSZip();
+   zip.file("folder", null, {
+      dir : true,
+      comment : referenceComment,
+      unixPermissions : parseInt("40500", 8)
+   });
+
+   // calling folder() doesn't override it
+   zip.folder("folder");
+
+   equal(zip.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
+   equal(zip.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
+});
+
+test("createFolders works on a file", function () {
+   var zip = new JSZip();
+   zip.file("false/0/1/2/file", "content", {createFolders:false, unixPermissions:"644"});
+   zip.file("true/0/1/2/file", "content", {createFolders:true, unixPermissions:"644"});
+
+   ok(!zip.files["false/"], "the false/ folder doesn't exist");
+   ok(zip.files["true/"], "the true/ folder exists");
+   equal(zip.files["true/"].unixPermissions, null, "the options are not propagated");
+});
+
+test("createFolders works on a folder", function () {
+   var zip = new JSZip();
+   zip.file("false/0/1/2/folder", null, {createFolders:false, unixPermissions:"777",dir:true});
+   zip.file("true/0/1/2/folder", null, {createFolders:true, unixPermissions:"777",dir:true});
+
+   ok(!zip.files["false/"], "the false/ folder doesn't exist");
+   ok(zip.files["true/"], "the true/ folder exists");
+   equal(zip.files["true/"].unixPermissions, null, "the options are not propagated");
+});
+
+
+// touch file_{666,640,400,755}
+// mkdir dir_{777,755,500}
+// for mode in 777 755 500 666 640 400; do
+//    chmod $mode *_$mode
+// done
 // then :
 // zip -r linux_zip.zip .
 // 7z a -r linux_7z.zip .
 // ...
 function assertUnixPermissions(file){
-   function doAsserts(fileName, dir, exec, ro) {
+   function doAsserts(fileName, dir, octal) {
+      var mode = parseInt(octal, 8);
       equal(zip.files[fileName].dosPermissions, null, fileName + ", no DOS permissions");
       equal(zip.files[fileName].dir, dir, fileName + " dir flag");
-      equal(zip.files[fileName].unixPermissions.executable, exec, fileName + " executable flag");
-      equal(zip.files[fileName].unixPermissions.readOnly, ro, fileName + " readOnly flag");
+      equal(zip.files[fileName].unixPermissions, mode, fileName + " mode " + octal);
    }
 
    var zip = new JSZip(file);
-   doAsserts("dir/",        true,  true,  false);
-   doAsserts("dir_ro/",     true,  true,  true);
-   doAsserts("file",        false, false, false);
-   doAsserts("file_ro",     false, false, true);
-   doAsserts("file_exe",    false, true,  false);
-   doAsserts("file_ro_exe", false, true,  true);
+   doAsserts("dir_777/", true,  "40777");
+   doAsserts("dir_755/", true,  "40755");
+   doAsserts("dir_500/", true,  "40500");
+   doAsserts("file_666", false, "100666");
+   doAsserts("file_640", false, "100640");
+   doAsserts("file_400", false, "100400");
+   doAsserts("file_755", false, "100755");
 }
 
 function assertDosPermissions(file){
-   function doAsserts(fileName, dir, hidden, ro) {
+   function doAsserts(fileName, dir, binary) {
+      var mode = parseInt(binary, 2);
       equal(zip.files[fileName].unixPermissions, null, fileName + ", no UNIX permissions");
       equal(zip.files[fileName].dir, dir, fileName + " dir flag");
-      equal(zip.files[fileName].dosPermissions.hidden, hidden, fileName + " hidden flag");
-      equal(zip.files[fileName].dosPermissions.readOnly, ro, fileName + " readOnly flag");
+      equal(zip.files[fileName].dosPermissions, mode, fileName + " mode " + mode);
    }
 
    var zip = new JSZip(file);
    if (zip.files["dir/"]) {
-      doAsserts("dir/",           true,  false, false);
+      doAsserts("dir/",           true,  "010000");
    }
    if (zip.files["dir_hidden/"]) {
-      doAsserts("dir_hidden/",    true,  true,  false);
+      doAsserts("dir_hidden/",    true,  "010010");
    }
-   doAsserts("file",           false, false, false);
-   doAsserts("file_ro",        false, false, true);
-   doAsserts("file_hidden",    false, true,  false);
-   doAsserts("file_ro_hidden", false, true,  true);
+   doAsserts("file",           false, "100000");
+   doAsserts("file_ro",        false, "100001");
+   doAsserts("file_hidden",    false, "100010");
+   doAsserts("file_ro_hidden", false, "100011");
 }
 function reloadAndAssertUnixPermissions(file){
    var zip = new JSZip(file);
@@ -1342,7 +1447,6 @@ testZipFile("permissions on linux : file created by ark", "ref/permissions/linux
 testZipFile("permissions on linux : file created by ark, reloaded", "ref/permissions/linux_ark.zip", reloadAndAssertUnixPermissions);
 testZipFile("permissions on mac : file created by finder", "ref/permissions/mac_finder.zip", assertUnixPermissions);
 testZipFile("permissions on mac : file created by finder, reloaded", "ref/permissions/mac_finder.zip", reloadAndAssertUnixPermissions);
-
 
 
 testZipFile("permissions on windows : file created by the compressed folders feature", "ref/permissions/windows_compressed_folders.zip", assertDosPermissions);
