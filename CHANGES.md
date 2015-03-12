@@ -4,6 +4,12 @@ layout: default
 section: main
 ---
 
+### v2.5.0 2015-03-10
+- add support for custom mime-types (see [#199](https://github.com/Stuk/jszip/issues/199)).
+- add an option to set the DEFLATE level (see [#201](https://github.com/Stuk/jszip/issues/201)).
+- improve the error message with corrupted zip (see [#202](https://github.com/Stuk/jszip/issues/202)).
+- add support for UNIX / DOS permissions (see [#200](https://github.com/Stuk/jszip/issues/200) and [#205](https://github.com/Stuk/jszip/issues/205)).
+
 ### v2.4.0 2014-07-24
 - update pako to 0.2.5 (see [#156](https://github.com/Stuk/jszip/issues/156)).
 - make JSZip work in a Firefox addon context (see [#151](https://github.com/Stuk/jszip/issues/151)).
