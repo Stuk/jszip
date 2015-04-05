@@ -85,23 +85,22 @@ jQuery(function ($) {
 
         // when everything has been downloaded, we can trigger the dl
         $.when.apply($, deferreds).done(function () {
-            zip.generateStream({type:"blob"})
-            .accumulate(function callback(err, blob) {
-                if(err) {
-                    showError(err);
-                }
-
-                // see FileSaver.js
-                saveAs(blob, "example.zip");
-
-                showMessage("done !");
-            }, function updateCallback(metadata) {
+            zip.generateAsync({type:"blob"}, function updateCallback(metadata) {
                 var msg = "progression : " + metadata.percent.toFixed(2) + " %";
                 if(metadata.currentFile) {
                     msg += ", current file = " + metadata.currentFile;
                 }
                 showMessage(msg);
                 updatePercent(metadata.percent|0);
+            })
+            .then(function callback( blob) {
+
+                // see FileSaver.js
+                saveAs(blob, "example.zip");
+
+                showMessage("done !");
+            }, function (e) {
+                showError(e);
             });
 
         }).fail(function (err) {

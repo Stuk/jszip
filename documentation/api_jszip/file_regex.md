@@ -43,7 +43,7 @@ folder.file(/file/);  // array of size 2
 folder.file(/^file/); // array of size 2, the relative paths start with file
 
 // arrays contain objects in the form:
-// {name: "file2.txt", dir: false, asText : function () {...}, ...}
+// {name: "file2.txt", dir: false, async : function () {...}, ...}
 ```
 
 

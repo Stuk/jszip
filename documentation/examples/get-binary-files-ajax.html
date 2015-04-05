@@ -33,7 +33,12 @@ section: example
 
     try {
       var zip = new JSZip(data);
-      showContent(elt, "" + data, zip.file("Hello.txt").asText());
+      zip.file("Hello.txt").async("string")
+      .then(function success(text) {
+        showContent(elt, "" + data, text);
+      }, function error(e) {
+        showError(elt, e);
+      });
     } catch(e) {
       showError(elt, e);
     }

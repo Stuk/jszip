@@ -31,22 +31,20 @@ browser). A compressed zip file of 10MB is easily opened by firefox / chrome
 javascript are encoded in UTF-16 : a 10MB ascii text file will take 20MB of
 memory.
 
-The synchronous operations (`asText()`, `generate()`, etc) will :
-
-- freeze the browser until the operation finishes
-- hold the full result in memory
-
-The asynchronous operations will solve these issues. The
-[`accumulate ` method]({{site.baseurl}}/documentation/api_streamhelper/accumulate.html)
-holds the full result in memory but doesn't freeze the browser. If the result
-is too big, you need to use the
-[`on` method]({{site.baseurl}}/documentation/api_streamhelper/on.html) to
+The
+[`async` method]({{site.baseurl}}/documentation/api_zipobject/async.html) and the
+[`generateAsync` method]({{site.baseurl}}/documentation/api_jszip/generate_async.html)
+hold the full result in memory but doesn't freeze the browser. If the result
+is too big, and if you can't use the
+[`stream` method]({{site.baseurl}}/documentation/api_zipobject/stream.html) or the
+[`generateStream` method]({{site.baseurl}}/documentation/api_jszip/generate_stream.html)
+you need to use the underlying
+[`StreamHelper`]({{site.baseurl}}/documentation/api_streamhelper.html) to
 handle the result chunk by chunk and `pause()`/`resume()` to handle the
 backpressure.
 
 If you're having performance issues, please consider the following :
 
-* Use the asynchronous methods.
 * Don't use IE &lt;= 9. Everything is better with typed arrays.
 * Use typed arrays (Uint8Array, ArrayBuffer, etc) if possible :
   * If you generate a zip file, you should use `type:"uint8array"`
@@ -79,5 +77,5 @@ Some data are discarded (file metadata) and other are added (subfolders).
 
 JSZip only supports utf8 : if the names of the files inside the zip are not in
 utf8 (or ASCII), they won't be interpreted correctly. If the content is a text
-not encoded with utf8 (or ASCII), the `asText()` method won't decode it
+not encoded with utf8 (or ASCII), the `async("string")` method won't decode it
 correctly.

@@ -54,14 +54,16 @@ jQuery(function($) {
 });
 
 </script>
-<textarea class="form-control" id="demo-code" rows="7" spellcheck="false">
+<textarea class="form-control" id="demo-code" rows="9" spellcheck="false">
 var zip = new JSZip();
 zip.file("Hello.txt", "Hello World\n");
 var img = zip.folder("images");
 img.file("smile.gif", imgData, {base64: true});
-var content = zip.generate({type:"blob"});
-// see FileSaver.js
-saveAs(content, "example.zip");</textarea>
+zip.generateAsync({type:"blob"})
+.then(function(content) {
+    // see FileSaver.js
+    saveAs(content, "example.zip");
+});</textarea>
 <button id="demo" class="btn btn-primary">Run!</button>
 <span id="status"></span>
 <div id="demo-not-supported" class="alert alert-danger hidden">

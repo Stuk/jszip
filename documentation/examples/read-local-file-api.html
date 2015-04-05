@@ -63,7 +63,7 @@ section: example
               $fileContent.append($("<li>", {
                 text : zipEntry.name
               }));
-              // the content is here : zipEntry.asText()
+              // the content is here : zipEntry.async("string")
             });
             // end of the magic !
 

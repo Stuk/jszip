@@ -27,14 +27,14 @@ var zip = new JSZip();
 zip.file("file.txt", "content");
 
 zip.file("file.txt").name // "file.txt"
-zip.file("file.txt").asText() // "content"
+zip.file("file.txt").async("string") // a promise of "content"
 zip.file("file.txt").options.dir // false
 
 // utf8 example
 var zip = new JSZip(zipFromAjaxWithUTF8);
-zip.file("amount.txt").asText() // "€15"
-zip.file("amount.txt").asArrayBuffer() // an ArrayBuffer containing €15 encoded as utf8
-zip.file("amount.txt").asUint8Array() // an Uint8Array containing €15 encoded as utf8
+zip.file("amount.txt").async("string") // a promise of "€15"
+zip.file("amount.txt").async("arraybuffer") // a promise of an ArrayBuffer containing €15 encoded as utf8
+zip.file("amount.txt").async("uint8array") // a promise of an Uint8Array containing €15 encoded as utf8
 
 // with folders
 zip.folder("sub").file("file.txt", "content");

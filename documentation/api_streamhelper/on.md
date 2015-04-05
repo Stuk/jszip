@@ -15,6 +15,7 @@ callback  | function | the function called when the event occurs. See below for 
 
 
 A `data` callback takes 2 parameters :
+
 - the current chunk of data (in a format specified by the method which
   generated this StreamHelper)
 - the metadata (see each method to know what's inside)

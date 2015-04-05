@@ -66,24 +66,12 @@ You can access the file content with `.file(name)` and
 [its getters]({{site.baseurl}}/documentation/api_zipobject.html) :
 
 ```js
-/*
- * sync version
- */
-zip.file("hello.txt").asText(); // "Hello World\n"
-
-if (JSZip.support.uint8array) {
-  zip.file("hello.txt").asUint8Array(); // Uint8Array { 0=72, 1=101, 2=108, more...}
-}
-
-/*
- * async version
- */
-zip.file("hello.txt").asTextStream().accumulate(function (err, data) {
+zip.file("hello.txt").async("string").then(function (data) {
   // data is "Hello World\n"
 });
 
 if (JSZip.support.uint8array) {
-  zip.file("hello.txt").asUint8ArrayStream().accumulate(function (err, data) {
+  zip.file("hello.txt").async("uint8array").then(function (data) {
     // data is Uint8Array { 0=72, 1=101, 2=108, more...}
   });
 }
@@ -100,27 +88,18 @@ zip.remove("photos"); // by removing the folder, you also remove its content.
 
 ### Generate a zip file
 
-With `.generate(options)` you can generate a zip file (not a real file but its
-representation in memory). Check
+With `.generateAsync(options)` or `.generateStream(options)` you can generate
+a zip file (not a real file but its representation in memory). Check
 [this page]({{site.baseurl}}/documentation/howto/write_zip.html) for more
 informations on how to write / give the file to the user.
 
 ```js
-var content = null;
+var promise = null;
 if (JSZip.support.uint8array) {
-  content = zip.generate({type : "uint8array"});
+  promise = zip.generateAsync({type : "uint8array"});
 } else {
-  content = zip.generate({type : "string"});
+  promise = zip.generateAsync({type : "string"});
 }
-```
-
-This method is synchronous and will freeze the browser until completion. To
-avoid that, you can/should use the async version :
-
-```js
-zip.generateStream({type : "uint8array"}).accumulate(function (err, data) {
-    // data contains the zip file
-});
 ```
 
 ### Read a zip file
@@ -135,6 +114,6 @@ var new_zip = new JSZip();
 new_zip.load(content);
 
 // you now have every files contained in the loaded zip
-new_zip.file("hello.txt").asText(); // "Hello World\n"
+new_zip.file("hello.txt").async("string"); // a promise of "Hello World\n"
 ```
 

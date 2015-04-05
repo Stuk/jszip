@@ -4,6 +4,34 @@ layout: default
 section: main
 ---
 
+### From 2.x to 3.0.0
+
+* On `ZipObject`, the synchronous getters has been replaced by `async()` and
+  `stream()`.
+* The `generate()` method has been replaced by `generateAsync()` and 
+  `generateStream()`.
+* The "text" type has been replaced by the "string" type, a binary string is
+  named "binarystring".
+
+```js
+// 2.x
+zip.file("test.txt").asText();
+// 3.x
+zip.file("test.txt")
+.then(function (content) {
+    // use content
+});
+
+
+// 2.x
+zip.generate({type:"uint8array"});
+// 3.x
+zip.generateAsync({type:"uint8array"})
+.then(function (content) {
+    // use content
+});
+```
+
 ### From 2.2.2 to 2.3.0
 
 * On `ZipObject#options`, the attributes `date` and `dir` have been
