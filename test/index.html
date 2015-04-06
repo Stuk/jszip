@@ -3,8 +3,15 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>JSZip Testing</title>
-<link media="screen" href="qunit-1.11.0.css" type="text/css" rel="stylesheet">
-<script type="text/javascript" src="qunit-1.11.0.js"></script>
+<link media="screen" href="//code.jquery.com/qunit/qunit-1.20.0.css" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="//code.jquery.com/qunit/qunit-1.20.0.js"></script>
+<script>
+// no CDN, fallback on the npm version
+if(!window.QUnit) {
+   document.write('<link media="screen" href="../node_modules/qunitjs/qunit/qunit.css" type="text/css" rel="stylesheet">');
+   document.write('<script type="text/javascript" src="../node_modules/qunitjs/qunit/qunit.js"><\/script>');
+}
+</script>
 
 <script type="text/javascript" src="../dist/jszip.js"></script>
 
@@ -35,13 +42,11 @@
 
    window.global_test_results = test_results;
    });
-   QUnit.testStart(function(testDetails){
-      QUnit.log = function(details){
-         if (!details.result) {
-            details.name = testDetails.name;
-            log.push(details);
-         }
-      };
+
+   QUnit.log(function (details) {
+       if (!details.result) {
+           log.push(details);
+       }
    });
 </script>
 
@@ -61,9 +66,21 @@ if(!window.JSZipUtils) {
 }
 </script>
 
-<script type="text/javascript" src="browser-test-utils.js"></script>
+<script type="text/javascript" src="helpers/test-utils.js"></script>
+<script type="text/javascript" src="helpers/browser-test-utils.js"></script>
 
-<script type="text/javascript" src="test.js"></script>
+<script type="text/javascript" src="asserts/constructor.js"></script>
+<script type="text/javascript" src="asserts/delete.js"></script>
+<script type="text/javascript" src="asserts/deprecated.js"></script>
+<script type="text/javascript" src="asserts/file.js"></script>
+<script type="text/javascript" src="asserts/filter.js"></script>
+<script type="text/javascript" src="asserts/generate.js"></script>
+<script type="text/javascript" src="asserts/load.js"></script>
+<script type="text/javascript" src="asserts/permissions.js"></script>
+<script type="text/javascript" src="asserts/stream.js"></script>
+<script type="text/javascript" src="asserts/unicode.js"></script>
+
+
 
 </head>
 <body>
