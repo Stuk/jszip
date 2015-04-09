@@ -344,3 +344,24 @@ test("generateAsync keep the explicit / folder", function (assert) {
         done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
+
+JSZipTestUtils.testZipFile("generate with promises as files", "ref/all.zip", function (expected) {
+    stop();
+    var zip = new JSZip();
+    zip.file("Hello.txt", new JSZip.external.Promise(function (resolve, reject) {
+        setTimeout(function () {
+            resolve("Hello World\n");
+        }, 50);
+    }));
+    zip.folder("images").file("smile.gif", new JSZip.external.Promise(function (resolve, reject) {
+        setTimeout(function () {
+            resolve("R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=");
+        }, 100);
+    }), {base64: true});
+
+    zip.generateAsync({type:"string"})
+    .then(function (result) {
+        ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+        start();
+    })['catch'](JSZipTestUtils.assertNoError);
+});

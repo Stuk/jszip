@@ -12,7 +12,7 @@ __Arguments__
 
 name               | type   | description
 -------------------|--------|------------
-data               | String/Array of bytes/ArrayBuffer/Uint8Array/Buffer | the zip file
+data               | String/Array of bytes/ArrayBuffer/Uint8Array/Buffer/Blob/Promise | the zip file
 options            | object | the options to load the zip file
 
 Content of `options` :

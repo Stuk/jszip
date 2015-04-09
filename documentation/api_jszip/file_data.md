@@ -11,7 +11,7 @@ __Arguments__
 name                | type    | description
 --------------------|---------|------------
 name                | string  | the name of the file. You can specify folders in the name : the folder separator is a forward slash ("/").
-data                | String/ArrayBuffer/Uint8Array/Buffer | the content of the file.
+data                | String/ArrayBuffer/Uint8Array/Buffer/Blob/Promise | the content of the file.
 options             | object  | the options.
 
 Content of `options` :
@@ -51,7 +51,8 @@ as a folder and the content will be ignored.
 
 __Returns__ : The current JSZip object, for chaining.
 
-__Throws__ : An exception if the data is not in a supported format.
+__Throws__ : Nothing. (an exception will be propagated if the data is not in
+a supported format).
 
 <!--
 __Complexity__ : **O(1)** for anything but binary strings.

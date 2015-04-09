@@ -32,56 +32,40 @@ section: example
     // be sure to show the results
     $("#result_block").removeClass("hidden").addClass("show");
 
-    // see http://www.html5rocks.com/en/tutorials/file/dndfiles/
+    // Closure to capture the file information.
+    function handleFile(f) {
+      var $title = $("<h4>", {
+        text : f.name
+      });
+      var $fileContent = $("<ul>");
+      $result.append($title);
+      $result.append($fileContent);
+    
+      var dateBefore = new Date();
+      JSZip.loadAsync(f)
+      .then(function(zip) {
+        var dateAfter = new Date();
+        $title.append($("<span>", {
+          text:" (loaded in " + (dateAfter - dateBefore) + "ms)"
+        }));
+
+
+        zip.forEach(function (relativePath, zipEntry) {
+          $fileContent.append($("<li>", {
+            text : zipEntry.name
+          }));
+        });
+      }, function (e) {
+        $fileContent = $("<div>", {
+          "class" : "alert alert-danger",
+          text : "Error reading " + f.name + " : " + e.message
+        });
+      });
+    }
 
     var files = evt.target.files;
     for (var i = 0, f; f = files[i]; i++) {
-
-      var reader = new FileReader();
-
-      // Closure to capture the file information.
-      reader.onload = (function(theFile) {
-        return function(e) {
-          var $title = $("<h4>", {
-            text : theFile.name
-          });
-          $result.append($title);
-          var $fileContent = $("<ul>");
-          try {
-
-            var dateBefore = new Date();
-            // read the content of the file with JSZip
-            JSZip.loadAsync(e.target.result)
-            .then(function(zip) {
-              var dateAfter = new Date();
-
-              $title.append($("<span>", {
-                  text:" (parsed in " + (dateAfter - dateBefore) + "ms)"
-              }));
-
-              zip.forEach(function (relativePath, zipEntry) {
-                $fileContent.append($("<li>", {
-                    text : zipEntry.name
-                }));
-                // the content is here : zipEntry.async("string")
-              });
-            });
-            // end of the magic !
-
-          } catch(e) {
-            $fileContent = $("<div>", {
-              "class" : "alert alert-danger",
-              text : "Error reading " + theFile.name + " : " + e.message
-            });
-          }
-          $result.append($fileContent);
-        }
-      })(f);
-
-      // read the file !
-      // readAsArrayBuffer and readAsBinaryString both produce valid content for JSZip.
-      reader.readAsArrayBuffer(f);
-      // reader.readAsBinaryString(f);
+        handleFile(f);
     }
   });
 })();
