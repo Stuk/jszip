@@ -159,7 +159,32 @@ testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name
       // comment this one for now.
       // ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       equal(reload(actual), actual, "Generated ZIP can be parsed");
-      });
+});
+
+testZipFile("Zip text file with non unicode characters in filename", "ref/local_encoding_in_name.zip", function(content) {
+   var zipUnicode = new JSZip(content);
+   ok(!zipUnicode.files["Новая папка/"], "default : the folder is not found");
+   ok(!zipUnicode.files["Новая папка/Новый текстовый документ.txt"], "default : the file is not found");
+
+   var conversions = {
+      "bytes 8d ae a2 a0 ef 20 af a0 af aa a0 2f" : "Новая папка/",
+      "bytes 8d ae a2 a0 ef 20 af a0 af aa a0 2f 8d ae a2 eb a9 20 e2 a5 aa e1 e2 ae a2 eb a9 20 a4 ae aa e3 ac a5 ad e2 2e 74 78 74" : "Новая папка/Новый текстовый документ.txt"
+   };
+   var zipCP866 = new JSZip(content, {
+      decodeFileName: function (bytes) {
+         // here, a real iconv implementation
+         var key = "bytes";
+         for(var i = 0; i < bytes.length; i++) {
+            key += " " + bytes[i].toString(16);
+         }
+
+         return conversions[key] || "";
+      }
+   });
+
+   ok(zipCP866.files["Новая папка/"], "with decodeFileName : the folder has been correctly read");
+   ok(zipCP866.files["Новая папка/Новый текстовый документ.txt"], "with decodeFileName : the file has been correctly read");
+});
 
 // zip -X -0 pile_of_poo.zip Iñtërnâtiônàlizætiøn☃💩.txt
 testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pile_of_poo.zip", function(expected) {
