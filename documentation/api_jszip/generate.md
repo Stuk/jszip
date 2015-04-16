@@ -18,6 +18,7 @@ options.type        | string  | `base64` | The type of zip to return, see below 
 options.comment     | string  |          | The comment to use for the zip file.
 options.mimeType    | string  | `application/zip` | mime-type for the generated file. Useful when you need to generate a file with a different extension, ie: ".ods".
 options.platform    | string  | `DOS`    | The platform to use when generating the zip file.
+options.encodeFileName | function  | encode with UTF-8 | the function to encode the file name / comment.
 
 Possible values for `type` :
 
@@ -57,6 +58,13 @@ If you set the platform value on nodejs, be sure to use `process.platform`.
 `fs.stats` returns a non executable mode for folders on windows, if you
 force the platform to `UNIX` the generated zip file will have a strange
 behavior on UNIX platforms.
+
+__About `encodeFileName`__ :
+
+By default, JSZip uses UTF-8 to encode the file names / comments. You can use
+this method to force an other encoding. Note : the encoding used is not stored
+in a zip file, not using UTF-8 may lead to encoding issues.
+The function takes a string and returns a bytes array (Uint8Array or Array).
 
 __Returns__ : The generated zip file.
 
@@ -136,4 +144,18 @@ link.href = url;
 
 ```
 
+
+Using a custom charset :
+
+```js
+// using iconv-lite for example
+var iconv = require('iconv-lite');
+
+zip.generate({
+    type: 'uint8array',
+    encodeFileName: function (string) {
+        return iconv.encode(string, 'your-encoding');
+    }
+});
+```
 
