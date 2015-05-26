@@ -49,5 +49,5 @@
   "dependencies":{
     "pako": "~0.2.5"
   },
-  "license": "MIT or GPLv3"
+  "license": "(MIT OR GPL-3.0)"
 }
