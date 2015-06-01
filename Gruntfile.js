@@ -90,7 +90,7 @@ module.exports = function(grunt) {
             options: {
                 jshintrc: "./.jshintrc"
             },
-            all: ['./lib/*.js']
+            all: ['./lib/**/*.js']
         },
     browserify: {
       all: {

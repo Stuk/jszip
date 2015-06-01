@@ -51,19 +51,21 @@ section: example
 
             var dateBefore = new Date();
             // read the content of the file with JSZip
-            var zip = new JSZip(e.target.result);
-            var dateAfter = new Date();
+            JSZip.loadAsync(e.target.result)
+            .then(function(zip) {
+              var dateAfter = new Date();
 
-            $title.append($("<span>", {
-              text:" (parsed in " + (dateAfter - dateBefore) + "ms)"
-            }));
-
-            // that, or a good ol' for(var entryName in zip.files)
-            $.each(zip.files, function (index, zipEntry) {
-              $fileContent.append($("<li>", {
-                text : zipEntry.name
+              $title.append($("<span>", {
+                  text:" (parsed in " + (dateAfter - dateBefore) + "ms)"
               }));
-              // the content is here : zipEntry.async("string")
+
+              // that, or a good ol' for(var entryName in zip.files)
+              $.each(zip.files, function (index, zipEntry) {
+                $fileContent.append($("<li>", {
+                    text : zipEntry.name
+                }));
+                // the content is here : zipEntry.async("string")
+              });
             });
             // end of the magic !
 

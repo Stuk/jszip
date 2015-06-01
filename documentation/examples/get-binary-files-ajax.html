@@ -32,8 +32,10 @@ section: example
     }
 
     try {
-      var zip = new JSZip(data);
-      zip.file("Hello.txt").async("string")
+      JSZip.loadAsync(data)
+      .then(function(zip) {
+        return zip.file("Hello.txt").async("string");
+      })
       .then(function success(text) {
         showContent(elt, "" + data, text);
       }, function error(e) {

@@ -104,16 +104,17 @@ if (JSZip.support.uint8array) {
 
 ### Read a zip file
 
-With `.load(data)` you can load a zip file. Check
+With `.loadAsync(data)` you can load a zip file. Check
 [this page]({{site.baseurl}}/documentation/howto/read_zip.html) to see how to
 do properly (it's more tricky that it seems).
 
 ```js
 var new_zip = new JSZip();
 // more files !
-new_zip.load(content);
-
-// you now have every files contained in the loaded zip
-new_zip.file("hello.txt").async("string"); // a promise of "Hello World\n"
+new_zip.loadAsync(content)
+.then(function(zip) {
+    // you now have every files contained in the loaded zip
+    new_zip.file("hello.txt").async("string"); // a promise of "Hello World\n"
+});
 ```
 

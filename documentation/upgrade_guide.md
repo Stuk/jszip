@@ -12,6 +12,8 @@ section: main
   `generateStream()`.
 * The "text" type has been replaced by the "string" type, a binary string is
   named "binarystring".
+* The `load()` method and the constructor with data (`new JSZip(data)`) have
+  been replaced by `loadAsync()`.
 
 ```js
 // 2.x
@@ -30,6 +32,13 @@ zip.generateAsync({type:"uint8array"})
 .then(function (content) {
     // use content
 });
+
+// 2.x
+new JSZip(data);
+zip.load(data);
+// 3.x
+JSZip.loadAsync(data);
+zip.loadAsync(data);
 ```
 
 ### From 2.2.2 to 2.3.0
