@@ -22,12 +22,32 @@ base64      | boolean | `false` | set to `true` if the data is base64 encoded. F
 binary      | boolean | `false` | set to `true` if the data should be treated as raw content, `false` if this is a text. If base64 is used, this defaults to `true`, if the data is not a string, this will be set to `true`.
 date        | date    | the current date | the last modification date.
 compression | string  | null    | If set, specifies compression method to use for this specific file. If not, the default file compression will be used, see [generateAsync(options)]({{site.baseurl}}/documentation/api_jszip/generate_async.html).
+compressionOptions | object | `null` | the options to use when compressing the file, see [generate(options)]({{site.baseurl}}/documentation/api_jszip/generate_async.html).
 comment     | string  | null    | The comment for this file.
 optimizedBinaryString | boolean | `false` | Set to true if (and only if) the input is a "binary string" and has already been prepared with a 0xFF mask.
 createFolders | boolean | `false` | Set to true if folders in the file path should be automatically created, otherwise there will only be virtual folders that represent the path to the file.
+unixPermissions | 16 bits number | null    | The UNIX permissions of the file, if any.
+dosPermissions  | 6 bits number  | null    | The DOS permissions of the file, if any.
+dir             | boolean        | false   | Set to true if this is a directory and content should be ignored.
 
 You shouldn't update the data given to this method : it is kept as it so any
 update will impact the stored data.
+
+
+__For the permissions__ :
+
+The field `unixPermissions` also accepts a string representing the octal value :
+"644", "755", etc. On nodejs you can use the `mode` attribute of
+[nodejs' fs.Stats](http://nodejs.org/api/fs.html#fs_class_fs_stats).
+
+See also [the platform option of generateAsync()]({{site.baseurl}}/documentation/api_jszip/generate_async.html).
+
+
+__About `dir`__ :
+
+If `dir` is true or if a permission says it's a folder, this entry be flagged
+as a folder and the content will be ignored.
+
 
 __Returns__ : The current JSZip object, for chaining.
 
@@ -65,6 +85,9 @@ zip.file("animals.txt", "dog,platypus\n").file("people.txt", "james,sebastian\n"
 zip.file("folder/file.txt", "file in folder", {createFolders: true});
 // In this case, the "folder" folder WILL have a 'D'irectory attribute and a Method property of "store".
 // It will exist whether or not "file.txt" is present.
+
+zip.file("script.sh", "echo 'hello world'", {
+  unixPermissions : "755"
+});
+// when generated with platform:UNIX, the script.sh file will be executable
 ```
-
-

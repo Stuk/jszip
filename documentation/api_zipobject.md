@@ -16,6 +16,8 @@ attribute name              | type        | description
 `dir`                       | boolean     | true if this is a directory
 `date`                      | date        | the last modification date
 `comment`                   | string      | the comment for this file
+`unixPermissions`           | 16 bits number | The UNIX permissions of the file, if any.
+`dosPermissions`            | 6 bits number  | The DOS permissions of the file, if any.
 `options`                   | object      | the options of the file. The available options are :
 `options.base64`            | boolean     | **Deprecated**, see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
 `options.binary`            | boolean     | **Deprecated**, see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)

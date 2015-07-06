@@ -1,4 +1,4 @@
-/* global QUnit,test,ok,equal,start,stop,throws */
+/* global QUnit,test,ok,equal,start,stop,throws,expect */
 /* global JSZip,JSZipTestUtils */
 'use strict';
 
@@ -1110,6 +1110,25 @@ testGenerateFor([{
          }
       });
    });
+
+   testZipFile("generate : type:blob mimeType:application/ods. " + testName, file, function(expected) {
+      testGenerate({
+         prepare : createZipAll,
+         options : {type:"blob",mimeType: "application/ods",streamFiles:streamFiles},
+         skipReloadTest : true,
+         assertions : function (err, result) {
+            if (JSZip.support.blob) {
+               equal(err, null, "no error");
+               ok(result instanceof Blob, "the result is a instance of Blob");
+               equal(result.type, "application/ods", "the result has the rigth mime type");
+               equal(result.size, expected.length, "the result has the right length");
+            } else {
+               equal(result, null, "no data");
+               ok(err.message.match("not supported by this browser"), "the error message is useful");
+            }
+         }
+      });
+   });
 });
 
 
@@ -1302,6 +1321,45 @@ test("Empty files / folders are not compressed", function() {
 });
 */
 
+
+test("DEFLATE level on generate()", function() {
+   expect(1);
+   var zip = new JSZip();
+   zip.file("Hello.txt", "world");
+
+   var oldCompressWorker = JSZip.compressions.DEFLATE.compressWorker;
+   JSZip.compressions.DEFLATE.compressWorker = function (options) {
+      equal(options.level, 5);
+      return oldCompressWorker(options);
+   };
+   stop();
+   zip.generateAsync({compression:'DEFLATE', compressionOptions : {level:5}})
+   .then(function () {
+      start();
+      JSZip.compressions.DEFLATE.compressWorker = oldCompressWorker;
+   })['catch'](assertNoError);
+
+});
+
+test("DEFLATE level on file() takes precedence", function() {
+   expect(1);
+   var zip = new JSZip();
+   zip.file("Hello.txt", "world", {compressionOptions:{level:9}});
+
+   var oldCompressWorker = JSZip.compressions.DEFLATE.compressWorker;
+   JSZip.compressions.DEFLATE.compressWorker = function (options) {
+      equal(options.level, 9);
+      return oldCompressWorker(options);
+   };
+   stop();
+   zip.generateAsync({compression:'DEFLATE', compressionOptions : {level:5}})
+   .then(function () {
+      start();
+      JSZip.compressions.DEFLATE.compressWorker = oldCompressWorker;
+   });
+});
+
+
 test("unknown compression throws an exception", function () {
    testGenerate({
       prepare : createZipAll,
@@ -1347,6 +1405,18 @@ testZipFile("bad compression method", "ref/invalid/compression.zip", function(fi
 test("not a zip file", function() {
    stop();
    JSZip.loadAsync("this is not a zip file")
+   .then(function success() {
+      start();
+      ok(false, "no exception were thrown");
+   }, function failure(e) {
+      start();
+      ok(e.message.match("stuk.github.io/jszip/documentation"), "the error message is useful");
+   });
+});
+
+test("truncated zip file", function() {
+   stop();
+   JSZip.loadAsync("PK\x03\x04\x0A\x00\x00\x00<cut>")
    .then(function success() {
       start();
       ok(false, "no exception were thrown");
@@ -1818,6 +1888,214 @@ test("A stream is pausable", function () {
 
 
 });
+
+//
+test("file() creates a folder with dir:true", function () {
+   var zip = new JSZip();
+   zip.file("folder", null, {
+      dir : true
+   });
+   ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
+});
+
+test("file() creates a folder with the right unix permissions", function () {
+   var zip = new JSZip();
+   zip.file("folder", null, {
+      unixPermissions : parseInt("40500", 8)
+   });
+   ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
+});
+
+test("file() creates a folder with the right dos permissions", function () {
+   var zip = new JSZip();
+   zip.file("folder", null, {
+      dosPermissions : parseInt("010000", 2)
+   });
+   ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
+});
+
+test("A folder stays a folder when created with file", function () {
+   var referenceDate = new Date("July 17, 2009 14:36:56");
+   var referenceComment = "my comment";
+   var zip = new JSZip();
+   zip.file("folder", null, {
+      dir : true,
+      date : referenceDate,
+      comment : referenceComment,
+      unixPermissions : parseInt("40500", 8)
+   });
+
+   ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
+   ok(zip.files['folder/'].options.dir, "the folder with options is marked as a folder, deprecated API");
+   equal(zip.files['folder/'].date.getMilliseconds(), referenceDate.getMilliseconds(), "the folder with options has the correct date");
+   equal(zip.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
+   equal(zip.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
+
+   zip.generateAsync({type:"string", platform:"UNIX"})
+   .then(JSZip.loadAsync)
+   .then(function (reloaded) {
+      ok(reloaded.files['folder/'].dir, "the folder with options is marked as a folder");
+      ok(reloaded.files['folder/'].options.dir, "the folder with options is marked as a folder, deprecated API");
+
+      ok(reloaded.files['folder/'].dir, "the folder with options is marked as a folder");
+      ok(reloaded.files['folder/'].options.dir, "the folder with options is marked as a folder, deprecated API");
+      equal(reloaded.files['folder/'].date.getMilliseconds(), referenceDate.getMilliseconds(), "the folder with options has the correct date");
+      equal(reloaded.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
+      equal(reloaded.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
+   })['catch'](assertNoError);
+
+});
+
+test("file() adds a slash for directories", function () {
+   var zip = new JSZip();
+   zip.file("folder_without_slash", null, {
+      dir : true
+   });
+   zip.file("folder_with_slash/", null, {
+      dir : true
+   });
+   ok(zip.files['folder_without_slash/'], "added a slash if not provided");
+   ok(zip.files['folder_with_slash/'], "keep the existing slash");
+});
+
+test("folder() doesn't overwrite existing entries", function () {
+   var referenceComment = "my comment";
+   var zip = new JSZip();
+   zip.file("folder", null, {
+      dir : true,
+      comment : referenceComment,
+      unixPermissions : parseInt("40500", 8)
+   });
+
+   // calling folder() doesn't override it
+   zip.folder("folder");
+
+   equal(zip.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
+   equal(zip.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
+});
+
+test("createFolders works on a file", function () {
+   var zip = new JSZip();
+   zip.file("false/0/1/2/file", "content", {createFolders:false, unixPermissions:"644"});
+   zip.file("true/0/1/2/file", "content", {createFolders:true, unixPermissions:"644"});
+
+   ok(!zip.files["false/"], "the false/ folder doesn't exist");
+   ok(zip.files["true/"], "the true/ folder exists");
+   equal(zip.files["true/"].unixPermissions, null, "the options are not propagated");
+});
+
+test("createFolders works on a folder", function () {
+   var zip = new JSZip();
+   zip.file("false/0/1/2/folder", null, {createFolders:false, unixPermissions:"777",dir:true});
+   zip.file("true/0/1/2/folder", null, {createFolders:true, unixPermissions:"777",dir:true});
+
+   ok(!zip.files["false/"], "the false/ folder doesn't exist");
+   ok(zip.files["true/"], "the true/ folder exists");
+   equal(zip.files["true/"].unixPermissions, null, "the options are not propagated");
+});
+
+
+// touch file_{666,640,400,755}
+// mkdir dir_{777,755,500}
+// for mode in 777 755 500 666 640 400; do
+//    chmod $mode *_$mode
+// done
+// then :
+// zip -r linux_zip.zip .
+// 7z a -r linux_7z.zip .
+// ...
+ function assertUnixPermissions(file){
+   function doAsserts(zip, fileName, dir, octal) {
+      var mode = parseInt(octal, 8);
+      equal(zip.files[fileName].dosPermissions, null, fileName + ", no DOS permissions");
+      equal(zip.files[fileName].dir, dir, fileName + " dir flag");
+      equal(zip.files[fileName].unixPermissions, mode, fileName + " mode " + octal);
+   }
+
+   stop();
+   JSZip.loadAsync(file)
+   .then(function(zip) {
+      start();
+      doAsserts(zip, "dir_777/", true,  "40777");
+      doAsserts(zip, "dir_755/", true,  "40755");
+      doAsserts(zip, "dir_500/", true,  "40500");
+      doAsserts(zip, "file_666", false, "100666");
+      doAsserts(zip, "file_640", false, "100640");
+      doAsserts(zip, "file_400", false, "100400");
+      doAsserts(zip, "file_755", false, "100755");
+   })['catch'](assertNoError);
+}
+
+function assertDosPermissions(file){
+   function doAsserts(zip, fileName, dir, binary) {
+      var mode = parseInt(binary, 2);
+      equal(zip.files[fileName].unixPermissions, null, fileName + ", no UNIX permissions");
+      equal(zip.files[fileName].dir, dir, fileName + " dir flag");
+      equal(zip.files[fileName].dosPermissions, mode, fileName + " mode " + mode);
+   }
+
+   stop();
+   JSZip.loadAsync(file)
+   .then(function(zip) {
+      start();
+      if (zip.files["dir/"]) {
+         doAsserts(zip, "dir/",           true,  "010000");
+      }
+      if (zip.files["dir_hidden/"]) {
+         doAsserts(zip, "dir_hidden/",    true,  "010010");
+      }
+      doAsserts(zip, "file",           false, "100000");
+      doAsserts(zip, "file_ro",        false, "100001");
+      doAsserts(zip, "file_hidden",    false, "100010");
+      doAsserts(zip, "file_ro_hidden", false, "100011");
+   })['catch'](assertNoError);
+}
+
+function reloadAndAssertUnixPermissions(file){
+   stop();
+   JSZip.loadAsync(file)
+   .then(function (zip) {
+      return zip.generateAsync({type:"string", platform:"UNIX"});
+   })
+   .then(function (content) {
+      start();
+      assertUnixPermissions(content);
+   })['catch'](assertNoError);
+}
+function reloadAndAssertDosPermissions(file){
+   stop();
+   JSZip.loadAsync(file)
+   .then(function (zip) {
+      return zip.generateAsync({type:"string", platform:"DOS"});
+   })
+   .then(function (content) {
+      start();
+      assertDosPermissions(content);
+   })['catch'](assertNoError);
+}
+testZipFile("permissions on linux : file created by zip", "ref/permissions/linux_zip.zip", assertUnixPermissions);
+testZipFile("permissions on linux : file created by zip, reloaded", "ref/permissions/linux_zip.zip", reloadAndAssertUnixPermissions);
+testZipFile("permissions on linux : file created by 7z", "ref/permissions/linux_7z.zip", assertUnixPermissions);
+testZipFile("permissions on linux : file created by 7z, reloaded", "ref/permissions/linux_7z.zip", reloadAndAssertUnixPermissions);
+testZipFile("permissions on linux : file created by file-roller on ubuntu", "ref/permissions/linux_file_roller-ubuntu.zip", assertUnixPermissions);
+testZipFile("permissions on linux : file created by file-roller on ubuntu, reloaded", "ref/permissions/linux_file_roller-ubuntu.zip", reloadAndAssertUnixPermissions);
+testZipFile("permissions on linux : file created by file-roller on xubuntu", "ref/permissions/linux_file_roller-xubuntu.zip", assertUnixPermissions);
+testZipFile("permissions on linux : file created by file-roller on xubuntu, reloaded", "ref/permissions/linux_file_roller-xubuntu.zip", reloadAndAssertUnixPermissions);
+testZipFile("permissions on linux : file created by ark", "ref/permissions/linux_ark.zip", assertUnixPermissions);
+testZipFile("permissions on linux : file created by ark, reloaded", "ref/permissions/linux_ark.zip", reloadAndAssertUnixPermissions);
+testZipFile("permissions on mac : file created by finder", "ref/permissions/mac_finder.zip", assertUnixPermissions);
+testZipFile("permissions on mac : file created by finder, reloaded", "ref/permissions/mac_finder.zip", reloadAndAssertUnixPermissions);
+
+
+testZipFile("permissions on windows : file created by the compressed folders feature", "ref/permissions/windows_compressed_folders.zip", assertDosPermissions);
+testZipFile("permissions on windows : file created by the compressed folders feature, reloaded", "ref/permissions/windows_compressed_folders.zip", reloadAndAssertDosPermissions);
+testZipFile("permissions on windows : file created by 7z", "ref/permissions/windows_7z.zip", assertDosPermissions);
+testZipFile("permissions on windows : file created by 7z, reloaded", "ref/permissions/windows_7z.zip", reloadAndAssertDosPermissions);
+testZipFile("permissions on windows : file created by izarc", "ref/permissions/windows_izarc.zip", assertDosPermissions);
+testZipFile("permissions on windows : file created by izarc, reloaded", "ref/permissions/windows_izarc.zip", reloadAndAssertDosPermissions);
+testZipFile("permissions on windows : file created by winrar", "ref/permissions/windows_winrar.zip", assertDosPermissions);
+testZipFile("permissions on windows : file created by winrar, reloaded", "ref/permissions/windows_winrar.zip", reloadAndAssertDosPermissions);
+
 
 // }}} Load file
 
