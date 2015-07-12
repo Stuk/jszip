@@ -21,6 +21,8 @@ section: main
   named "binarystring".
 * The `load()` method and the constructor with data (`new JSZip(data)`) have
   been replaced by `loadAsync()`.
+* When adding a file, the option `createFolders` now defaults to `true`. If
+  you don't want to create sub folders, set it to false.
 
 ```js
 // 2.x

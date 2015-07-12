@@ -373,18 +373,18 @@ testZipFile("Zip text, folder and image", "ref/all.zip", function(expected) {
    })['catch'](assertNoError);
 });
 
-test("Folders are not created by default", function() {
+test("Folders are created by default", function() {
    var zip = new JSZip();
    zip.file("test/Readme", "Hello World!\n");
    ok(zip.files["test/Readme"], "the file exists");
-   ok(!zip.files["test/"], "the folder doesn't exist");
+   ok(zip.files["test/"], "the folder exists");
 });
 
-test("Folders can be created with createFolders", function() {
+test("Folders can be avoided with createFolders", function() {
    var zip = new JSZip();
-   zip.file("test/Readme", "Hello World!\n", {createFolders: true});
+   zip.file("test/Readme", "Hello World!\n", {createFolders: false});
    ok(zip.files["test/Readme"], "the file exists");
-   ok(zip.files["test/"], "the folder exists");
+   ok(!zip.files["test/"], "the folder doesn't exist");
 });
 
 test("Finding a file", function() {
@@ -1970,7 +1970,7 @@ test("createFolders works on a folder", function () {
    }
 
    stop();
-   JSZip.loadAsync(file)
+   JSZip.loadAsync(file, {createFolders:false})
    .then(function(zip) {
       start();
       doAsserts(zip, "dir_777/", true,  "40777");
@@ -1992,7 +1992,7 @@ function assertDosPermissions(file){
    }
 
    stop();
-   JSZip.loadAsync(file)
+   JSZip.loadAsync(file, {createFolders:false})
    .then(function(zip) {
       start();
       if (zip.files["dir/"]) {
@@ -2010,7 +2010,7 @@ function assertDosPermissions(file){
 
 function reloadAndAssertUnixPermissions(file){
    stop();
-   JSZip.loadAsync(file)
+   JSZip.loadAsync(file, {createFolders:false})
    .then(function (zip) {
       return zip.generateAsync({type:"string", platform:"UNIX"});
    })
@@ -2021,7 +2021,7 @@ function reloadAndAssertUnixPermissions(file){
 }
 function reloadAndAssertDosPermissions(file){
    stop();
-   JSZip.loadAsync(file)
+   JSZip.loadAsync(file, {createFolders:false})
    .then(function (zip) {
       return zip.generateAsync({type:"string", platform:"DOS"});
    })
@@ -2086,10 +2086,10 @@ if (QUnit.urlParams.complexfiles) {
    });
 
    // a showcase in http://msdn.microsoft.com/en-us/windows/hardware/gg463429
-   testZipFile("Outlook2007_Calendar.xps", "ref/complex_files/Outlook2007_Calendar.xps", function(file) {
+   testZipFile("Outlook2007_Calendar.xps, createFolders: false", "ref/complex_files/Outlook2007_Calendar.xps", function(file) {
 
       stop();
-      JSZip.loadAsync(file)
+      JSZip.loadAsync(file, {createFolders: false})
       .then(function(zip) {
       // the zip file contains 15 entries.
          equal(zip.filter(function(){return true;}).length, 15, "the zip contains the good number of elements.");
@@ -2102,7 +2102,7 @@ if (QUnit.urlParams.complexfiles) {
    });
 
     // Same test as above, but with createFolders option set to true
-    testZipFile("Outlook2007_Calendar.xps", "ref/complex_files/Outlook2007_Calendar.xps", function(file) {
+    testZipFile("Outlook2007_Calendar.xps, createFolders: true", "ref/complex_files/Outlook2007_Calendar.xps", function(file) {
        stop();
        JSZip.loadAsync(file, {createFolders: true})
        .then(function(zip) {
@@ -2118,9 +2118,9 @@ if (QUnit.urlParams.complexfiles) {
 
    // an example file in http://cheeso.members.winisp.net/srcview.aspx?dir=js-unzip
    // the data come from http://www.antarctica.ac.uk/met/READER/upper_air/
-   testZipFile("AntarcticaTemps.xlsx", "ref/complex_files/AntarcticaTemps.xlsx", function(file) {
+   testZipFile("AntarcticaTemps.xlsx, createFolders: false", "ref/complex_files/AntarcticaTemps.xlsx", function(file) {
       stop();
-      JSZip.loadAsync(file)
+      JSZip.loadAsync(file, {createFolders: false})
       .then(function(zip) {
          // the zip file contains 17 entries.
          equal(zip.filter(function(){return true;}).length, 17, "the zip contains the good number of elements.");
@@ -2132,7 +2132,7 @@ if (QUnit.urlParams.complexfiles) {
    });
 
    // Same test as above, but with createFolders option set to true
-   testZipFile("AntarcticaTemps.xlsx", "ref/complex_files/AntarcticaTemps.xlsx", function(file) {
+   testZipFile("AntarcticaTemps.xlsx, createFolders: true", "ref/complex_files/AntarcticaTemps.xlsx", function(file) {
        stop();
        JSZip.loadAsync(file, {createFolders: true})
        .then(function(zip) {
@@ -2146,9 +2146,9 @@ if (QUnit.urlParams.complexfiles) {
    });
 
    // same as two up, but in the Open Document format
-   testZipFile("AntarcticaTemps.ods", "ref/complex_files/AntarcticaTemps.ods", function (file) {
+   testZipFile("AntarcticaTemps.ods, createFolders: false", "ref/complex_files/AntarcticaTemps.ods", function (file) {
        stop();
-       JSZip.loadAsync(file)
+       JSZip.loadAsync(file, {createFolders: false})
        .then(function(zip) {
           // the zip file contains 20 entries.
           equal(zip.filter(function () {return true;}).length, 20, "the zip contains the good number of elements.");
@@ -2161,7 +2161,7 @@ if (QUnit.urlParams.complexfiles) {
    });
 
    // same as above, but in the Open Document format
-   testZipFile("AntarcticaTemps.ods", "ref/complex_files/AntarcticaTemps.ods", function (file) {
+   testZipFile("AntarcticaTemps.ods, createFolders: true", "ref/complex_files/AntarcticaTemps.ods", function (file) {
        stop();
        JSZip.loadAsync(file, {createFolders: true})
        .then(function(zip) {
