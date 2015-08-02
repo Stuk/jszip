@@ -16,6 +16,7 @@ section: main
   `nodeStream()`.
 * The `generate()` method has been replaced by `generateAsync()` and 
   `generateNodeStream()`.
+* The `type` option in `generate()` is now mandatory.
 * The "text" type has been replaced by the "string" type, a binary string is
   named "binarystring".
 * The `load()` method and the constructor with data (`new JSZip(data)`) have
@@ -32,7 +33,7 @@ zip.file("test.txt").async("string")
 
 
 // 2.x
-zip.generate({type:"uint8array"});
+zip.generate();
 // 3.x
 zip.generateAsync({type:"uint8array"})
 .then(function (content) {

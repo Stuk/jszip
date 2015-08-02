@@ -13,7 +13,7 @@ name                | type     | default  | description
 options             | object   |          | the options to generate the zip file :
 options.compression | string   | `STORE` (no compression) | the default file compression method to use. Available methods are `STORE` and `DEFLATE`. You can also provide your own compression method.
 options.compressionOptions | object | `null` | the options to use when compressing the file, see below.
-options.type        | string   | `base64` | The type of zip to return, see below for the other types.
+options.type        | string   |          | The type of zip to return, see below for the other types.
 options.comment     | string   |          | The comment to use for the zip file.
 options.mimeType    | string   | `application/zip` | mime-type for the generated file. Useful when you need to generate a file with a different extension, ie: ".ods".
 options.platform    | string   | `DOS`    | The platform to use when generating the zip file.
@@ -22,7 +22,7 @@ onUpdate            | function |          | The optional function called on each
 
 Possible values for `type` :
 
-* `base64` (default) : the result will be a string, the binary in a base64 form.
+* `base64` : the result will be a string, the binary in a base64 form.
 * `binarystring` (or `string`, deprecated) : the result will be a string in "binary" form, using 1 byte per char (2 bytes).
 * `uint8array` : the result will be a Uint8Array containing the zip. This requires a compatible browser.
 * `arraybuffer` : the result will be a ArrayBuffer containing the zip. This requires a compatible browser.

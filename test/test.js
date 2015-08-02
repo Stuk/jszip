@@ -1262,7 +1262,7 @@ test("DEFLATE level on generate()", function() {
       return oldCompressWorker(options);
    };
    stop();
-   zip.generateAsync({compression:'DEFLATE', compressionOptions : {level:5}})
+   zip.generateAsync({type:"string", compression:'DEFLATE', compressionOptions : {level:5}})
    .then(function () {
       start();
       JSZip.compressions.DEFLATE.compressWorker = oldCompressWorker;
@@ -1281,21 +1281,32 @@ test("DEFLATE level on file() takes precedence", function() {
       return oldCompressWorker(options);
    };
    stop();
-   zip.generateAsync({compression:'DEFLATE', compressionOptions : {level:5}})
+   zip.generateAsync({type:"string",compression:'DEFLATE', compressionOptions : {level:5}})
    .then(function () {
       start();
       JSZip.compressions.DEFLATE.compressWorker = oldCompressWorker;
-   });
+   })['catch'](assertNoError);
 });
 
 
 test("unknown compression throws an exception", function () {
    testGenerate({
       prepare : createZipAll,
-      options : {compression:'MAYBE'},
+      options : {type:"string",compression:'MAYBE'},
       assertions : function (err, result) {
          equal(result, null, "no data");
          ok(err.message.match("not a valid compression"), "the error message is useful");
+      }
+   });
+});
+
+test("missing type throws an exception", function () {
+   testGenerate({
+      prepare : createZipAll,
+      options : {},
+      assertions : function (err, result) {
+         equal(result, null, "no data");
+         ok(err.message.match("No output type specified."), "the error message is useful");
       }
    });
 });
