@@ -19,7 +19,7 @@ section: main
 // 2.x
 zip.file("test.txt").asText();
 // 3.x
-zip.file("test.txt")
+zip.file("test.txt").async("string")
 .then(function (content) {
     // use content
 });
