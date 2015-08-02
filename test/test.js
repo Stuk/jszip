@@ -690,6 +690,7 @@ function testFileDataGetters (opts) {
       opts.rawData = opts.textData;
    }
    _actualTestFileDataGetters.testGetter(opts, "string");
+   _actualTestFileDataGetters.testGetter(opts, "text");
    _actualTestFileDataGetters.testGetter(opts, "binarystring");
    _actualTestFileDataGetters.testGetter(opts, "arraybuffer");
    _actualTestFileDataGetters.testGetter(opts, "uint8array");
@@ -707,6 +708,7 @@ function testFileDataGetters (opts) {
          rawData : opts.rawData
       };
       _actualTestFileDataGetters.testGetter(reloaded, "string");
+      _actualTestFileDataGetters.testGetter(reloaded, "text");
       _actualTestFileDataGetters.testGetter(reloaded, "binarystring");
       _actualTestFileDataGetters.testGetter(reloaded, "arraybuffer");
       _actualTestFileDataGetters.testGetter(reloaded, "uint8array");
@@ -738,6 +740,9 @@ var _actualTestFileDataGetters = {
    assert_string: function (opts, err, txt, testName) {
       equal(err, null, testName + "no error");
       equal(txt, opts.textData, testName + "content ok");
+   },
+   assert_text: function () {
+      this.assert_string.apply(this, arguments);
    },
    assert_binarystring : function (opts, err, bin, testName) {
       equal(err, null, testName + "no error");
