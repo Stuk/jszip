@@ -1,5 +1,5 @@
 ---
-title: "stream(type[, onUpdate])"
+title: "nodeStream(type[, onUpdate])"
 layout: default
 section: api
 ---
@@ -25,7 +25,7 @@ __Example__
 ```js
 zip
 .file("my_text.txt")
-.stream("nodebuffer")
+.nodeStream("nodebuffer")
 .pipe(fs.createWriteStream('/tmp/my_text.txt'))
 .on("end", function () {...});
 ```

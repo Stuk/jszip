@@ -34,10 +34,10 @@ __Example__
 
 ```js
 zip
-.generateStream({type:"uint8array"})
+.generateInternalStream({type:"uint8array"})
 .on('data', function (data, metadata) {
-    // data is a Uint8Array because that's the type asked in generateStream
-    // metadata contains for example currentFile and percent, see the generateStream doc.
+    // data is a Uint8Array because that's the type asked in generateInternalStream
+    // metadata contains for example currentFile and percent, see the generateInternalStream doc.
 })
 .on('error', function (e) {
     // e is the error

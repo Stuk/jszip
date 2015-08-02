@@ -1,5 +1,5 @@
 ---
-title: "generateStream(options[, onUpdate])"
+title: "generateNodeStream(options[, onUpdate])"
 layout: default
 section: api
 ---
@@ -23,7 +23,7 @@ __Example__
 
 ```js
 zip
-.generateStream({type:'nodebuffer',streamFiles:true})
+.generateNodeStream({type:'nodebuffer',streamFiles:true})
 .pipe(fs.createWriteStream('out.zip'))
 .on('end', function () {
     console.log("out.zip written.");

@@ -104,7 +104,7 @@ var zip = new JSZip();
 // ... and other manipulations
 
 zip
-.generateStream({type:'nodebuffer',streamFiles:true})
+.generateNodeStream({type:'nodebuffer',streamFiles:true})
 .pipe(fs.createWriteStream('out.zip'))
 .on('end', function () {
     console.log("out.zip written.");

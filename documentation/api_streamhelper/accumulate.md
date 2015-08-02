@@ -28,11 +28,11 @@ __Example__
 
 ```js
 zip
-.generateStream({type:"uint8array"})
+.generateInternalStream({type:"uint8array"})
 .accumulate(function callback(err, data) {
     // err contains the error if something went wrong, null otherwise.
-    // data contains here the complete zip file as a uint8array (the type asked in generateStream)
+    // data contains here the complete zip file as a uint8array (the type asked in generateInternalStream)
 }, function updateCallback(metadata) {
-    // metadata contains for example currentFile and percent, see the generateStream doc.
+    // metadata contains for example currentFile and percent, see the generateInternalStream doc.
 });
 ```

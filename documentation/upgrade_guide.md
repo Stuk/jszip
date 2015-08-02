@@ -7,9 +7,9 @@ section: main
 ### From 2.x to 3.0.0
 
 * On `ZipObject`, the synchronous getters has been replaced by `async()` and
-  `stream()`.
+  `nodeStream()`.
 * The `generate()` method has been replaced by `generateAsync()` and 
-  `generateStream()`.
+  `generateNodeStream()`.
 * The "text" type has been replaced by the "string" type, a binary string is
   named "binarystring".
 * The `load()` method and the constructor with data (`new JSZip(data)`) have

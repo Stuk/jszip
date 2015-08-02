@@ -36,8 +36,8 @@ The
 [`generateAsync` method]({{site.baseurl}}/documentation/api_jszip/generate_async.html)
 hold the full result in memory but doesn't freeze the browser. If the result
 is too big, and if you can't use the
-[`stream` method]({{site.baseurl}}/documentation/api_zipobject/stream.html) or the
-[`generateStream` method]({{site.baseurl}}/documentation/api_jszip/generate_stream.html)
+[`nodeStream` method]({{site.baseurl}}/documentation/api_zipobject/node_stream.html) or the
+[`generateNodeStream` method]({{site.baseurl}}/documentation/api_jszip/generate_node_stream.html)
 you need to use the underlying
 [`StreamHelper`]({{site.baseurl}}/documentation/api_streamhelper.html) to
 handle the result chunk by chunk and `pause()`/`resume()` to handle the

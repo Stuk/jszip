@@ -17,7 +17,7 @@ __Example__
 
 ```js
 zip
-.generateStream({type:"uint8array"})
+.generateInternalStream({type:"uint8array"})
 .on('data', function(chunk) {
 
     // if we push the chunk to an other service which is overloaded, we can
