@@ -1467,11 +1467,33 @@ testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file) {
    });
 });
 
-testZipFile("bad decompressed size", "ref/invalid/bad_decompressed_size.zip", function(file) {
+testZipFile("bad decompressed size, read a file", "ref/invalid/bad_decompressed_size.zip", function(file) {
    stop();
    JSZip.loadAsync(file)
    .then(function (zip) {
       return zip.file("Hello.txt").async("string");
+   })
+   .then(function success() {
+      ok(false, "successful result in an error test");
+      start();
+   }, function failure(e) {
+      ok(e.message.match("size mismatch"), "async call : the error message is useful");
+      start();
+   });
+});
+
+testZipFile("bad decompressed size, generate a zip", "ref/invalid/bad_decompressed_size.zip", function(file) {
+   stop();
+   JSZip.loadAsync(file)
+   .then(function (zip) {
+
+      // add other files to be sure to trigger the right code path
+      zip.file("zz", "zz");
+
+      return zip.generateAsync({
+         type:"string",
+         compression:"DEFLATE" // a different compression to force a read
+      });
    })
    .then(function success() {
       ok(false, "successful result in an error test");
