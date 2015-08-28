@@ -50,7 +50,7 @@
     "es6-promise": "~2.1.0",
     "pako": "~0.2.5",
     "readable-stream": "~1.1.0",
-    "setimmediate2": "~1.1.4"
+    "asap": "~2.0.3"
   },
   "license": "MIT or GPLv3"
 }
