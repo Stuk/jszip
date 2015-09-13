@@ -13,7 +13,6 @@ decode the binary content as a text and corrupt it. See
 
 ### My browser crashes / becomes unresponsive / never finish the execution
 
-That happens if you try to handle to much data. If possible, try again with a
-small (some KB) zip file to see if your code is correct. See
-[this page]({{site.baseurl}}/documentation/limitations.html) for more
-informations.
+That happens if you try to handle to much data with the synchronous API. If
+possible, try the asynchronous API, see
+[this page]({{site.baseurl}}/documentation/limitations.html) for more informations.

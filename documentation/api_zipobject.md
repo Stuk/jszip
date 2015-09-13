@@ -5,7 +5,7 @@ section: api
 ---
 
 This represents an entry in the zip file. If the entry comes from an existing
-archive previously [loaded]({{site.baseurl}}/documentation/api_jszip/load.html), the content
+archive previously [loaded]({{site.baseurl}}/documentation/api_jszip/load_async.html), the content
 will be automatically decompressed/converted first.
 
 ### Attributes
@@ -25,13 +25,3 @@ attribute name              | type        | description
 `options.date`              | date        | **Deprecated**, use `date`. See [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
 `options.compression`       | compression | see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
 
-
-### Getters
-
-method            | return type   | description
-------------------|---------------|-------------
-`asText()`        | string        | the content as an unicode string.
-`asBinary()`      | string        | the content as binary string.
-`asArrayBuffer()` | ArrayBuffer   | need a [compatible browser]({{site.baseurl}}/documentation/api_jszip/support.html).
-`asUint8Array()`  | Uint8Array    | need a [compatible browser]({{site.baseurl}}/documentation/api_jszip/support.html).
-`asNodeBuffer()`  | nodejs Buffer | need [nodejs]({{site.baseurl}}/documentation/api_jszip/support.html).

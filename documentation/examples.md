@@ -66,10 +66,14 @@ You can access the file content with `.file(name)` and
 [its getters]({{site.baseurl}}/documentation/api_zipobject.html) :
 
 ```js
-zip.file("hello.txt").asText(); // "Hello World\n"
+zip.file("hello.txt").async("string").then(function (data) {
+  // data is "Hello World\n"
+});
 
 if (JSZip.support.uint8array) {
-  zip.file("hello.txt").asUint8Array(); // Uint8Array { 0=72, 1=101, 2=108, more...}
+  zip.file("hello.txt").async("uint8array").then(function (data) {
+    // data is Uint8Array { 0=72, 1=101, 2=108, more...}
+  });
 }
 ```
 
@@ -84,32 +88,33 @@ zip.remove("photos"); // by removing the folder, you also remove its content.
 
 ### Generate a zip file
 
-With `.generate(options)` you can generate a zip file (not a real file but its
-representation in memory). Check
+With `.generateAsync(options)` or `.generateNodeStream(options)` you can generate
+a zip file (not a real file but its representation in memory). Check
 [this page]({{site.baseurl}}/documentation/howto/write_zip.html) for more
 informations on how to write / give the file to the user.
 
 ```js
-var content = null;
+var promise = null;
 if (JSZip.support.uint8array) {
-  content = zip.generate({type : "uint8array"});
+  promise = zip.generateAsync({type : "uint8array"});
 } else {
-  content = zip.generate({type : "string"});
+  promise = zip.generateAsync({type : "string"});
 }
 ```
 
 ### Read a zip file
 
-With `.load(data)` you can load a zip file. Check
+With `.loadAsync(data)` you can load a zip file. Check
 [this page]({{site.baseurl}}/documentation/howto/read_zip.html) to see how to
 do properly (it's more tricky that it seems).
 
 ```js
 var new_zip = new JSZip();
 // more files !
-new_zip.load(content);
-
-// you now have every files contained in the loaded zip
-new_zip.file("hello.txt").asText(); // "Hello World\n"
+new_zip.loadAsync(content)
+.then(function(zip) {
+    // you now have every files contained in the loaded zip
+    new_zip.file("hello.txt").async("string"); // a promise of "Hello World\n"
+});
 ```
 

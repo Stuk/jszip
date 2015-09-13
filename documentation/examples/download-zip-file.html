@@ -34,13 +34,11 @@ section: example
   var blobLink = document.getElementById('blob');
   if (JSZip.support.blob) {
     function downloadWithBlob() {
-      try {
-        var blob = zip.generate({type:"blob"});
-        // see FileSaver.js
+      zip.generateAsync({type:"blob"}).then(function (blob) {
         saveAs(blob, "hello.zip");
-      } catch(e) {
-        blobLink.innerHTML += " " + e;
-      }
+      }, function (err) {
+          blobLink.innerHTML += " " + err;
+      });
       return false;
     }
     bindEvent(blobLink, 'click', downloadWithBlob);
@@ -50,7 +48,11 @@ section: example
 
   // data URI
   function downloadWithDataURI() {
-    window.location = "data:application/zip;base64," + zip.generate({type:"base64"});
+    zip.generateAsync({type:"base64"}).then(function (base64) {
+      window.location = "data:application/zip;base64," + base64;
+    }, function (err) {
+      // shouldn't happen with a base64...
+    });
   }
   var dataUriLink = document.getElementById('data_uri');
   bindEvent(dataUriLink, 'click', downloadWithDataURI);

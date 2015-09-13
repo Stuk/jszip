@@ -120,7 +120,9 @@ var req = http.get(url.parse("http://localhost/.../file.zip"), function (res) {
 
     // here we go !
     var zip = new JSZip(buf);
-    console.log(zip.file("content.txt").asText());
+    zip.file("content.txt").async("string").then(function (text) {
+      console.log(text);
+    });
   });
 });
 
@@ -147,6 +149,8 @@ request({
     return;
   }
   var zip = new JSZip(body);
-  console.log(zip.file("content.txt").asText());
+  zip.file("content.txt").async("string").then(function (text) {
+    console.log(text);
+  });
 });
 ```

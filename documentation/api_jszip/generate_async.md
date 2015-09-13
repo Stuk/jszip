@@ -1,5 +1,5 @@
 ---
-title: "generate(options)"
+title: "generateAsync(options[, onUpdate])"
 layout: default
 section: api
 ---
@@ -8,21 +8,23 @@ __Description__ : Generates the complete zip file.
 
 __Arguments__
 
-name                | type    | default | description
---------------------|---------|---------|------------
-options             | object  |         | the options to generate the zip file :
-options.base64      | boolean | false   | **deprecated**, use `type` instead. If `type` is not used, set to `false` to get the result as a raw byte string, `true` to encode it as base64.
-options.compression | string  | `STORE` (no compression) | the default file compression method to use. Available methods are `STORE` and `DEFLATE`. You can also provide your own compression method.
+name                | type     | default  | description
+--------------------|----------|----------|------------
+options             | object   |          | the options to generate the zip file :
+options.base64      | boolean  | false    | **deprecated**, use `type` instead. If `type` is not used, set to `false` to get the result as a raw byte string, `true` to encode it as base64.
+options.compression | string   | `STORE` (no compression) | the default file compression method to use. Available methods are `STORE` and `DEFLATE`. You can also provide your own compression method.
 options.compressionOptions | object | `null` | the options to use when compressing the file, see below.
-options.type        | string  | `base64` | The type of zip to return, see below for the other types.
-options.comment     | string  |          | The comment to use for the zip file.
-options.mimeType    | string  | `application/zip` | mime-type for the generated file. Useful when you need to generate a file with a different extension, ie: ".ods".
-options.platform    | string  | `DOS`    | The platform to use when generating the zip file.
+options.type        | string   | `base64` | The type of zip to return, see below for the other types.
+options.comment     | string   |          | The comment to use for the zip file.
+options.mimeType    | string   | `application/zip` | mime-type for the generated file. Useful when you need to generate a file with a different extension, ie: ".ods".
+options.platform    | string   | `DOS`    | The platform to use when generating the zip file.
+options.streamFiles | boolean  | false    | Stream the files and create file descriptors, see below.
+onUpdate            | function |          | The optional function called on each internal update with the metadata.
 
 Possible values for `type` :
 
 * `base64` (default) : the result will be a string, the binary in a base64 form.
-* `string` : the result will be a string in "binary" form, using 1 byte per char (2 bytes).
+* `binarystring` (or `string`, deprecated) : the result will be a string in "binary" form, using 1 byte per char (2 bytes).
 * `uint8array` : the result will be a Uint8Array containing the zip. This requires a compatible browser.
 * `arraybuffer` : the result will be a ArrayBuffer containing the zip. This requires a compatible browser.
 * `blob` : the result will be a Blob containing the zip. This requires a compatible browser.
@@ -46,6 +48,15 @@ encoding of this field and JSZip will use UTF-8. With non ASCII characters you
 might get encoding issues if the file archiver doesn't use UTF-8 to decode the
 comment.
 
+Note for the `streamFiles` option : in a zip file, the size and the crc32 of
+the content are placed before the actual content : to write it we must process
+the whole file. When this option is `false` (the default) the processed file is
+held in memory. It takes more memory but generates a zip file which should be
+read by every program.
+When this options is `true`, we stream the file and use data descriptors at the
+end of the entry. This option uses less memory but some program might not
+support data descriptors (and won't accept the generated zip file).
+
 If not set, JSZip will use the field `comment` on its `options`.
 
 Possible values for `platform` : `DOS` and `UNIX`. It also accepts nodejs
@@ -58,7 +69,15 @@ If you set the platform value on nodejs, be sure to use `process.platform`.
 force the platform to `UNIX` the generated zip file will have a strange
 behavior on UNIX platforms.
 
-__Returns__ : The generated zip file.
+__Metadata__ : the metadata are :
+
+name        | type   | description
+------------|--------|------------
+percent     | number | the percent of completion (a double between 0 and 100)
+currentFile | string | the name of the current file being processed, if any.
+
+__Returns__ : A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+of the generated zip file.
 
 __Throws__ : An exception if the asked `type` is not available in the browser,
 see [JSZip.support]({{site.baseurl}}/documentation/api_jszip/support.html).
@@ -68,19 +87,25 @@ see [JSZip.support]({{site.baseurl}}/documentation/api_jszip/support.html).
 __Example__
 
 ```js
-var content = zip.generate({type:"blob"});
-// see FileSaver.js
-saveAs(content, "hello.zip");
+zip.generateAsync({type:"blob"})
+.then(function (content) {
+    // see FileSaver.js
+    saveAs(content, "hello.zip");
+});
 ```
 
 ```js
-var content = zip.generate({type:"base64"});
-location.href="data:application/zip;base64,"+content;
+zip.generateAsync({type:"base64"})
+.then(function (content) {
+    location.href="data:application/zip;base64,"+content;
+});
 ```
 
 ```js
-var content = zip.generate({type:"nodebuffer"});
-require("fs").writeFile("hello.zip", content, function(err){/*...*/});
+zip.generateAsync({type:"nodebuffer"});
+.then(function (content) {
+    require("fs").writeFile("hello.zip", content, function(err){/*...*/});
+});
 ```
 
 ```js
@@ -112,7 +137,7 @@ conf2.folder("menubar");
 conf2.folder("progressbar");
 conf2.folder("toolbar");
 
-var manifest = "<..."; //xml containing manifest.xml 
+var manifest = "<..."; //xml containing manifest.xml
 var styles = "<..."; //xml containing styles.xml
 var settings = "<..."; //xml containing settings.xml
 var meta = "<..."; //xml containing meta.xml
@@ -121,19 +146,20 @@ var content = "<..."; //xml containing content.xml
 var metaInf = zip.folder("META-INF");
 metaInf.file("manifest.xml", manifest);
 zip.file("styles.xml", styles);
-zip.file("settings.xml", settings); 
+zip.file("settings.xml", settings);
 zip.file("meta.xml", meta);
 zip.file("content.xml", content);
 
 //Generate the file
-var odsFile = zip.generate({type: "blob", mimeType: "application/ods", compression: "DEFLATE"});
-
-var url = window.URL.createObjectURL(odsFile);
-var link = document.getElementById("link"); //I suppose you'll have a link with this id :)
-link.download = "testjs.ods";
-link.href = url;
-
+zip.generateAsync({
+    type: "blob",
+    mimeType: "application/ods",
+    compression: "DEFLATE"
+}).then(function (odsFile) {
+    var url = window.URL.createObjectURL(odsFile);
+    var link = document.getElementById("link"); //I suppose you'll have a link with this id :)
+    link.download = "testjs.ods";
+    link.href = url;
+});
 
 ```
-
-

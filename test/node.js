@@ -1,3 +1,5 @@
+'use strict';
+
 var fs = require("fs");
 
 global.JSZip = require("../lib/index");
@@ -7,3 +9,6 @@ global.JSZipTestUtils = {
         fs.readFile(name, "binary", callback);
     }
 };
+process.on('uncaughtException', function(err) {
+      console.log('uncaughtException: ' + err, err.stack);
+});

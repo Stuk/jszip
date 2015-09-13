@@ -18,8 +18,10 @@ With recent browsers, the easiest way is to use `saveAs` or a polyfill, see
 [FileSaver.js](https://github.com/eligrey/FileSaver.js) :
 
 ```js
-var blob = zip.generate({type:"blob"});
-saveAs(blob, "hello.zip");
+zip.generateAsync({type:"blob"})
+.then(function (blob) {
+    saveAs(blob, "hello.zip");
+});
 ```
 
 Under the hood, the polyfill uses the native `saveAs` from the
@@ -34,7 +36,9 @@ For older browsers that support [data URI](http://caniuse.com/datauri), you can 
 do the following :
 
 ```js
-location.href="data:application/zip;base64," + zip.generate({type:"base64"});
+zip.generateAsync({type:"base64"}).then(function (base64) {
+    location.href="data:application/zip;base64," + base64;
+});
 ```
 
 The biggest issue here is that the filenames are very awkward, Firefox
@@ -60,13 +64,16 @@ with the following changes:
 ```js
 zip = new JSZip();
 zip.file("Hello.", "hello.txt");
-Downloadify.create('downloadify',{
-...
-  data: function(){
-    return zip.generate({type:"base64"});
-  },
-...
-  dataType: 'base64'
+
+zip.generateAsync({type:"base64"}).then(function (base64) {
+    Downloadify.create('downloadify',{
+    ...
+    data: function(){
+        return base64;
+    },
+    ...
+    dataType: 'base64'
+    });
 });
 ```
 
@@ -96,10 +103,11 @@ var zip = new JSZip();
 // zip.file("file", content);
 // ... and other manipulations
 
-var buffer = zip.generate({type:"nodebuffer"});
-
-fs.writeFile("test.zip", buffer, function(err) {
-  if (err) throw err;
+zip
+.generateNodeStream({type:'nodebuffer',streamFiles:true})
+.pipe(fs.createWriteStream('out.zip'))
+.on('end', function () {
+    console.log("out.zip written.");
 });
 ```
 

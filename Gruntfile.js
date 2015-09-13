@@ -1,4 +1,5 @@
 /*jshint node: true */
+'use strict';
 module.exports = function(grunt) {
   var browsers = [{
       browserName: "iphone",
@@ -16,6 +17,10 @@ module.exports = function(grunt) {
       platform: "XP"
   }, {
       browserName: "internet explorer",
+      platform: "WIN8.1",
+      version: "11"
+  }, {
+      browserName: "internet explorer",
       platform: "WIN8",
       version: "10"
   }, {
@@ -31,6 +36,10 @@ module.exports = function(grunt) {
       platform: "XP",
       version: "7"
   }, {
+      browserName: "internet explorer",
+      platform: "XP",
+      version: "6"
+  }, {
       browserName: "opera",
       platform: "Windows 2008",
       version: "12"
@@ -38,6 +47,14 @@ module.exports = function(grunt) {
       browserName: "safari",
       platform: "OS X 10.8",
       version: "6"
+  }, {
+      browserName: "safari",
+      platform: "OS X 10.9",
+      version: "7"
+  }, {
+      browserName: "safari",
+      platform: "OS X 10.10",
+      version: "8"
   }];
 
   var tags = [];
@@ -60,9 +77,9 @@ module.exports = function(grunt) {
           all: {
               options: {
                   urls: ["http://127.0.0.1:9999/test/index.html"],
-                  tunnelTimeout: 5,
                   build: process.env.TRAVIS_JOB_ID,
-                  concurrency: 3,
+                  throttled: 3,
+                  "max-duration" : 600, // seconds, IE6 is slow
                   browsers: browsers,
                   testname: "qunit tests",
                   tags: tags
@@ -73,7 +90,7 @@ module.exports = function(grunt) {
             options: {
                 jshintrc: "./.jshintrc"
             },
-            all: ['./lib/*.js']
+            all: ['./lib/**/*.js']
         },
     browserify: {
       all: {
@@ -81,7 +98,7 @@ module.exports = function(grunt) {
           'dist/jszip.js': ['lib/index.js']
         },
         options: {
-          bundleOptions: {
+          browserifyOptions: {
             standalone: 'JSZip',
             insertGlobalVars : {
               Buffer: function () {
@@ -91,13 +108,8 @@ module.exports = function(grunt) {
               }
             }
           },
-          postBundleCB: function(err, src, done) {
-            // add the license
-            var license = require('fs').readFileSync('lib/license_header.js');
-            // remove the source mapping of zlib.js, see #75
-            var srcWithoutSourceMapping = src.replace(/\/\/@ sourceMappingURL=raw..flate.min.js.map/g, '');
-            done(err, license + srcWithoutSourceMapping);
-          }
+          ignore : ["./lib/nodejs/*"],
+          banner : require('fs').readFileSync('lib/license_header.js')
         }
       }
     },
