@@ -34,19 +34,19 @@
     "inflate"
   ],
   "devDependencies": {
-    "qunit": "~0.6.3",
+    "qunit": "^0.7.6",
     "grunt": "~0.4.1",
     "grunt-cli": "~0.1.9",
-    "grunt-saucelabs": "~7.0.0",
-    "grunt-contrib-connect": "~0.7.1",
-    "jshint": "~2.5.1",
-    "browserify": "~4.1.4",
-    "grunt-browserify": "~2.1.0",
-    "grunt-contrib-jshint": "~0.10.0",
-    "grunt-contrib-uglify": "~0.4.0",
+    "grunt-saucelabs": "~8.6.1",
+    "grunt-contrib-connect": "~0.11.2",
+    "jshint": "~2.8.0",
+    "browserify": "~11.2.0",
+    "grunt-browserify": "~4.0.1",
+    "grunt-contrib-jshint": "~0.11.3",
+    "grunt-contrib-uglify": "~0.9.2",
     "jszip-utils": "~0.0.2"
   },
-  "dependencies":{
+  "dependencies": {
     "pako": "~0.2.5"
   },
   "license": "(MIT OR GPL-3.0)"
