@@ -80,8 +80,8 @@ module.exports = function(grunt) {
         files: {
           'dist/jszip.js': ['lib/index.js']
         },
-        browserifyOptions: {
-          bundleOptions: {
+        options: {
+          browserifyOptions: {
             standalone: 'JSZip',
             insertGlobalVars : {
               Buffer: function () {
@@ -95,7 +95,7 @@ module.exports = function(grunt) {
             // add the license
             var license = require('fs').readFileSync('lib/license_header.js');
             // remove the source mapping of zlib.js, see #75
-            var srcWithoutSourceMapping = src.replace(/\/\/@ sourceMappingURL=raw..flate.min.js.map/g, '');
+            var srcWithoutSourceMapping = src.toString().replace(/\/\/@ sourceMappingURL=raw..flate.min.js.map/g, '');
             done(err, license + srcWithoutSourceMapping);
           }
         }
