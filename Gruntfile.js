@@ -80,7 +80,7 @@ module.exports = function(grunt) {
         files: {
           'dist/jszip.js': ['lib/index.js']
         },
-        options: {
+        browserifyOptions: {
           bundleOptions: {
             standalone: 'JSZip',
             insertGlobalVars : {
