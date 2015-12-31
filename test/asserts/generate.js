@@ -90,7 +90,7 @@ testGenerateFor([{
                     ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
                 } else {
                     equal(result, null, "no data");
-                    ok(err.message.match("not supported by this browser"), "the error message is useful");
+                    ok(err.message.match("not supported by this platform"), "the error message is useful");
                 }
             }
         });
@@ -108,7 +108,7 @@ testGenerateFor([{
                     ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
                 } else {
                     equal(result, null, "no data");
-                    ok(err.message.match("not supported by this browser"), "the error message is useful");
+                    ok(err.message.match("not supported by this platform"), "the error message is useful");
                 }
             }
         });
@@ -129,7 +129,7 @@ testGenerateFor([{
                     ok(JSZipTestUtils.similar(actual, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
                 } else {
                     equal(result, null, "no data");
-                    ok(err.message.match("not supported by this browser"), "the error message is useful");
+                    ok(err.message.match("not supported by this platform"), "the error message is useful");
                 }
             }
         });
@@ -148,7 +148,7 @@ testGenerateFor([{
                     equal(result.size, expected.length, "the result has the right length");
                 } else {
                     equal(result, null, "no data");
-                    ok(err.message.match("not supported by this browser"), "the error message is useful");
+                    ok(err.message.match("not supported by this platform"), "the error message is useful");
                 }
             }
         });
@@ -167,7 +167,7 @@ testGenerateFor([{
                     equal(result.size, expected.length, "the result has the right length");
                 } else {
                     equal(result, null, "no data");
-                    ok(err.message.match("not supported by this browser"), "the error message is useful");
+                    ok(err.message.match("not supported by this platform"), "the error message is useful");
                 }
             }
         });

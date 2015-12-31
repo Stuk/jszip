@@ -12,5 +12,6 @@ JSZip.support object. It contains the following boolean properties :
 * `uint8array` : true if JSZip can read and generate Uint8Array, false otherwise.
 * `blob` : true if JSZip can generate Blob, false otherwise.
 * `nodebuffer` : true if JSZip can read and generate nodejs Buffer, false otherwise.
+* `nodestream` : true if JSZip can read and generate nodejs stream, false otherwise.
 
 

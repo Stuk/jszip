@@ -157,7 +157,7 @@ QUnit.module("file", function () {
                 equal(actual, opts.rawData, testName + "content ok");
             } else {
                 equal(buffer, null, testName + "no data");
-                ok(err.message.match("not supported by this browser"), testName + "the error message is useful");
+                ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
             }
         },
         assert_uint8array : function (opts, err, bufferView, testName) {
@@ -168,7 +168,7 @@ QUnit.module("file", function () {
                 equal(actual, opts.rawData, testName + "content ok");
             } else {
                 equal(bufferView, null, testName + "no data");
-                ok(err.message.match("not supported by this browser"), testName + "the error message is useful");
+                ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
             }
         },
         assert_nodebuffer : function (opts, err, buffer, testName) {
@@ -179,12 +179,12 @@ QUnit.module("file", function () {
                 equal(actual, opts.rawData, testName + "content ok");
             } else {
                 equal(buffer, null, testName + "no data");
-                ok(err.message.match("not supported by this browser"), testName + "the error message is useful");
+                ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
             }
         },
         assert_unknown : function (opts, err, buffer, testName) {
             equal(buffer, null, testName + "no data");
-            ok(err.message.match("not supported by this browser"), testName + "the error message is useful");
+            ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
         }
     };
 
