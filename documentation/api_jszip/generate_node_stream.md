@@ -14,6 +14,7 @@ options             | object   |         | the options to generate the zip file,
 onUpdate            | function |         | The optional function called on each internal update with the metadata.
 
 The `type` parameter has here the default value of `nodebuffer`.
+Only `nodebuffer` is currently supported.
 
 __Metadata__ : see [the metadata of `generateAsync()`]({{site.baseurl}}/documentation/api_jszip/generate_async.html).
 
