@@ -96,6 +96,7 @@ QUnit.module("file", function () {
         _actualTestFileDataGetters.testGetter(opts, "arraybuffer");
         _actualTestFileDataGetters.testGetter(opts, "uint8array");
         _actualTestFileDataGetters.testGetter(opts, "nodebuffer");
+        _actualTestFileDataGetters.testGetter(opts, "blob");
         _actualTestFileDataGetters.testGetter(opts, "unknown");
 
         stop();
@@ -114,6 +115,7 @@ QUnit.module("file", function () {
             _actualTestFileDataGetters.testGetter(reloaded, "arraybuffer");
             _actualTestFileDataGetters.testGetter(reloaded, "uint8array");
             _actualTestFileDataGetters.testGetter(reloaded, "nodebuffer");
+            _actualTestFileDataGetters.testGetter(reloaded, "blob");
             _actualTestFileDataGetters.testGetter(reloaded, "unknown");
 
             opts.zip.file("file.txt", "changing the content after the call won't change the result");
@@ -179,6 +181,17 @@ QUnit.module("file", function () {
                 equal(actual, opts.rawData, testName + "content ok");
             } else {
                 equal(buffer, null, testName + "no data");
+                ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
+            }
+        },
+        assert_blob : function (opts, err, blob, testName) {
+            if (JSZip.support.blob) {
+                equal(err, null, testName + "no error");
+                ok(blob instanceof Blob, testName + "the result is a instance of Blob");
+                equal(blob.type,  "", testName + "the result has the rigth mime type");
+                equal(blob.size, opts.rawData.length, testName + "the result has the right length");
+            } else {
+                equal(blob, null, testName + "no data");
                 ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
             }
         },
