@@ -2,7 +2,7 @@
     "undef": true,
     "strict": true,
     "sub": true,
-    "es3": true,
+    "esversion": 3,
 
     "globals": {
         "TextEncoder": false,

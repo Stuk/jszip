@@ -109,7 +109,7 @@ module.exports = function(grunt) {
             }
           },
           ignore : ["./lib/nodejs/*"],
-          banner : require('fs').readFileSync('lib/license_header.js')
+          banner : grunt.file.read('lib/license_header.js')
         }
       }
     },
@@ -117,7 +117,8 @@ module.exports = function(grunt) {
       options: {
         report: 'gzip',
         mangle: true,
-        preserveComments: 'some'
+        preserveComments: false,
+        banner : grunt.file.read('lib/license_header.js')
       },
       all: {
         src: 'dist/jszip.js',
