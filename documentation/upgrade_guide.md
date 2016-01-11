@@ -12,6 +12,7 @@ section: main
     on `ZipObject` (see the [2.3 upgrade section](#from-2.2.2-to-2.3.0))
   * `JSZip.utils`
   * `JSZip.prototype.crc32`, `JSZip.prototype.utf8encode`, `JSZip.prototype.utf8decode`
+* `JSZip.compressions` has been removed.
 * On `ZipObject`, the synchronous getters has been replaced by `async()` and
   `nodeStream()`.
 * The `generate()` method has been replaced by `generateAsync()` and 
