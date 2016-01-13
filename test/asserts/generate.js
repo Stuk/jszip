@@ -65,13 +65,19 @@ testGenerateFor([{
     });
     JSZipTestUtils.testZipFile("generate : type:base64. " + testName, file, function(expected) {
         testGenerate({
-            prepare : JSZipTestUtils.createZipAll,
+            prepare : function () {
+                // fix date to get a predictible output
+                var zip = new JSZip();
+                zip.file("Hello.txt", "Hello World\n", {date: new Date(1234567891011)});
+                zip.file("images", null, {dir:true, date: new Date(1234876591011)});
+                zip.file("images/smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true, date: new Date(1234123491011)});
+                return zip;
+            },
             skipReloadTest : true,
             options : {type:"base64",streamFiles:streamFiles},
             assertions : function (err, result) {
                 equal(err, null, "no error");
-                var actual = JSZip.base64.decode(result);
-                ok(JSZipTestUtils.similar(actual, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+                equal(result, JSZipTestUtils.base64encode("all.zip.base64,stream=" + streamFiles), "generated ZIP matches reference ZIP");
             }
         });
     });
