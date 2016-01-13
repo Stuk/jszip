@@ -92,6 +92,7 @@ QUnit.module("file", function () {
         }
         _actualTestFileDataGetters.testGetter(opts, "string");
         _actualTestFileDataGetters.testGetter(opts, "text");
+        _actualTestFileDataGetters.testGetter(opts, "base64");
         _actualTestFileDataGetters.testGetter(opts, "binarystring");
         _actualTestFileDataGetters.testGetter(opts, "arraybuffer");
         _actualTestFileDataGetters.testGetter(opts, "uint8array");
@@ -111,6 +112,7 @@ QUnit.module("file", function () {
             };
             _actualTestFileDataGetters.testGetter(reloaded, "string");
             _actualTestFileDataGetters.testGetter(reloaded, "text");
+            _actualTestFileDataGetters.testGetter(reloaded, "base64");
             _actualTestFileDataGetters.testGetter(reloaded, "binarystring");
             _actualTestFileDataGetters.testGetter(reloaded, "arraybuffer");
             _actualTestFileDataGetters.testGetter(reloaded, "uint8array");
@@ -146,6 +148,10 @@ QUnit.module("file", function () {
         },
         assert_text: function () {
             this.assert_string.apply(this, arguments);
+        },
+        assert_base64: function (opts, err, bin, testName) {
+            equal(err, null, testName + "no error");
+            equal(bin, JSZipTestUtils.base64encode(opts.rawData), testName + "content ok");
         },
         assert_binarystring : function (opts, err, bin, testName) {
             equal(err, null, testName + "no error");

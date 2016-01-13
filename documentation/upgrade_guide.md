@@ -50,6 +50,15 @@ zip.load(data);
 // 3.x
 JSZip.loadAsync(data);
 zip.loadAsync(data);
+
+// 2.x
+var data = zip.file("img.jpg").asBinary();
+var dataURI = "data:image/jpeg;base64," + JSZip.base64.encode(data);
+// 3.x
+zip.file("img.jpg").async("base64")
+.then(function (data64) {
+    var dataURI = "data:image/jpeg;base64," + data64;
+});
 ```
 
 ### From 2.2.2 to 2.3.0
