@@ -398,7 +398,7 @@ QUnit.module("file", function () {
         });
 
         ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
-        equal(zip.files['folder/'].date.getMilliseconds(), referenceDate.getMilliseconds(), "the folder with options has the correct date");
+        equal(zip.files['folder/'].date.getTime(), referenceDate.getTime(), "the folder with options has the correct date");
         equal(zip.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
         equal(zip.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
 
@@ -410,7 +410,7 @@ QUnit.module("file", function () {
             ok(reloaded.files['folder/'].dir, "the folder with options is marked as a folder");
 
             ok(reloaded.files['folder/'].dir, "the folder with options is marked as a folder");
-            equal(reloaded.files['folder/'].date.getMilliseconds(), referenceDate.getMilliseconds(), "the folder with options has the correct date");
+            equal(reloaded.files['folder/'].date.getTime(), referenceDate.getTime(), "the folder with options has the correct date");
             equal(reloaded.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
             equal(reloaded.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
         })['catch'](JSZipTestUtils.assertNoError);
