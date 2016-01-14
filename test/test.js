@@ -1117,6 +1117,26 @@ testZipFile("load(string) handles bytes > 255", "ref/all.zip", function(file) {
    equal(zip.file("Hello.txt").asText(), "Hello World\n", "the zip was correctly read.");
 });
 
+testZipFile("load(Array) works", "ref/deflate.zip", function(file) {
+   var updatedFile = new Array(file.length);
+   for( var i = 0; i < file.length; ++i ) {
+      updatedFile[i] = file.charCodeAt(i) + 0x4200;
+   }
+   var zip = new JSZip(updatedFile);
+
+   equal(zip.file("Hello.txt").asText(), "This a looong file : we need to see the difference between the different compression methods.\n", "the zip was correctly read.");
+});
+
+testZipFile("load(array) handles bytes > 255", "ref/deflate.zip", function(file) {
+   var updatedFile = new Array(file.length);
+   for( var i = 0; i < file.length; ++i ) {
+      updatedFile[i] = file.charCodeAt(i) + 0x4200;
+   }
+   var zip = new JSZip(updatedFile);
+
+   equal(zip.file("Hello.txt").asText(), "This a looong file : we need to see the difference between the different compression methods.\n", "the zip was correctly read.");
+});
+
 if (JSZip.support.arraybuffer) {
    testZipFile("load(ArrayBuffer) works", "ref/all.zip", function(fileAsString) {
       var file = new ArrayBuffer(fileAsString.length);
