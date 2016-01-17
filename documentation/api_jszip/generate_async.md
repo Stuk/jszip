@@ -4,7 +4,7 @@ layout: default
 section: api
 ---
 
-__Description__ : Generates the complete zip file.
+__Description__ : Generates the complete zip file at the current folder level.
 
 __Arguments__
 
@@ -38,7 +38,7 @@ give the compression level with `compressionOptions : {level:6}` (or any level
 between 1 (best speed) and 9 (best compression)).
 
 Note : if the entry is *already* compressed (coming from a compressed zip file),
-calling `generate()` with a different compression level won't update the entry.
+calling `generateAsync()` with a different compression level won't update the entry.
 The reason is simple : JSZip doesn't know how compressed the content was and
 how to match the compression level with the implementation we use.
 
@@ -101,8 +101,17 @@ zip.generateAsync({type:"base64"})
 ```
 
 ```js
-zip.generateAsync({type:"nodebuffer"});
+zip.folder("folder_1").folder("folder_2").file("hello.txt", "hello");
+// zip now contains:
+// folder_1/
+// folder_1/folder_2/
+// folder_1/folder_2/hello.txt
+
+zip.folder("folder_1").generateAsync({type:"nodebuffer"})
 .then(function (content) {
+    // relative to folder_1/, this file only contains:
+    // folder_2/
+    // folder_2/hello.txt
     require("fs").writeFile("hello.zip", content, function(err){/*...*/});
 });
 ```
@@ -116,7 +125,7 @@ zip.file(pathname, content, {
 
 // ...
 
-zip.generate({
+zip.generateAsync({
     type: 'nodebuffer',
     platform: process.platform
 });

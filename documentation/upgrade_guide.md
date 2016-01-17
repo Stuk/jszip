@@ -25,6 +25,8 @@ section: main
   been replaced by `loadAsync()`.
 * When adding a file, the option `createFolders` now defaults to `true`. If
   you don't want to create sub folders, set it to false.
+* `zip.generateAsync()` and `zip.generateNodeStream()` now depend on the
+  current folder level.
 
 ```js
 // 2.x

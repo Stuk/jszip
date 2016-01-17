@@ -308,3 +308,39 @@ test("missing type throws an exception", function () {
         }
     });
 });
+
+test("generateAsync uses the current folder level", function (assert) {
+    var done = assert.async();
+
+    var zip = new JSZip();
+    zip.file("file1", "a");
+    zip.folder("root1");
+    zip.folder("root2").file("leaf1", "a");
+    zip.folder("root2")
+    .generateAsync({type:"string"})
+    .then(JSZip.loadAsync)
+    .then(function(zip) {
+        assert.ok(!zip.file("file1"), "root files are not present");
+        assert.ok(!zip.file("root1"), "root folders are not present");
+        assert.ok(!zip.file("root2"), "root folders are not present");
+        assert.ok(zip.file("leaf1"), "leaves are present");
+
+        done();
+    })['catch'](JSZipTestUtils.assertNoError);
+});
+
+test("generateAsync keep the explicit / folder", function (assert) {
+    var done = assert.async();
+
+    var zip = new JSZip();
+    zip.file("/file1", "a");
+    zip.file("/root1/file2", "b");
+    zip.generateAsync({type:"string"})
+    .then(JSZip.loadAsync)
+    .then(function(zip) {
+        assert.ok(zip.file("/file1"), "root files are present");
+        assert.ok(zip.file("/root1/file2"), "root folders are present");
+
+        done();
+    })['catch'](JSZipTestUtils.assertNoError);
+});

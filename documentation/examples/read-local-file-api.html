@@ -59,8 +59,7 @@ section: example
                   text:" (parsed in " + (dateAfter - dateBefore) + "ms)"
               }));
 
-              // that, or a good ol' for(var entryName in zip.files)
-              $.each(zip.files, function (index, zipEntry) {
+              zip.forEach(function (relativePath, zipEntry) {
                 $fileContent.append($("<li>", {
                     text : zipEntry.name
                 }));

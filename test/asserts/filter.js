@@ -26,9 +26,12 @@ test("Filtering a zip from a relative path", function() {
     zip.file("2.txt", "2\n");
     zip.file("3.log", "3\n");
 
+    var count = 0;
     var result = zip.folder("foo").filter(function (relativeFilename, file) {
+        count++;
         return relativeFilename.indexOf("3") != -1;
     });
+    equal(count, 3, "the callback has been called the right number of times");
     equal(result.length, 1, "filter has filtered");
     equal(result[0].name, "foo/3.log", "filter has filtered the good file");
 });
