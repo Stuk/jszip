@@ -471,6 +471,12 @@ QUnit.module("file", function () {
         equal(zip.files["true/"].unixPermissions, null, "the options are not propagated");
     });
 
+    test("folder follows the default createFolders settings", function () {
+        var zip = new JSZip();
+        zip.folder("true/0/1/2/folder");
+        ok(zip.files["true/"], "the true/ folder exists");
+    });
+
 
     test("A folder stays a folder", function () {
         var zip = new JSZip();
@@ -563,9 +569,9 @@ QUnit.module("file", function () {
         zip.folder("root/").folder("sub1/");
         zip.folder("root/sub2/subsub1");
 
-        equal(zip.folder(/sub2\/$/).length, 0, "unique result");
+        equal(zip.folder(/sub2\/$/).length, 1, "unique result");
         equal(zip.folder(/sub1/).length, 2, "multiple results");
-        equal(zip.folder(/root/).length, 3, "match on whole path");
+        equal(zip.folder(/root/).length, 4, "match on whole path");
     });
 
     test("Finding folders with relative path", function () {
