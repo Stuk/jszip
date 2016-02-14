@@ -115,7 +115,6 @@ module.exports = function(grunt) {
     },
     uglify: {
       options: {
-        report: 'gzip',
         mangle: true,
         preserveComments: false,
         banner : grunt.file.read('lib/license_header.js')
