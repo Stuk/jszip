@@ -5,6 +5,7 @@ node_js:
 - '4.0'
 - '4.1'
 script: npm run $COMMAND
+sudo: false
 env:
   matrix:
   - COMMAND=test-node
