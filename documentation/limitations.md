@@ -67,7 +67,22 @@ Some data are discarded (file metadata) and other are added (subfolders).
 
 ### Encodings support
 
-JSZip only supports utf8 : if the names of the files inside the zip are not in
-utf8 (or ASCII), they won't be interpreted correctly. If the content is a text
-not encoded with utf8 (or ASCII), the `asText()` method won't decode it
-correctly.
+JSZip only supports UTF-8 natively. A zip file doesn't contain the name of the
+encoding used, you need to know it before doing anything.
+
+#### File name
+
+If the name of a file inside the zip is encoded with UTF-8 then JSZip can
+detect it (Language encoding flag, Unicode Path Extra Field). If not, JSZip
+can't detect the encoding used and will generate [Mojibake](https://en.wikipedia.org/wiki/Mojibake).
+You can use the [encodeFileName]({{site.baseurl}}/documentation/api_jszip/generate.html)
+option and the [decodeFileName]({{site.baseurl}}/documentation/api_jszip/load.html)
+option to encode/decode using a custom encoding.
+
+#### File content
+
+The `asText()` method uses UTF-8 to decode the content. If you have a text in
+a different encoding, you can get the bytes array with `asUint8Array()` and
+decode it with a lib (iconv, iconv-lite, etc) on your side.
+To save a text using a non-UTF-8 encoding, do the same : encode it into a
+Uint8Array before adding it to JSZip.

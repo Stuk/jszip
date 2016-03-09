@@ -159,7 +159,49 @@ testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name
       // comment this one for now.
       // ok(similar(actual, expected, 18) , "Generated ZIP matches reference ZIP");
       equal(reload(actual), actual, "Generated ZIP can be parsed");
-      });
+});
+
+testZipFile("Zip text file with non unicode characters in filename", "ref/local_encoding_in_name.zip", function(content) {
+   var zipUnicode = new JSZip(content);
+   ok(!zipUnicode.files["Новая папка/"], "default : the folder is not found");
+   ok(!zipUnicode.files["Новая папка/Новый текстовый документ.txt"], "default : the file is not found");
+
+   var conversions = {
+      "": [],
+      "Новая папка/": [0x8d, 0xae, 0xa2, 0xa0, 0xef, 0x20, 0xaf, 0xa0, 0xaf, 0xaa, 0xa0, 0x2f],
+      "Новая папка/Новый текстовый документ.txt": [0x8d, 0xae, 0xa2, 0xa0, 0xef, 0x20, 0xaf, 0xa0, 0xaf, 0xaa, 0xa0, 0x2f, 0x8d, 0xae, 0xa2, 0xeb, 0xa9, 0x20, 0xe2, 0xa5, 0xaa, 0xe1, 0xe2, 0xae, 0xa2, 0xeb, 0xa9, 0x20, 0xa4, 0xae, 0xaa, 0xe3, 0xac, 0xa5, 0xad, 0xe2, 0x2e, 0x74, 0x78, 0x74]
+   };
+   function decodeCP866(bytes) {
+      for(var text in conversions) {
+         if (conversions[text].length === bytes.length) {
+            return text;
+         }
+      }
+   }
+   function encodeCP866(string) {
+      return conversions[string];
+   }
+   var zipCP866 = new JSZip(content, {
+      decodeFileName: decodeCP866
+   });
+
+   ok(zipCP866.files["Новая папка/"], "with decodeFileName : the folder has been correctly read");
+   ok(zipCP866.files["Новая папка/Новый текстовый документ.txt"], "with decodeFileName : the file has been correctly read");
+
+   var newZip = zipCP866.generate({
+      type:"string",
+      encodeFileName: encodeCP866
+   });
+   // the example zip doesn't contain the unicode path extra field, we can't
+   // compare them.
+
+   var zipCP866Reloaded = new JSZip(newZip, {
+      decodeFileName: decodeCP866
+   });
+
+   ok(zipCP866Reloaded.files["Новая папка/"], "reloaded, with decodeFileName : the folder has been correctly read");
+   ok(zipCP866Reloaded.files["Новая папка/Новый текстовый документ.txt"], "reloaded, with decodeFileName : the file has been correctly read");
+});
 
 // zip -X -0 pile_of_poo.zip Iñtërnâtiônàlizætiøn☃💩.txt
 testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pile_of_poo.zip", function(expected) {
