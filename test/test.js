@@ -1129,6 +1129,26 @@ test("truncated zip file", function() {
    }
 });
 
+// dd if=all.zip of=all_missing_bytes.zip bs=32 skip=1
+testZipFile("zip file with missing bytes", "ref/all_missing_bytes.zip", function(file) {
+   try {
+      var zip = new JSZip(file);
+      ok(false, "no exception were thrown");
+   } catch(e) {
+      ok(e.message.match("Corrupted zip"), "the error message is useful");
+   }
+});
+
+// dd if=zip64.zip of=zip64_missing_bytes.zip bs=32 skip=1
+testZipFile("zip64 file with missing bytes", "ref/zip64_missing_bytes.zip", function(file) {
+   try {
+      var zip = new JSZip(file);
+      ok(false, "no exception were thrown");
+   } catch(e) {
+      ok(e.message.match("Corrupted zip"), "the error message is useful");
+   }
+});
+
 test("not a zip file", function() {
    try {
       var zip = new JSZip("I'm not a zip file");
@@ -1519,6 +1539,30 @@ testZipFile("permissions on windows : file created by izarc", "ref/permissions/w
 testZipFile("permissions on windows : file created by izarc, reloaded", "ref/permissions/windows_izarc.zip", reloadAndAssertDosPermissions);
 testZipFile("permissions on windows : file created by winrar", "ref/permissions/windows_winrar.zip", assertDosPermissions);
 testZipFile("permissions on windows : file created by winrar, reloaded", "ref/permissions/windows_winrar.zip", reloadAndAssertDosPermissions);
+
+// cat Hello.txt all.zip > all_prepended_bytes.zip
+testZipFile("zip file with prepended bytes", "ref/all_prepended_bytes.zip", function(file) {
+   var zip = new JSZip(file);
+   equal(zip.file("Hello.txt").asText(), "Hello World\n", "the zip was correctly read.");
+});
+
+// cat all.zip Hello.txt > all_appended_bytes.zip
+testZipFile("zip file with appended bytes", "ref/all_appended_bytes.zip", function(file) {
+   var zip = new JSZip(file);
+   equal(zip.file("Hello.txt").asText(), "Hello World\n", "the zip was correctly read.");
+});
+
+// cat Hello.txt zip64.zip > zip64_prepended_bytes.zip
+testZipFile("zip64 file with extra bytes", "ref/zip64_prepended_bytes.zip", function(file) {
+   var zip = new JSZip(file);
+   equal(zip.file("Hello.txt").asText(), "Hello World\n", "the zip was correctly read.");
+});
+
+// cat zip64.zip Hello.txt > zip64_appended_bytes.zip
+testZipFile("zip64 file with extra bytes", "ref/zip64_appended_bytes.zip", function(file) {
+   var zip = new JSZip(file);
+   equal(zip.file("Hello.txt").asText(), "Hello World\n", "the zip was correctly read.");
+});
 
 // }}} Load file
 
