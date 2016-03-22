@@ -25,7 +25,7 @@ compression | string  | null    | If set, specifies compression method to use fo
 compressionOptions | object | `null` | the options to use when compressing the file, see [generate(options)]({{site.baseurl}}/documentation/api_jszip/generate_async.html).
 comment     | string  | null    | The comment for this file.
 optimizedBinaryString | boolean | `false` | Set to true if (and only if) the input is a "binary string" and has already been prepared with a 0xFF mask.
-createFolders | boolean | `false` | Set to true if folders in the file path should be automatically created, otherwise there will only be virtual folders that represent the path to the file.
+createFolders | boolean | `true` | Set to true if folders in the file path should be automatically created, otherwise there will only be virtual folders that represent the path to the file.
 unixPermissions | 16 bits number | null    | The UNIX permissions of the file, if any.
 dosPermissions  | 6 bits number  | null    | The DOS permissions of the file, if any.
 dir             | boolean        | false   | Set to true if this is a directory and content should be ignored.

@@ -10,7 +10,7 @@ __Arguments__
 
 name     | type     | description
 ---------|----------|------------
-type     | String   | the type of the result : `string` (or `text`, its alias), `binarystring`, `uint8array`, `arraybuffer`, `nodebuffer`.
+type     | String   | the type of the result : `string` (or `text`, its alias), `binarystring`, `base64`, `uint8array`, `arraybuffer`, `nodebuffer`.
 onUpdate | Function | an optional function called on each internal update with the metadata.
 
 __Metadata__ : the metadata are :

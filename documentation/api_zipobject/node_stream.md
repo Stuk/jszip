@@ -9,10 +9,10 @@ of the content in the asked type.
 
 __Arguments__
 
-name     | type     | description
----------|----------|------------
-type     | String   | the type of the result : `string`, `binarystring`, `uint8array`, `arraybuffer`, `nodebuffer`.
-onUpdate | Function | an optional function called on each internal update with the metadata.
+name     | type     | default      | description
+---------|----------|--------------|------------
+type     | String   | `nodebuffer` | only `nodebuffer` is currently supported.
+onUpdate | Function |              | an optional function called on each internal update with the metadata.
 
 __Metadata__ : see [the metadata of `async()`]({{site.baseurl}}/documentation/api_zipobject/async.html).
 
@@ -25,7 +25,7 @@ __Example__
 ```js
 zip
 .file("my_text.txt")
-.nodeStream("nodebuffer")
+.nodeStream()
 .pipe(fs.createWriteStream('/tmp/my_text.txt'))
 .on("end", function () {...});
 ```

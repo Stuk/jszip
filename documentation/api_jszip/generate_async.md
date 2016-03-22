@@ -4,17 +4,16 @@ layout: default
 section: api
 ---
 
-__Description__ : Generates the complete zip file.
+__Description__ : Generates the complete zip file at the current folder level.
 
 __Arguments__
 
 name                | type     | default  | description
 --------------------|----------|----------|------------
 options             | object   |          | the options to generate the zip file :
-options.base64      | boolean  | false    | **deprecated**, use `type` instead. If `type` is not used, set to `false` to get the result as a raw byte string, `true` to encode it as base64.
 options.compression | string   | `STORE` (no compression) | the default file compression method to use. Available methods are `STORE` and `DEFLATE`. You can also provide your own compression method.
 options.compressionOptions | object | `null` | the options to use when compressing the file, see below.
-options.type        | string   | `base64` | The type of zip to return, see below for the other types.
+options.type        | string   |          | The type of zip to return, see below for the other types.
 options.comment     | string   |          | The comment to use for the zip file.
 options.mimeType    | string   | `application/zip` | mime-type for the generated file. Useful when you need to generate a file with a different extension, ie: ".ods".
 options.platform    | string   | `DOS`    | The platform to use when generating the zip file.
@@ -23,7 +22,7 @@ onUpdate            | function |          | The optional function called on each
 
 Possible values for `type` :
 
-* `base64` (default) : the result will be a string, the binary in a base64 form.
+* `base64` : the result will be a string, the binary in a base64 form.
 * `binarystring` (or `string`, deprecated) : the result will be a string in "binary" form, using 1 byte per char (2 bytes).
 * `uint8array` : the result will be a Uint8Array containing the zip. This requires a compatible browser.
 * `arraybuffer` : the result will be a ArrayBuffer containing the zip. This requires a compatible browser.
@@ -39,7 +38,7 @@ give the compression level with `compressionOptions : {level:6}` (or any level
 between 1 (best speed) and 9 (best compression)).
 
 Note : if the entry is *already* compressed (coming from a compressed zip file),
-calling `generate()` with a different compression level won't update the entry.
+calling `generateAsync()` with a different compression level won't update the entry.
 The reason is simple : JSZip doesn't know how compressed the content was and
 how to match the compression level with the implementation we use.
 
@@ -102,8 +101,17 @@ zip.generateAsync({type:"base64"})
 ```
 
 ```js
-zip.generateAsync({type:"nodebuffer"});
+zip.folder("folder_1").folder("folder_2").file("hello.txt", "hello");
+// zip now contains:
+// folder_1/
+// folder_1/folder_2/
+// folder_1/folder_2/hello.txt
+
+zip.folder("folder_1").generateAsync({type:"nodebuffer"})
 .then(function (content) {
+    // relative to folder_1/, this file only contains:
+    // folder_2/
+    // folder_2/hello.txt
     require("fs").writeFile("hello.zip", content, function(err){/*...*/});
 });
 ```
@@ -117,7 +125,7 @@ zip.file(pathname, content, {
 
 // ...
 
-zip.generate({
+zip.generateAsync({
     type: 'nodebuffer',
     platform: process.platform
 });

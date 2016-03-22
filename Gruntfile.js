@@ -90,7 +90,7 @@ module.exports = function(grunt) {
             options: {
                 jshintrc: "./.jshintrc"
             },
-            all: ['./lib/**/*.js']
+            all: ['./lib/**/*.js', './test/helpers/**/*.js', './test/asserts/**/*.js']
         },
     browserify: {
       all: {
@@ -109,15 +109,15 @@ module.exports = function(grunt) {
             }
           },
           ignore : ["./lib/nodejs/*"],
-          banner : require('fs').readFileSync('lib/license_header.js')
+          banner : grunt.file.read('lib/license_header.js')
         }
       }
     },
     uglify: {
       options: {
-        report: 'gzip',
         mangle: true,
-        preserveComments: 'some'
+        preserveComments: false,
+        banner : grunt.file.read('lib/license_header.js')
       },
       all: {
         src: 'dist/jszip.js',
