@@ -2,8 +2,8 @@ language: node_js
 node_js:
 - '0.10'
 - '0.12'
-- '4.0'
-- '4.1'
+- '4.4'
+- 'stable'
 script: npm run $COMMAND
 sudo: false
 env:
