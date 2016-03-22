@@ -4,6 +4,14 @@ layout: default
 section: main
 ---
 
+### v2.6.0 2016-03-23
+- publish `dist/` files in the npm package (see [#225](https://github.com/Stuk/jszip/pull/225)).
+- update pako to v1.0.0 (see [#261](https://github.com/Stuk/jszip/pull/261)).
+- add support of Array in JSZip#load (see [#252](https://github.com/Stuk/jszip/pull/252)).
+- improve file name / comment encoding support (see [#211](https://github.com/Stuk/jszip/pull/211)).
+- handle prepended data (see [#266](https://github.com/Stuk/jszip/pull/266)).
+- improve platform coverage in tests (see [#233](https://github.com/Stuk/jszip/pull/233) and [#269](https://github.com/Stuk/jszip/pull/269)).
+
 ### v2.5.0 2015-03-10
 - add support for custom mime-types (see [#199](https://github.com/Stuk/jszip/issues/199)).
 - add an option to set the DEFLATE level (see [#201](https://github.com/Stuk/jszip/issues/201)).
