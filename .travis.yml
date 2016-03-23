@@ -1,15 +1,18 @@
 language: node_js
-node_js:
-- '0.10'
-- '0.12'
-- '4.4'
-- 'stable'
-script: npm run $COMMAND
 sudo: false
 env:
   matrix:
-  - COMMAND=test-node
-  - COMMAND=test-browser
+    - node_js: "0.10"
+      env: COMMAND=test-node
+    - node_js: "0.12"
+      env: COMMAND=test-node
+    - node_js: "4.4"
+      env: COMMAND=test-node
+    - node_js: "stable"
+      env: COMMAND=test-node
+    - node_js: "stable"
+      env: COMMAND=test-browser
   global:
   - secure: MhA8GHU42X3GWTUMaqdZVvarx4BMjhQCUGNi3kvuD/iCmKVb7gMwj4jbds7AcJdsCRsRk8bBGzZs/E7HidBJMPDa5DhgLKy9EV1s42JlHq8lVzbJeWIGgrtyJvhVUkGRy2OJjnDSgh3U6elkQmvDn74jreSQc6m/yGoPFF1nqq8=
   - secure: qREw6aUu2DnB+2reMuHgygSkumRiJvt7Z5Fz4uEVoraqbe65e4PGhtzypr9uIgCN43vxS2D5tAIeDbfid5VQrWFUQnrC9O5Z5qgVPsKN94zZ1tvYurXI4wRlAg58nNjkfGXWhLI3VUjjDTp5gYcMqgfe5hpEFYUPnUQkKGnaqAk=
+script: npm run $COMMAND
