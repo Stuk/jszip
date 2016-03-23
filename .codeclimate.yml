@@ -11,4 +11,6 @@ engines:
     enabled: true
 ratings:
   paths:
-  - "lib/*"
+  - "lib/*.js"
+exclude_paths:
+- "dist/*"
