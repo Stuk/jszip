@@ -1,7 +1,7 @@
 language: node_js
 sudo: false
-env:
-  matrix:
+matrix:
+  include:
     - node_js: "0.10"
       env: COMMAND=test-node
     - node_js: "0.12"
