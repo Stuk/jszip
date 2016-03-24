@@ -37,6 +37,39 @@ QUnit.module("load", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
+
+    JSZipTestUtils.testZipFile("load(Array) works", "ref/deflate.zip", function(file) {
+        var updatedFile = new Array(file.length);
+        for( var i = 0; i < file.length; ++i ) {
+            updatedFile[i] = file.charCodeAt(i);
+        }
+        stop();
+        JSZip.loadAsync(updatedFile)
+        .then(function (zip) {
+            return zip.file("Hello.txt").async("string");
+        })
+        .then(function (content) {
+            equal(content, "This a looong file : we need to see the difference between the different compression methods.\n", "the zip was correctly read.");
+            start();
+        })['catch'](JSZipTestUtils.assertNoError);
+    });
+
+    JSZipTestUtils.testZipFile("load(array) handles bytes > 255", "ref/deflate.zip", function(file) {
+        var updatedFile = new Array(file.length);
+        for( var i = 0; i < file.length; ++i ) {
+            updatedFile[i] = file.charCodeAt(i) + 0x4200;
+        }
+        stop();
+        JSZip.loadAsync(updatedFile)
+        .then(function (zip) {
+            return zip.file("Hello.txt").async("string");
+        })
+        .then(function (content) {
+            equal(content, "This a looong file : we need to see the difference between the different compression methods.\n", "the zip was correctly read.");
+            start();
+        })['catch'](JSZipTestUtils.assertNoError);
+    });
+
     if (JSZip.support.arraybuffer) {
         JSZipTestUtils.testZipFile("load(ArrayBuffer) works", "ref/all.zip", function(fileAsString) {
             var file = new ArrayBuffer(fileAsString.length);
@@ -352,6 +385,53 @@ QUnit.module("load", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
+    // cat Hello.txt all.zip > all_prepended_bytes.zip
+    JSZipTestUtils.testZipFile("zip file with prepended bytes", "ref/all_prepended_bytes.zip", function(file) {
+        stop();
+        JSZip.loadAsync(file)
+        .then(function success(zip) {
+            return zip.file("Hello.txt").async("string");
+        }).then(function (content) {
+            start();
+            equal(content, "Hello World\n", "the zip was correctly read.");
+        })['catch'](JSZipTestUtils.assertNoError);
+    });
+
+    // cat all.zip Hello.txt > all_appended_bytes.zip
+    JSZipTestUtils.testZipFile("zip file with appended bytes", "ref/all_appended_bytes.zip", function(file) {
+        stop();
+        JSZip.loadAsync(file)
+        .then(function success(zip) {
+            return zip.file("Hello.txt").async("string");
+        }).then(function (content) {
+            start();
+            equal(content, "Hello World\n", "the zip was correctly read.");
+        })['catch'](JSZipTestUtils.assertNoError);
+    });
+
+    // cat Hello.txt zip64.zip > zip64_prepended_bytes.zip
+    JSZipTestUtils.testZipFile("zip64 file with extra bytes", "ref/zip64_prepended_bytes.zip", function(file) {
+        stop();
+        JSZip.loadAsync(file)
+        .then(function success(zip) {
+            return zip.file("Hello.txt").async("string");
+        }).then(function (content) {
+            start();
+            equal(content, "Hello World\n", "the zip was correctly read.");
+        })['catch'](JSZipTestUtils.assertNoError);
+    });
+
+    // cat zip64.zip Hello.txt > zip64_appended_bytes.zip
+    JSZipTestUtils.testZipFile("zip64 file with extra bytes", "ref/zip64_appended_bytes.zip", function(file) {
+        stop();
+        JSZip.loadAsync(file)
+        .then(function success(zip) {
+            return zip.file("Hello.txt").async("string");
+        }).then(function (content) {
+            start();
+            equal(content, "Hello World\n", "the zip was correctly read.");
+        })['catch'](JSZipTestUtils.assertNoError);
+    });
 
 
     QUnit.module("not supported features");
@@ -372,6 +452,32 @@ QUnit.module("load", function () {
     QUnit.module("corrupted zip");
 
     JSZipTestUtils.testZipFile("bad compression method", "ref/invalid/compression.zip", function(file) {
+        stop();
+        JSZip.loadAsync(file)
+        .then(function success() {
+            start();
+            ok(false, "no exception were thrown");
+        }, function failure(e) {
+            start();
+            ok(e.message.match("Corrupted zip"), "the error message is useful");
+        });
+    });
+
+    // dd if=all.zip of=all_missing_bytes.zip bs=32 skip=1
+    JSZipTestUtils.testZipFile("zip file with missing bytes", "ref/all_missing_bytes.zip", function(file) {
+        stop();
+        JSZip.loadAsync(file)
+        .then(function success() {
+            start();
+            ok(false, "no exception were thrown");
+        }, function failure(e) {
+            start();
+            ok(e.message.match("Corrupted zip"), "the error message is useful");
+        });
+    });
+
+    // dd if=zip64.zip of=zip64_missing_bytes.zip bs=32 skip=1
+    JSZipTestUtils.testZipFile("zip64 file with missing bytes", "ref/zip64_missing_bytes.zip", function(file) {
         stop();
         JSZip.loadAsync(file)
         .then(function success() {

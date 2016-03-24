@@ -51,6 +51,81 @@ JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters in filename", "r
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
+JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filename: loadAsync without decodeFileName", "ref/local_encoding_in_name.zip", function(content) {
+
+    stop();
+    JSZip.loadAsync(content).then(function (zipUnicode) {
+        ok(!zipUnicode.files["Новая папка/"], "default : the folder is not found");
+        ok(!zipUnicode.files["Новая папка/Новый текстовый документ.txt"], "default : the file is not found");
+        start();
+    })['catch'](JSZipTestUtils.assertNoError);
+
+});
+
+JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filename: loadAsync with decodeFileName", "ref/local_encoding_in_name.zip", function(content) {
+    var conversions = {
+        "bytes 8d ae a2 a0 ef 20 af a0 af aa a0 2f" : "Новая папка/",
+        "bytes 8d ae a2 a0 ef 20 af a0 af aa a0 2f 8d ae a2 eb a9 20 e2 a5 aa e1 e2 ae a2 eb a9 20 a4 ae aa e3 ac a5 ad e2 2e 74 78 74" : "Новая папка/Новый текстовый документ.txt"
+    };
+
+    stop();
+    JSZip.loadAsync(content, {
+        decodeFileName: function (bytes) {
+            // here, a real iconv implementation
+            var key = "bytes";
+            for(var i = 0; i < bytes.length; i++) {
+                key += " " + bytes[i].toString(16);
+            }
+
+            return conversions[key] || "";
+        }
+    }).then(function (zipCP866) {
+        ok(zipCP866.files["Новая папка/"], "with decodeFileName : the folder has been correctly read");
+        ok(zipCP866.files["Новая папка/Новый текстовый документ.txt"], "with decodeFileName : the file has been correctly read");
+        start();
+    })['catch'](JSZipTestUtils.assertNoError);
+});
+
+JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filename: generateAsync with encodeFileName", "ref/local_encoding_in_name.zip", function(content) {
+    var conversions = {
+        "": [],
+        "Новая папка/": [0x8d, 0xae, 0xa2, 0xa0, 0xef, 0x20, 0xaf, 0xa0, 0xaf, 0xaa, 0xa0, 0x2f],
+        "Новая папка/Новый текстовый документ.txt": [0x8d, 0xae, 0xa2, 0xa0, 0xef, 0x20, 0xaf, 0xa0, 0xaf, 0xaa, 0xa0, 0x2f, 0x8d, 0xae, 0xa2, 0xeb, 0xa9, 0x20, 0xe2, 0xa5, 0xaa, 0xe1, 0xe2, 0xae, 0xa2, 0xeb, 0xa9, 0x20, 0xa4, 0xae, 0xaa, 0xe3, 0xac, 0xa5, 0xad, 0xe2, 0x2e, 0x74, 0x78, 0x74]
+    };
+
+    function decodeCP866(bytes) {
+        for(var text in conversions) {
+            if (conversions[text].length === bytes.length) {
+                return text;
+            }
+        }
+    }
+
+    function encodeCP866(string) {
+        return conversions[string];
+    }
+
+    stop();
+    JSZip.loadAsync(content, {
+        decodeFileName: decodeCP866
+    }).then(function (zipCP866) {
+        return zipCP866.generateAsync({
+            type: "string",
+            encodeFileName: encodeCP866
+        });
+    }).then(function (regeneratedContent) {
+        return JSZip.loadAsync(regeneratedContent, {
+            decodeFileName: decodeCP866
+        });
+    }).then(function (zipCP866) {
+        // the example zip doesn't contain the unicode path extra field, we can't
+        // compare them.
+        ok(zipCP866.files["Новая папка/"], "with decodeFileName : the folder has been correctly read");
+        ok(zipCP866.files["Новая папка/Новый текстовый документ.txt"], "with decodeFileName : the file has been correctly read");
+        start();
+    })['catch'](JSZipTestUtils.assertNoError);
+});
+
 // zip --entry-comments --archive-comment -X -0 pile_of_poo.zip Iñtërnâtiônàlizætiøn☃$'\360\237\222\251'.txt
 JSZipTestUtils.testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pile_of_poo.zip", function(expected) {
     var zip = new JSZip();

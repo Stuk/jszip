@@ -1,25 +1,24 @@
 # will be overwritten by github, see https://help.github.com/articles/using-jekyll-with-pages
-safe: true
 lsi: false
-pygments: true
+safe: true
 source: ./
+incremental: false
+highlighter: rouge
+gist:
+    noscript: false
 # /overwritten
 
 baseurl: /jszip
 
-layouts: ./documentation/_layouts
+layouts_dir: ./documentation/_layouts
 permalink: none
 exclude: ['bin', 'README.md', 'node_modules']
 
-markdown: redcarpet
-redcarpet:
-    extensions: [
-        'no_intra_emphasis',
-        'fenced_code_blocks',
-        'autolink',
-        'strikethrough',
-        'superscript',
-        'with_toc_data',
-        'tables',
-        'hardwrap'
-    ]
+
+kramdown:
+    input: GFM
+    hard_wrap: false
+gems:
+    - jekyll-coffeescript
+    - jekyll-paginate
+
