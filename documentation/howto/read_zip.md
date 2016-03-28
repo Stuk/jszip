@@ -112,15 +112,12 @@ var req = http.get(url.parse("http://localhost/.../file.zip"), function (res) {
   });
 
   res.on("end", function () {
-    var buf = new Buffer(dataLen);
-    for (var i=0,len=data.length,pos=0; i<len; i++) {
-      data[i].copy(buf, pos);
-      pos += data[i].length;
-    }
+    var buf = Buffer.concat(data);
 
     // here we go !
-    var zip = new JSZip(buf);
-    zip.file("content.txt").async("string").then(function (text) {
+    JSZip.loadAsync(buf).then(function (zip) {
+      return zip.file("content.txt").async("string");
+    }).then(function (text) {
       console.log(text);
     });
   });
@@ -148,8 +145,9 @@ request({
     // handle error
     return;
   }
-  var zip = new JSZip(body);
-  zip.file("content.txt").async("string").then(function (text) {
+  JSZip.loadAsync(body).then(function (zip) {
+    return zip.file("content.txt").async("string");
+  }).then(function () {
     console.log(text);
   });
 });

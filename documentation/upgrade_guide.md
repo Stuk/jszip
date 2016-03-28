@@ -9,7 +9,7 @@ section: main
 * Deprecated objects/methods has been removed:
   * `options.base64` in `generate()` (the base64 type is still valid)
   * `options.base64`, `options.binary`, `options.dir`, `options.date`
-    on `ZipObject` (see the [2.3 upgrade section](#from-2.2.2-to-2.3.0))
+    on `ZipObject` (see the [2.3 upgrade section](#from-222-to-230))
   * `JSZip.utils`
   * `JSZip.prototype.crc32`, `JSZip.prototype.utf8encode`, `JSZip.prototype.utf8decode`
   * `JSZip.base64` (you can get the content of a file directly as a base64 string)
