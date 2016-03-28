@@ -21,6 +21,9 @@ function createPromiseProxy(OriginalPromise) {
     }
     MyShinyPromise.prototype.isACustomImplementation = true;
     for(var method in OriginalPromise) {
+        if (!OriginalPromise.hasOwnProperty(method)) {
+            continue;
+        }
         proxyMethod(method);
     }
     return MyShinyPromise;

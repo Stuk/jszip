@@ -18,7 +18,7 @@ test("Removed constructor with data throws an exception", function(assert) {
     var file = JSZipTestUtils.createZipAll().file("Hello.txt");
     assert.throws(
         function() {
-            new JSZip("");
+            var zip = new JSZip("");
         },
         /upgrade guide/,
         "new JSZip(data) throws an exception"
