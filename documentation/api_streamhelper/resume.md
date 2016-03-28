@@ -4,16 +4,14 @@ layout: default
 section: api
 ---
 
-__Description__ : Resume the stream if the stream is paused. Once resumed, the
-stream starts sending `data` events again.
-
-__Arguments__ : None.
+Resume the stream if the stream is paused. Once resumed, the stream starts
+sending `data` events again.
 
 __Returns__ : The current StreamHelper object, for chaining.
 
-__Throws__ : Nothing.
+__Since__: v3.0.0
 
-__Example__
+## Example
 
 ```js
 zip

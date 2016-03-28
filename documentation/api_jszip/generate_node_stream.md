@@ -4,9 +4,13 @@ layout: default
 section: api
 ---
 
-__Description__ : Generates the complete zip file as a nodejs stream.
+Generates the complete zip file as a nodejs stream.
 
-__Arguments__
+__Returns__ : a [nodejs Streams3](https://github.com/nodejs/readable-stream).
+
+__Since__: v3.0.0
+
+## Arguments
 
 name                | type     | default | description
 --------------------|----------|---------|------------
@@ -16,13 +20,9 @@ onUpdate            | function |         | The optional function called on each 
 The `type` parameter has here the default value of `nodebuffer`.
 Only `nodebuffer` is currently supported.
 
-__Metadata__ : see [the metadata of `generateAsync()`]({{site.baseurl}}/documentation/api_jszip/generate_async.html).
+__Metadata__ : see [the metadata of `generateAsync()`]({{site.baseurl}}/documentation/api_jszip/generate_async.html#onupdate-callback).
 
-__Returns__ : a [nodejs Streams3](https://github.com/nodejs/readable-stream).
-
-__Throws__ : Nothing.
-
-__Example__
+## Examples
 
 ```js
 zip

@@ -4,20 +4,20 @@ layout: default
 section: api
 ---
 
-__Description__ : Return a [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html) of the content in the asked type.
+Return a [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html)
+of the content in the asked type.
 
-__Arguments__
+__Returns__ : a [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html)
+of the content in the asked type.
+
+## Arguments
 
 name     | type     | description
 ---------|----------|------------
-type     | String   | the type of the result : `string`, `binarystring`, `uint8array`, `arraybuffer`, `nodebuffer`.
+type     | String   | the type of the result: `string`, `binarystring`, `uint8array`, `arraybuffer`, `nodebuffer`.
 
 
-__Returns__ : a [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html) of the content in the asked type.
-
-__Throws__ : Nothing.
-
-__Example__
+## Example
 
 ```js
 zip

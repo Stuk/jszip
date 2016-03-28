@@ -4,22 +4,21 @@ layout: default
 section: api
 ---
 
-__Description__ : Generates the complete zip file with the internal stream
-implementation.
+Generates the complete zip file with the internal stream implementation.
 
-__Arguments__
+__Returns__ : a [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html).
+
+__Since__: v3.0.0
+
+## Arguments
 
 name                | type     | default | description
 --------------------|----------|---------|------------
 options             | object   |         | the options to generate the zip file, see [the options of `generateAsync()`]({{site.baseurl}}/documentation/api_jszip/generate_async.html)
 
-__Metadata__ : see [the metadata of `generateAsync()`]({{site.baseurl}}/documentation/api_jszip/generate_async.html).
+__Metadata__ : see [the metadata of `generateAsync()`]({{site.baseurl}}/documentation/api_jszip/generate_async.html#onupdate-callback).
 
-__Returns__ : a [StreamHelper]({{site.baseurl}}/documentation/api_streamhelper.html).
-
-__Throws__ : Nothing.
-
-__Example__
+## Examples
 
 ```js
 zip.generateInternalStream({type:"blob"}).accumulate(function callback(err, content) {

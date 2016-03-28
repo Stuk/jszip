@@ -4,17 +4,13 @@ layout: default
 section: api
 ---
 
-__Description__ : Create a new JSZip instance.
-
-__Arguments__ : None
+Create a new JSZip instance.
 
 __Returns__ : A new JSZip.
 
-__Throws__ : Nothing.
+__Since__: v1.0.0
 
-<!-- __Complexity__ : Object creation in **O(1)**. -->
-
-__Example__
+## Example
 
 ```js
 var zip = new JSZip();

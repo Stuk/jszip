@@ -6,7 +6,9 @@ section: api
 
 The version of JSZip as a string.
 
-__Example__
+__Since__: v3.1.0
+
+## Example
 
 ```js
 JSZip.version == "3.1.0";

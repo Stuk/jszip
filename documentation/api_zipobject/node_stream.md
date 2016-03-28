@@ -4,23 +4,21 @@ layout: default
 section: api
 ---
 
-__Description__ : Return a [nodejs Streams3](https://github.com/nodejs/readable-stream)
+Return a [nodejs Streams3](https://github.com/nodejs/readable-stream)
 of the content in the asked type.
 
-__Arguments__
+__Returns__ : a [nodejs Streams3](https://github.com/nodejs/readable-stream).
+
+## Arguments
 
 name     | type     | default      | description
 ---------|----------|--------------|------------
 type     | String   | `nodebuffer` | only `nodebuffer` is currently supported.
 onUpdate | Function |              | an optional function called on each internal update with the metadata.
 
-__Metadata__ : see [the metadata of `async()`]({{site.baseurl}}/documentation/api_zipobject/async.html).
+__Metadata__ : see [the metadata of `async()`]({{site.baseurl}}/documentation/api_zipobject/async.html#onupdate-callback).
 
-__Returns__ : a [nodejs Streams3](https://github.com/nodejs/readable-stream).
-
-__Throws__ : Nothing.
-
-__Example__
+## Example
 
 ```js
 zip
