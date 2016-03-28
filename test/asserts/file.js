@@ -93,6 +93,7 @@ QUnit.module("file", function () {
         _actualTestFileDataGetters.testGetter(opts, "string");
         _actualTestFileDataGetters.testGetter(opts, "text");
         _actualTestFileDataGetters.testGetter(opts, "base64");
+        _actualTestFileDataGetters.testGetter(opts, "array");
         _actualTestFileDataGetters.testGetter(opts, "binarystring");
         _actualTestFileDataGetters.testGetter(opts, "arraybuffer");
         _actualTestFileDataGetters.testGetter(opts, "uint8array");
@@ -113,6 +114,7 @@ QUnit.module("file", function () {
             _actualTestFileDataGetters.testGetter(reloaded, "string");
             _actualTestFileDataGetters.testGetter(reloaded, "text");
             _actualTestFileDataGetters.testGetter(reloaded, "base64");
+            _actualTestFileDataGetters.testGetter(reloaded, "array");
             _actualTestFileDataGetters.testGetter(reloaded, "binarystring");
             _actualTestFileDataGetters.testGetter(reloaded, "arraybuffer");
             _actualTestFileDataGetters.testGetter(reloaded, "uint8array");
@@ -156,6 +158,12 @@ QUnit.module("file", function () {
         assert_binarystring : function (opts, err, bin, testName) {
             equal(err, null, testName + "no error");
             equal(bin, opts.rawData, testName + "content ok");
+        },
+        assert_array : function (opts, err, array, testName) {
+            equal(err, null, testName + "no error");
+            ok(array instanceof Array, testName + "the result is a instance of Array");
+            var actual = JSZipTestUtils.toString(array);
+            equal(actual, opts.rawData, testName + "content ok");
         },
         assert_arraybuffer : function (opts, err, buffer, testName) {
             if (JSZip.support.arraybuffer) {
@@ -252,6 +260,23 @@ QUnit.module("file", function () {
 
         zip = new JSZip();
         zip.file("file.txt", "test\r\ntest\r\n", {binary:true});
+        testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+    });
+
+    test("add file: file(name, array)", function() {
+        var zip = new JSZip();
+        function toArray(str) {
+            var array = new Array(str.length);
+            for (var i = 0; i < str.length; i++) {
+                array[i] = str.charCodeAt(i);
+            }
+            return array;
+        }
+        zip.file("file.txt", toArray("\xE2\x82\xAC15\n"), {binary:true});
+        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
+        zip = new JSZip();
+        zip.file("file.txt", toArray("test\r\ntest\r\n"), {binary:true});
         testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
     });
 
