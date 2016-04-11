@@ -1,4 +1,11 @@
 {
+    "curly": true,
+    "eqeqeq": true,
+    "nonew": true,
+    "noarg": true,
+    "forin": true,
+    "futurehostile": true,
+    "freeze": true,
     "undef": true,
     "strict": true,
     "sub": true,

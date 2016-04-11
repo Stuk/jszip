@@ -1,6 +1,11 @@
 jQuery(function ($) {
     "use strict";
 
+    var Promise = window.Promise;
+    if (!Promise) {
+        Promise = JSZip.external.Promise;
+    }
+
     /**
      * Reset the message.
      */
@@ -43,24 +48,20 @@ jQuery(function ($) {
     }
 
     /**
-     * Fetch the content, add it to the JSZip object
-     * and use a jQuery deferred to hold the result.
+     * Fetch the content and return the associated promise.
      * @param {String} url the url of the content to fetch.
-     * @param {String} filename the filename to use in the JSZip object.
-     * @param {JSZip} zip the JSZip instance.
-     * @return {jQuery.Deferred} the deferred containing the data.
+     * @return {Promise} the promise containing the data.
      */
-    function deferredAddZip(url, filename, zip) {
-        var deferred = $.Deferred();
-        JSZipUtils.getBinaryContent(url, function (err, data) {
-            if(err) {
-                deferred.reject(err);
-            } else {
-                zip.file(filename, data, {binary:true});
-                deferred.resolve(data);
-            }
+    function urlToPromise(url) {
+        return new Promise(function(resolve, reject) {
+            JSZipUtils.getBinaryContent(url, function (err, data) {
+                if(err) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
         });
-        return deferred;
     }
 
     if(!JSZip.support.blob) {
@@ -73,39 +74,34 @@ jQuery(function ($) {
         resetMessage();
 
         var zip = new JSZip();
-        var deferreds = [];
 
         // find every checked item
         $(this).find(":checked").each(function () {
             var $this = $(this);
             var url = $this.data("url");
             var filename = url.replace(/.*\//g, "");
-            deferreds.push(deferredAddZip(url, filename, zip));
+            zip.file(filename, urlToPromise(url), {binary:true});
         });
 
         // when everything has been downloaded, we can trigger the dl
-        $.when.apply($, deferreds).done(function () {
-            zip.generateAsync({type:"blob"}, function updateCallback(metadata) {
-                var msg = "progression : " + metadata.percent.toFixed(2) + " %";
-                if(metadata.currentFile) {
-                    msg += ", current file = " + metadata.currentFile;
-                }
-                showMessage(msg);
-                updatePercent(metadata.percent|0);
-            })
-            .then(function callback( blob) {
+        zip.generateAsync({type:"blob"}, function updateCallback(metadata) {
+            var msg = "progression : " + metadata.percent.toFixed(2) + " %";
+            if(metadata.currentFile) {
+                msg += ", current file = " + metadata.currentFile;
+            }
+            showMessage(msg);
+            updatePercent(metadata.percent|0);
+        })
+        .then(function callback(blob) {
 
-                // see FileSaver.js
-                saveAs(blob, "example.zip");
+            // see FileSaver.js
+            saveAs(blob, "example.zip");
 
-                showMessage("done !");
-            }, function (e) {
-                showError(e);
-            });
-
-        }).fail(function (err) {
-            showError(err);
+            showMessage("done !");
+        }, function (e) {
+            showError(e);
         });
+
         return false;
     });
 });

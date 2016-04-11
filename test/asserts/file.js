@@ -1,5 +1,5 @@
 /* jshint qunit: true */
-/* global JSZip,JSZipTestUtils */
+/* global JSZip,JSZipTestUtils,Promise,BlobBuilder */
 'use strict';
 
 QUnit.module("file", function () {
@@ -93,6 +93,7 @@ QUnit.module("file", function () {
         _actualTestFileDataGetters.testGetter(opts, "string");
         _actualTestFileDataGetters.testGetter(opts, "text");
         _actualTestFileDataGetters.testGetter(opts, "base64");
+        _actualTestFileDataGetters.testGetter(opts, "array");
         _actualTestFileDataGetters.testGetter(opts, "binarystring");
         _actualTestFileDataGetters.testGetter(opts, "arraybuffer");
         _actualTestFileDataGetters.testGetter(opts, "uint8array");
@@ -113,6 +114,7 @@ QUnit.module("file", function () {
             _actualTestFileDataGetters.testGetter(reloaded, "string");
             _actualTestFileDataGetters.testGetter(reloaded, "text");
             _actualTestFileDataGetters.testGetter(reloaded, "base64");
+            _actualTestFileDataGetters.testGetter(reloaded, "array");
             _actualTestFileDataGetters.testGetter(reloaded, "binarystring");
             _actualTestFileDataGetters.testGetter(reloaded, "arraybuffer");
             _actualTestFileDataGetters.testGetter(reloaded, "uint8array");
@@ -156,6 +158,12 @@ QUnit.module("file", function () {
         assert_binarystring : function (opts, err, bin, testName) {
             equal(err, null, testName + "no error");
             equal(bin, opts.rawData, testName + "content ok");
+        },
+        assert_array : function (opts, err, array, testName) {
+            equal(err, null, testName + "no error");
+            ok(array instanceof Array, testName + "the result is a instance of Array");
+            var actual = JSZipTestUtils.toString(array);
+            equal(actual, opts.rawData, testName + "content ok");
         },
         assert_arraybuffer : function (opts, err, buffer, testName) {
             if (JSZip.support.arraybuffer) {
@@ -255,6 +263,23 @@ QUnit.module("file", function () {
         testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
     });
 
+    test("add file: file(name, array)", function() {
+        var zip = new JSZip();
+        function toArray(str) {
+            var array = new Array(str.length);
+            for (var i = 0; i < str.length; i++) {
+                array[i] = str.charCodeAt(i);
+            }
+            return array;
+        }
+        zip.file("file.txt", toArray("\xE2\x82\xAC15\n"), {binary:true});
+        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
+        zip = new JSZip();
+        zip.file("file.txt", toArray("test\r\ntest\r\n"), {binary:true});
+        testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+    });
+
     test("add file: file(name, base64)", function() {
         var zip = new JSZip();
         zip.file("file.txt", "4oKsMTUK", {base64:true});
@@ -266,13 +291,21 @@ QUnit.module("file", function () {
     });
 
     test("add file: file(name, unsupported)", function() {
+        stop();
         var zip = new JSZip();
-        try {
-            zip.file("test.txt", new Date());
+        zip.file("test.txt", new Date());
+
+        zip.file("test.txt")
+        .async("string")
+        // XXX zip.file(name, data) returns a ZipObject for chaining,
+        // we need to try to get the value to get the error
+        .then(function () {
+            start();
             ok(false, "An unsupported object was added, but no exception thrown");
-        } catch(e) {
+        }, function (e) {
+            start();
             ok(e.message.match("unsupported format"), "the error message is useful");
-        }
+        });
     });
 
     if (JSZip.support.uint8array) {
@@ -320,6 +353,81 @@ QUnit.module("file", function () {
             testFileDataGetters({name : "empty content", zip : zip, textData : ""});
         });
     }
+    
+    if (JSZip.support.blob) {
+        test("add file: file(name, Blob)", function() {
+            var str2blob = function (str) {
+                var array = new Uint8Array(str.length);
+                for(var i = 0; i < str.length; i++) {
+                    array[i] = str.charCodeAt(i);
+                }
+                try {
+                    // don't use an Uint8Array, see the comment on utils.newBlob
+                    return new Blob([array.buffer], {type:"text/plain"});
+                } catch (e) {
+                    var Builder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
+                    var builder = new Builder();
+                    builder.append(array.buffer);
+                    return builder.getBlob("text/plain");
+                }
+            };
+            var zip = new JSZip();
+            zip.file("file.txt", str2blob("\xE2\x82\xAC15\n"));
+            testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
+            zip = new JSZip();
+            zip.file("file.txt", str2blob("test\r\ntest\r\n"));
+            testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+
+            zip = new JSZip();
+            zip.file("file.txt", str2blob(""));
+            testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+        });
+    }
+
+    if (typeof Promise !== "undefined") {
+        test("add file: file(name, native Promise)", function() {
+            var str2promise = function (str) {
+                return new Promise(function(resolve, reject) {
+                    setTimeout(function () {
+                        resolve(str);
+                    }, 10);
+                });
+            };
+            var zip = new JSZip();
+            zip.file("file.txt", str2promise("\xE2\x82\xAC15\n"));
+            testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
+            zip = new JSZip();
+            zip.file("file.txt", str2promise("test\r\ntest\r\n"));
+            testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+
+            zip = new JSZip();
+            zip.file("file.txt", str2promise(""));
+            testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+        });
+    }
+
+    test("add file: file(name, polyfill Promise)", function() {
+        var str2promise = function (str) {
+            return new JSZip.external.Promise(function(resolve, reject) {
+                setTimeout(function () {
+                    resolve(str);
+                }, 10);
+            });
+        };
+        var zip = new JSZip();
+        zip.file("file.txt", str2promise("\xE2\x82\xAC15\n"));
+        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
+        zip = new JSZip();
+        zip.file("file.txt", str2promise("test\r\ntest\r\n"));
+        testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+
+        zip = new JSZip();
+        zip.file("file.txt", str2promise(""));
+        testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+    });
 
     if (JSZip.support.nodebuffer) {
         test("add file: file(name, Buffer)", function() {

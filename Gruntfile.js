@@ -107,11 +107,27 @@ module.exports = function(grunt) {
           }
       },
       jshint: {
-            options: {
-                jshintrc: "./.jshintrc"
-            },
-            all: ['./lib/**/*.js', './test/helpers/**/*.js', './test/asserts/**/*.js']
-        },
+          // see https://github.com/gruntjs/grunt-contrib-jshint/issues/198
+          // we can't override the options using the jshintrc path
+          options: grunt.file.readJSON('.jshintrc'),
+          production: ['./lib/**/*.js'],
+          test: ['./test/helpers/**/*.js', './test/asserts/**/*.js'],
+          documentation: {
+              options: {
+                  globals: {
+                      jQuery: false,
+                      JSZip: false,
+                      JSZipUtils: false,
+                      saveAs: false
+                  },
+                  // implied still give false positives in our case
+                  strict: false
+              },
+              files: {
+                  src: ['./documentation/**/*.js']
+              }
+          }
+      },
     browserify: {
       all: {
         files: {

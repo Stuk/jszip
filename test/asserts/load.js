@@ -1,5 +1,5 @@
 /* jshint qunit: true */
-/* global JSZip,JSZipTestUtils */
+/* global JSZip,JSZipTestUtils,BlobBuilder */
 'use strict';
 
 QUnit.module("load", function () {
@@ -433,6 +433,45 @@ QUnit.module("load", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
+ 
+    JSZipTestUtils.testZipFile("load(promise) works", "ref/all.zip", function(fileAsString) {
+        stop();
+        JSZip.loadAsync(JSZip.external.Promise.resolve(fileAsString))
+        .then(function (zip) {
+            return zip.file("Hello.txt").async("string");
+        }).then(function (content){
+            equal(content, "Hello World\n", "the zip was correctly read.");
+            start();
+        })['catch'](JSZipTestUtils.assertNoError);
+    });
+
+    if (JSZip.support.blob) {
+        JSZipTestUtils.testZipFile("load(blob) works", "ref/all.zip", function(fileAsString) {
+            var u8 = new Uint8Array(fileAsString.length);
+            for( var i = 0; i < fileAsString.length; ++i ) {
+                u8[i] = fileAsString.charCodeAt(i);
+            }
+            var file = null;
+            try {
+                // don't use an Uint8Array, see the comment on utils.newBlob
+                file = new Blob([u8.buffer], {type:"application/zip"});
+            } catch (e) {
+                var Builder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
+                var builder = new Builder();
+                builder.append(u8.buffer);
+                file = builder.getBlob("application/zip");
+            }
+
+            stop();
+            JSZip.loadAsync(file)
+            .then(function (zip) {
+                return zip.file("Hello.txt").async("string");
+            }).then(function (content){
+                equal(content, "Hello World\n", "the zip was correctly read.");
+                start();
+            })['catch'](JSZipTestUtils.assertNoError);
+        });
+    }
 
     QUnit.module("not supported features");
 

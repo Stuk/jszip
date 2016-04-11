@@ -9,6 +9,9 @@ section: example
 <h3>With JSZipUtils</h3>
 <div id="jszip_utils"></div>
 
+<h3>With the Fetch API</h3>
+<div id="fetch"></div>
+
 <script type="text/javascript">
 (function () {
 
@@ -16,8 +19,8 @@ section: example
     elt.innerHTML = "<p class='alert alert-danger'>" + err + "</p>";
   }
 
-  function showContent(elt, type, content) {
-    elt.innerHTML = "<p class='alert alert-success'>loaded ! (as a " + type + ")<br/>" +
+  function showContent(elt, content) {
+    elt.innerHTML = "<p class='alert alert-success'>loaded !<br/>" +
       "Content = " + content + "</p>";
   }
 
@@ -37,7 +40,7 @@ section: example
         return zip.file("Hello.txt").async("string");
       })
       .then(function success(text) {
-        showContent(elt, "" + data, text);
+        showContent(elt, text);
       }, function error(e) {
         showError(elt, e);
       });
@@ -45,6 +48,34 @@ section: example
       showError(elt, e);
     }
   });
+
+  //=========================
+  // Fetch API
+  //=========================
+  (function () {
+    var elt = document.getElementById('fetch');
+    if(typeof window.fetch === "function") {
+      fetch('{{site.baseurl}}/test/ref/text.zip')
+      .then(function (response) {
+        if (response.status === 200 || response.status === 0) {
+          return Promise.resolve(response.arrayBuffer())
+        } else {
+          return Promise.reject(new Error(response.statusText))
+        }
+      })
+      .then(JSZip.loadAsync)
+      .then(function (zip) {
+        return zip.file("Hello.txt").async("string");
+      })
+      .then(function success(text) {
+        showContent(elt, text);
+      }, function error(e) {
+        showError(elt, e);
+      });
+    } else {
+      showError(elt, "This browser doesn't support the Fetch API.");
+    } 
+  })();
 
 })();
 </script>

@@ -255,6 +255,19 @@ QUnit.module("stream", function () {
             .resume();
         });
 
+        test("loadAsync ends with an error when called with a stream", function(assert) {
+            var done = assert.async();
+            var stream = JSZipTestUtils.createZipAll().generateNodeStream({"type":"nodebuffer"});
+            JSZip.loadAsync(stream).then(function () {
+                assert.ok(false, "loading a zip file from a stream is impossible");
+                done();
+            }, function (e) {
+                assert.ok(e.message.match("can't accept a stream when loading"), "the error message is useful");
+                done();
+            });
+
+        });
+
     } else {
         test("generateNodeStream generates an error", function(assert) {
             try {

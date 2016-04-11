@@ -34,6 +34,9 @@ process.on('uncaughtException', function(err) {
     }
 
     for ( i in assertions ) {
+        if (!assertions.hasOwnProperty(i)) {
+            continue;
+        }
         QUnit[ i ] = applyCurrent( assertions[ i ] );
         global[ i ] = QUnit[ i ];
     }
