@@ -1,5 +1,5 @@
 ---
-title: "accumulate(callback [,updateCallback])"
+title: "accumulate([updateCallback])"
 layout: default
 section: api
 ---
@@ -10,17 +10,13 @@ __Arguments__
 
 name            | type     | description
 ----------------|----------|------------
-callback        | function | the function called once when the final content is ready.
 updateCallback  | function | the function called every time the stream updates. This function is optional.
 
 
-The callback function takes 2 parameters :
-- the error if any
-- the complete content
-
 The update callback function takes 1 parameter : the metadata (see the [`on` method]({{site.baseurl}}/documentation/api_streamhelper/on.html)).
 
-__Returns__ : Nothing.
+__Returns__ : A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+of the full content.
 
 __Throws__ : Nothing.
 
@@ -29,10 +25,9 @@ __Example__
 ```js
 zip
 .generateInternalStream({type:"uint8array"})
-.accumulate(function callback(err, data) {
-    // err contains the error if something went wrong, null otherwise.
-    // data contains here the complete zip file as a uint8array (the type asked in generateInternalStream)
-}, function updateCallback(metadata) {
+.accumulate(function updateCallback(metadata) {
     // metadata contains for example currentFile and percent, see the generateInternalStream doc.
+}).then(function (data) {
+    // data contains here the complete zip file as a uint8array (the type asked in generateInternalStream)
 });
 ```
