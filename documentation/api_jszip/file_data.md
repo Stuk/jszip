@@ -11,7 +11,7 @@ __Arguments__
 name                | type    | description
 --------------------|---------|------------
 name                | string  | the name of the file. You can specify folders in the name : the folder separator is a forward slash ("/").
-data                | String/ArrayBuffer/Uint8Array/Buffer/Blob/Promise | the content of the file.
+data                | String/ArrayBuffer/Uint8Array/Buffer/Blob/Promise/Nodejs stream | the content of the file.
 options             | object  | the options.
 
 Content of `options` :
@@ -48,6 +48,13 @@ __About `dir`__ :
 If `dir` is true or if a permission says it's a folder, this entry be flagged
 as a folder and the content will be ignored.
 
+__About nodejs stream__:
+
+A stream can't be restarted: if it is used once, it can't be used again (
+by [generateAsync()]({{site.baseurl}}/documentation/api_jszip/generate_async.html)
+or by [ZipObject methods]({{site.baseurl}}/documentation/api_zipobject.html)).
+In that case, the promise/stream (depending on the method called) will get
+an error.
 
 __Returns__ : The current JSZip object, for chaining.
 
