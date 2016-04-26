@@ -6,8 +6,8 @@ QUnit.module("stream", function () {
 
     QUnit.module("internal");
 
-    test("A stream is pausable", function () {
-        // let's get a stream that generates a lot of chunks
+    test("A stream is pausable", function (assert) {
+        // let's get a stream that generates a lot of chunks (~40)
         var zip = new JSZip();
         var txt = "a text";
         for(var i = 0; i < 10; i++) {
@@ -16,33 +16,37 @@ QUnit.module("stream", function () {
 
         var allowChunks = true;
         var chunkCount = 0;
+        var done = assert.async();
 
         var helper = zip.generateInternalStream({streamFiles:true, type:"binarystring"});
         helper
         .on("data", function () {
             chunkCount++;
-            equal(allowChunks, true, "be sure to get chunks only when allowed");
+            assert.equal(allowChunks, true, "be sure to get chunks only when allowed");
+
+            /*
+             * We stop at ~ half of chunks.
+             * A setTimeout aside this stream is not reliable and can be
+             * triggered *after* the completion of the stream.
+             */
+            if (chunkCount === 20) {
+
+                allowChunks = false;
+                helper.pause();
+                setTimeout(function () {
+                    allowChunks = true;
+                    helper.resume();
+                }, 50);
+            }
         })
         .on("error", function (e) {
-            start();
-            ok(false, e.message);
+            done();
+            assert.ok(false, e.message);
         })
         .on("end", function () {
-            start();
+            done();
         });
-        stop();
         helper.resume();
-        setTimeout(function () {
-            allowChunks = false;
-            ok(chunkCount > 0, "the stream emitted at least 1 chunk before pausing it");
-            helper.pause();
-        }, 10);
-        setTimeout(function () {
-            allowChunks = true;
-            helper.resume();
-        }, 40);
-
-
     });
 
     QUnit.module("nodejs");
