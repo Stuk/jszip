@@ -73,6 +73,10 @@ fs.readFile("picture.png", function(err, data) {
   var zip = new JSZip();
   zip.file("picture.png", data);
 });
+
+// read a file as a stream and add it to a zip
+var stream = fs.createReadStream("picture.png");
+zip.file("picture.png", stream);
 ```
 
 #### Remote file
