@@ -27,5 +27,9 @@ zip
 .file("my_text.txt")
 .nodeStream()
 .pipe(fs.createWriteStream('/tmp/my_text.txt'))
-.on("end", function () {...});
+.on('finish', function () {
+    // JSZip generates a readable stream with a "end" event,
+    // but is piped here in a writable stream which emits a "finish" event.
+    console.log("text file written.");
+});
 ```
