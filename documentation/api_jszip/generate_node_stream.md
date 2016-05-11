@@ -28,7 +28,9 @@ __Example__
 zip
 .generateNodeStream({streamFiles:true})
 .pipe(fs.createWriteStream('out.zip'))
-.on('end', function () {
+.on('finish', function () {
+    // JSZip generates a readable stream with a "end" event,
+    // but is piped here in a writable stream which emits a "finish" event.
     console.log("out.zip written.");
 });
 ```
