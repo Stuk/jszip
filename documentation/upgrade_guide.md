@@ -49,9 +49,11 @@ zip.generateAsync({type:"uint8array"})
 // 2.x
 new JSZip(data);
 zip.load(data);
+// zip.file(...)
 // 3.x
-JSZip.loadAsync(data);
-zip.loadAsync(data);
+JSZip.loadAsync(data).then(zip) {...};
+zip.loadAsync(data).then(zip) {...};
+// here, zip won't have (yet) the updated content
 
 // 2.x
 var data = zip.file("img.jpg").asBinary();
@@ -60,6 +62,55 @@ var dataURI = "data:image/jpeg;base64," + JSZip.base64.encode(data);
 zip.file("img.jpg").async("base64")
 .then(function (data64) {
     var dataURI = "data:image/jpeg;base64," + data64;
+});
+```
+
+`async` and `loadAsync` use (a polyfill of) promises, you can find
+the documentation [here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+and a tutorial [here](http://www.html5rocks.com/en/tutorials/es6/promises/).
+
+It is worth noting that:
+
+```js
+/*
+ * JSZip accepts these promise as input
+ */
+
+// replace a content with JSZip v2
+var content = zip.file("my_file").asText();
+content = content.replace(/apples/, 'oranges');
+zip.file("my_file", content);
+
+// replace a content with JSZip v3
+var contentPromise = zip.file("my_file").async("text").then(function (content) {
+    return content.replace(/apples/, 'oranges');
+});
+zip.file("my_file", contentPromise);
+
+
+/*
+ * Promises are chainable
+ */
+
+// read, update, generate a zip file with JSZip v2
+var zip = new JSZip(content);
+zip.file("new_file", "new_content");
+var blob = zip.generate({type: "blob"});
+saveAs(blob, "result.zip");
+
+// read, update, generate a zip file with JSZip v3
+JSZip.loadAsync(content)
+.then(function (zip) {
+    zip.file("new_file", "new_content");
+    // if you return the zip object, it will be available in the next "then"
+    return zip;
+.then(function (zip) {
+    // if you return a promise of a blob, promises will "merge": the current
+    // promise will wait for the other and the next "then" will get the
+    // blob
+    return zip.generateAsync({type: "blob"});
+.then(function (blob) {
+    saveAs(blob, "result.zip");
 });
 ```
 
