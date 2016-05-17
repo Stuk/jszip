@@ -8,8 +8,8 @@ fullpage: true
 ### Not supported features
 
 All the features of zip files are not supported. Classic zip files will work
-but encrypted zip, multi-volume, etc are not supported and the load() method
-will throw an `Error`.
+but encrypted zip, multi-volume, etc are not supported and the loadAsync()
+method will return a failed promise.
 
 
 ### ZIP64 and 32bit integers

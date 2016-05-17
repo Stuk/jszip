@@ -95,7 +95,7 @@ Using a custom charset :
 // using iconv-lite for example
 var iconv = require('iconv-lite');
 
-zip.load(content, {
+zip.loadAsync(content, {
     decodeFileName: function (bytes) {
         return iconv.decode(bytes, 'your-encoding');
     }
