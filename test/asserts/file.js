@@ -86,6 +86,32 @@ QUnit.module("file", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
+    test("add file: wrong string as base64", function(assert) {
+        var zip = new JSZip();
+        zip.file("text.txt", "a random string", {base64:true});
+        stop();
+        zip.generateAsync({type:"binarystring"}).then(function(actual) {
+            assert.ok(false, "generateAsync should fail");
+            start();
+        })['catch'](function (e) {
+            assert.ok(e.message, "Invalid base64 input, bad content length.", "triggers the correct error");
+            start();
+        });
+    });
+
+    test("add file: data url instead of base64", function(assert) {
+        var zip = new JSZip();
+        zip.file("text.txt", "data:image/png;base64,YmFzZTY0", {base64:true});
+        stop();
+        zip.generateAsync({type:"binarystring"}).then(function(actual) {
+            assert.ok(false, "generateAsync should fail");
+            start();
+        })['catch'](function (e) {
+            assert.ok(e.message, "Invalid base64 input, it looks like a data url.", "triggers the correct error");
+            start();
+        });
+    });
+
     function testFileDataGetters (opts) {
         if (typeof opts.rawData === "undefined") {
             opts.rawData = opts.textData;
