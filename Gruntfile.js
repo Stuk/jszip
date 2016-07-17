@@ -1,13 +1,12 @@
 /*jshint node: true */
 'use strict';
 module.exports = function(grunt) {
+  // see https://saucelabs.com/rest/v1/info/browsers/webdriver
   var browsers = [{
       browserName: "iphone",
-      platform: "OS X 10.8",
-      version: "6"
+      version: "7.0"
   }, {
       browserName: "iphone",
-      platform: "OS X 10.10",
       version: "9.2"
   }, {
       browserName: "android",
