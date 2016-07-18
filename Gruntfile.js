@@ -1,13 +1,12 @@
 /*jshint node: true */
 'use strict';
 module.exports = function(grunt) {
+  // see https://saucelabs.com/rest/v1/info/browsers/webdriver
   var browsers = [{
       browserName: "iphone",
-      platform: "OS X 10.8",
-      version: "6"
+      version: "7.0"
   }, {
       browserName: "iphone",
-      platform: "OS X 10.10",
       version: "9.2"
   }, {
       browserName: "android",
@@ -159,6 +158,9 @@ module.exports = function(grunt) {
         src: 'dist/jszip.js',
         dest: 'dist/jszip.min.js'
       }
+    },
+    qunit: {
+        all: ['test/**/*.html']
     }
   });
 
@@ -167,11 +169,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-qunit');
 
   if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
-    grunt.registerTask("test", ["connect", "saucelabs-qunit"]);
+    grunt.registerTask("test", ["qunit", "connect", "saucelabs-qunit"]);
   } else {
-    grunt.registerTask("test", []);
+    grunt.registerTask("test", ["qunit"]);
   }
   grunt.registerTask("build", ["browserify", "uglify"]);
   grunt.registerTask("default", ["jshint", "build"]);
