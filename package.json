@@ -53,7 +53,8 @@
     "es6-promise": "~3.0.2",
     "pako": "~1.0.0",
     "readable-stream": "~2.0.6",
-    "asap": "~2.0.3"
+    "asap": "~2.0.3",
+    "vow": "~0.4.12"
   },
   "license": "(MIT OR GPL-3.0)"
 }

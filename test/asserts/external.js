@@ -1,33 +1,61 @@
 /* jshint qunit: true */
-/* global JSZip,JSZipTestUtils */
+/* global JSZip,JSZipTestUtils,Promise */
 'use strict';
 
 QUnit.module("external");
 
+/**
+ * Creates a wrapper around an existing Promise implementation to count
+ * calls and detect custom implementations.
+ * @param {Promise} OriginalPromise the promise to wrap
+ * @return {Promise} the wrapped promise
+ */
 function createPromiseProxy(OriginalPromise) {
-    function MyShinyPromise () {
-        OriginalPromise.apply(this, arguments);
+    function MyShinyPromise (input) {
+        if (input.then) { // thenable, we wrap it
+            this._promise = input;
+        } else { // executor
+            this._promise = new OriginalPromise(input);
+        }
         MyShinyPromise.calls++;
     }
     MyShinyPromise.calls = 0;
-    MyShinyPromise.prototype = OriginalPromise.prototype;
-    function proxyMethod(method) {
-        if (typeof OriginalPromise[method] === "function") {
-            MyShinyPromise[method] = function () {
-                MyShinyPromise.calls++;
-                return OriginalPromise[method].apply(OriginalPromise, arguments);
-            };
-        }
-    }
-    MyShinyPromise.prototype.isACustomImplementation = true;
-    for(var method in OriginalPromise) {
-        if (!OriginalPromise.hasOwnProperty(method)) {
-            continue;
-        }
-        proxyMethod(method);
-    }
+    MyShinyPromise.prototype = {
+        then: function (onFulfilled, onRejected) {
+            return new MyShinyPromise(this._promise.then(onFulfilled, onRejected));
+        },
+        "catch": function (onRejected) {
+            return new MyShinyPromise(this._promise['catch'](onRejected));
+        },
+        isACustomImplementation: true
+    };
+
+    MyShinyPromise.resolve = function (value) {
+        return new MyShinyPromise(OriginalPromise.resolve(value));
+    };
+    MyShinyPromise.reject = function (value) {
+        return new MyShinyPromise(OriginalPromise.reject(value));
+    };
+    MyShinyPromise.all = function (value) {
+        return new MyShinyPromise(OriginalPromise.all(value));
+    };
     return MyShinyPromise;
 }
+
+test("JSZip.external.Promise", function (assert) {
+    assert.ok(JSZip.external.Promise, "JSZip.external.Promise is defined");
+    assert.ok(JSZip.external.Promise.resolve, "JSZip.external.Promise looks like a Promise");
+    assert.ok(JSZip.external.Promise.reject, "JSZip.external.Promise looks like a Promise");
+});
+
+test("load JSZip doesn't override the global Promise", function (assert) {
+    if (typeof Promise !== "undefined"){
+        assert.equal(Promise, JSZipTestUtils.oldPromise, "the previous Promise didn't change");
+        assert.equal(Promise, JSZip.external.Promise, "JSZip.external.Promise reused the global Promise");
+    } else {
+        assert.ok(JSZip.external.Promise, "JSZip.external.Promise is defined even if the global Promise doesn't exist");
+    }
+});
 
 test("external.Promise can be replaced in .async()", function (assert) {
     var done = assert.async();

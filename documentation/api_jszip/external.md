@@ -4,11 +4,14 @@ layout: default
 section: api
 ---
 
-JSZip uses polyfills of objects that may not exist on every platform.
+JSZip uses objects that may not exist on every platform, in which case it uses
+a shim.
 Accessing or replacing these objects can sometimes be useful. JSZip.external
 contains the following properties :
 
 * `Promise` : the [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) implementation used.
+
+The global object is prefered when available.
 
 __Example__
 
