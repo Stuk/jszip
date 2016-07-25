@@ -50,10 +50,10 @@
     "tmp": "0.0.28"
   },
   "dependencies": {
+    "core-js": "~2.3.0",
     "es6-promise": "~3.0.2",
     "pako": "~1.0.0",
-    "readable-stream": "~2.0.6",
-    "asap": "~2.0.3"
+    "readable-stream": "~2.0.6"
   },
   "license": "(MIT OR GPL-3.0)"
 }

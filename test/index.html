@@ -32,6 +32,8 @@ if(!window.QUnit) {
       var details = log[i];
       tests.push({
          name: details.name,
+         message: details.message,
+         module: details.module,
          result: details.result,
          expected: details.expected,
          actual: details.actual,
