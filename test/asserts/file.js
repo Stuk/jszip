@@ -4,6 +4,21 @@
 
 QUnit.module("file", function () {
 
+    function str2blob (str) {
+        var u8 = new Uint8Array(str.length);
+        for(var i = 0; i < str.length; i++) {
+            u8[i] = str.charCodeAt(i);
+        }
+        try {
+            // don't use an Uint8Array, see the comment on utils.newBlob
+            return new Blob([u8.buffer], {type:"text/plain"});
+        } catch (e) {
+            var Builder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
+            var builder = new Builder();
+            builder.append(u8.buffer);
+            return builder.getBlob("text/plain");
+        }
+    }
 
     QUnit.module("add");
 
@@ -382,21 +397,6 @@ QUnit.module("file", function () {
     
     if (JSZip.support.blob) {
         test("add file: file(name, Blob)", function() {
-            var str2blob = function (str) {
-                var array = new Uint8Array(str.length);
-                for(var i = 0; i < str.length; i++) {
-                    array[i] = str.charCodeAt(i);
-                }
-                try {
-                    // don't use an Uint8Array, see the comment on utils.newBlob
-                    return new Blob([array.buffer], {type:"text/plain"});
-                } catch (e) {
-                    var Builder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
-                    var builder = new Builder();
-                    builder.append(array.buffer);
-                    return builder.getBlob("text/plain");
-                }
-            };
             var zip = new JSZip();
             zip.file("file.txt", str2blob("\xE2\x82\xAC15\n"));
             testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
@@ -434,7 +434,7 @@ QUnit.module("file", function () {
         });
     }
 
-    test("add file: file(name, polyfill Promise)", function() {
+    test("add file: file(name, polyfill Promise[string])", function() {
         var str2promise = function (str) {
             return new JSZip.external.Promise(function(resolve, reject) {
                 setTimeout(function () {
@@ -454,6 +454,29 @@ QUnit.module("file", function () {
         zip.file("file.txt", str2promise(""));
         testFileDataGetters({name : "empty content", zip : zip, textData : ""});
     });
+
+    if (JSZip.support.blob) {
+        test("add file: file(name, polyfill Promise[Blob])", function() {
+            var str2promiseOfBlob = function (str) {
+                return new JSZip.external.Promise(function(resolve, reject) {
+                    setTimeout(function () {
+                        resolve(str2blob(str));
+                    }, 10);
+                });
+            };
+            var zip = new JSZip();
+            zip.file("file.txt", str2promiseOfBlob("\xE2\x82\xAC15\n"));
+            testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+
+            zip = new JSZip();
+            zip.file("file.txt", str2promiseOfBlob("test\r\ntest\r\n"));
+            testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+
+            zip = new JSZip();
+            zip.file("file.txt", str2promiseOfBlob(""));
+            testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+        });
+    }
 
     if (JSZip.support.nodebuffer) {
         test("add file: file(name, Buffer)", function() {
