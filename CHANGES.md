@@ -4,6 +4,9 @@ layout: default
 section: main
 ---
 
+### v2.6.1 2016-07-28
+- update pako to v1.0.2 to fix a DEFLATE bug (see [#322](https://github.com/Stuk/jszip/pull/322)).
+
 ### v2.6.0 2016-03-23
 - publish `dist/` files in the npm package (see [#225](https://github.com/Stuk/jszip/pull/225)).
 - update pako to v1.0.0 (see [#261](https://github.com/Stuk/jszip/pull/261)).
