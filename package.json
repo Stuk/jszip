@@ -53,9 +53,9 @@
   "dependencies": {
     "core-js": "~2.3.0",
     "es6-promise": "~3.0.2",
+    "lie": "~3.1.0",
     "pako": "~1.0.2",
-    "readable-stream": "~2.0.6",
-    "vow": "~0.4.12"
+    "readable-stream": "~2.0.6"
   },
   "license": "(MIT OR GPL-3.0)"
 }
