@@ -83,6 +83,8 @@ module.exports = function(grunt) {
     tags.push(process.env.TRAVIS_BRANCH);
   }
 
+  var version = require("./package.json").version;
+
   grunt.initConfig({
       connect: {
           server: {
@@ -95,7 +97,7 @@ module.exports = function(grunt) {
       'saucelabs-qunit': {
           all: {
               options: {
-                  urls: ["http://127.0.0.1:9999/test/index.html"],
+                  urls: ["http://127.0.0.1:9999/test/index.html?hidepassed"],
                   build: process.env.TRAVIS_JOB_ID,
                   throttled: 3,
                   "max-duration" : 600, // seconds, IE6 is slow
@@ -135,6 +137,7 @@ module.exports = function(grunt) {
         options: {
           browserifyOptions: {
             standalone: 'JSZip',
+            transform: ['package-json-versionify'],
             insertGlobalVars : {
               Buffer: function () {
                 // instead of the full polyfill, we just use the raw value
@@ -144,7 +147,7 @@ module.exports = function(grunt) {
             }
           },
           ignore : ["./lib/nodejs/*"],
-          banner : grunt.file.read('lib/license_header.js')
+          banner : grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
         }
       }
     },
@@ -152,7 +155,7 @@ module.exports = function(grunt) {
       options: {
         mangle: true,
         preserveComments: false,
-        banner : grunt.file.read('lib/license_header.js')
+        banner : grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
       },
       all: {
         src: 'dist/jszip.js',

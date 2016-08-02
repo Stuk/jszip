@@ -45,15 +45,16 @@
     "grunt-contrib-qunit": "~1.2.0",
     "grunt-contrib-uglify": "~1.0.0",
     "jszip-utils": "~0.0.2",
+    "package-json-versionify": "~1.0.2",
     "qunit-cli": "~0.2.0",
     "qunitjs": "~1.23.0",
     "tmp": "0.0.28"
   },
   "dependencies": {
+    "core-js": "~2.3.0",
     "es6-promise": "~3.0.2",
-    "pako": "~1.0.0",
+    "pako": "~1.0.2",
     "readable-stream": "~2.0.6",
-    "asap": "~2.0.3",
     "vow": "~0.4.12"
   },
   "license": "(MIT OR GPL-3.0)"
