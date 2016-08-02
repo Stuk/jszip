@@ -203,5 +203,12 @@
         return base64Dict[input];
     };
 
+
+    if (global.JSZip) {
+        throw new Error("JSZip is already defined, we can't capture the global state *before* its load");
+    }
+
+    JSZipTestUtils.oldPromise = global.Promise;
+
     global.JSZipTestUtils = JSZipTestUtils;
 })(typeof window !== "undefined" && window || global);
