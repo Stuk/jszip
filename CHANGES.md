@@ -4,6 +4,14 @@ layout: default
 section: main
 ---
 
+### v3.1.0 2016-08-03
+- utils.delay: use macro tasks instead of micro tasks (see [#288](https://github.com/Stuk/jszip/pull/288)).
+- Harden base64 decode (see [#316](https://github.com/Stuk/jszip/pull/316)).
+- Add JSZip.version and the version in the header (see [#317](https://github.com/Stuk/jszip/pull/317)).
+- Support Promise(Blob) (see [#318](https://github.com/Stuk/jszip/pull/318)).
+- Change JSZip.external.Promise implementation (see [#321](https://github.com/Stuk/jszip/pull/321)).
+- Update pako to v1.0.2 to fix a DEFLATE bug (see [#322](https://github.com/Stuk/jszip/pull/322)).
+
 ### v3.0.0 2016-04-13
 This release changes a lot of methods, please see [the upgrade guide](http://stuk.github.io/jszip/documentation/upgrade_guide.html).
 
