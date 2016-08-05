@@ -146,7 +146,6 @@ module.exports = function(grunt) {
               }
             }
           },
-          ignore : ["./lib/nodejs/*"],
           banner : grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
         }
       }
