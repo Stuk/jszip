@@ -4,6 +4,9 @@ layout: default
 section: main
 ---
 
+### v3.1.1 2016-08-08
+- Use a hard-coded JSZip.version, fix an issue with webpack (see [#328](https://github.com/Stuk/jszip/pull/328)).
+
 ### v3.1.0 2016-08-03
 - utils.delay: use macro tasks instead of micro tasks (see [#288](https://github.com/Stuk/jszip/pull/288)).
 - Harden base64 decode (see [#316](https://github.com/Stuk/jszip/pull/316)).
