@@ -33,7 +33,7 @@ JSZipUtils.getBinaryContent('path/to/content.zip', function(err, data) {
 new JSZip.external.Promise(function (resolve, reject) {
     JSZipUtils.getBinaryContent('path/to/content.zip', function(err, data) {
         if (err) {
-            reject(e);
+            reject(err);
         } else {
             resolve(data);
         }
