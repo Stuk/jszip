@@ -1,6 +1,6 @@
 /*!
 
-JSZip v3.1.0 - A Javascript class for generating and reading zip files
+JSZip v3.1.1 - A Javascript class for generating and reading zip files
 <http://stuartk.com/jszip>
 
 (c) 2009-2016 Stuart Knightley <stuart [at] stuartk.com>
@@ -1028,7 +1028,10 @@ JSZip.prototype = require('./object');
 JSZip.prototype.loadAsync = require('./load');
 JSZip.support = require('./support');
 JSZip.defaults = require('./defaults');
-JSZip.version = require('../package.json').version;
+
+// TODO find a better way to handle this version,
+// a require('package.json').version doesn't work with webpack, see #327
+JSZip.version = "3.1.1";
 
 JSZip.loadAsync = function (content, options) {
     return new JSZip().loadAsync(content, options);
@@ -1037,7 +1040,7 @@ JSZip.loadAsync = function (content, options) {
 JSZip.external = require("./external");
 module.exports = JSZip;
 
-},{"../package.json":73,"./defaults":5,"./external":6,"./load":11,"./object":13,"./support":27}],11:[function(require,module,exports){
+},{"./defaults":5,"./external":6,"./load":11,"./object":13,"./support":27}],11:[function(require,module,exports){
 'use strict';
 var utils = require('./utils');
 var external = require("./external");
@@ -11218,7 +11221,5 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],73:[function(require,module,exports){
-module.exports={"version":"3.1.0"}
 },{}]},{},[10])(10)
 });
