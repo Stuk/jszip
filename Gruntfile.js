@@ -138,13 +138,8 @@ module.exports = function(grunt) {
           browserifyOptions: {
             standalone: 'JSZip',
             transform: ['package-json-versionify'],
-            insertGlobalVars : {
-              Buffer: function () {
-                // instead of the full polyfill, we just use the raw value
-                // (or undefined).
-                return '(typeof Buffer !== "undefined" ? Buffer : undefined)';
-              }
-            }
+            builtins: [],
+            detectGlobals: false
           },
           banner : grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
         }
