@@ -138,8 +138,13 @@ module.exports = function(grunt) {
           browserifyOptions: {
             standalone: 'JSZip',
             transform: ['package-json-versionify'],
-            builtins: [],
-            detectGlobals: false
+            insertGlobalVars: {
+                process: undefined,
+                Buffer: undefined,
+                __filename: undefined,
+                __dirname: undefined
+            },
+            builtins: false
           },
           banner : grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
         }
