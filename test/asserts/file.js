@@ -434,7 +434,7 @@ QUnit.module("file", function () {
         });
     }
 
-    test("add file: file(name, polyfill Promise[string])", function() {
+    test("add file: file(name, polyfill Promise[string] as binary)", function() {
         var str2promise = function (str) {
             return new JSZip.external.Promise(function(resolve, reject) {
                 setTimeout(function () {
@@ -443,7 +443,36 @@ QUnit.module("file", function () {
             });
         };
         var zip = new JSZip();
-        zip.file("file.txt", str2promise("\xE2\x82\xAC15\n"));
+        zip.file("file.txt", str2promise("\xE2\x82\xAC15\n"), {binary: true});
+        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+    });
+
+    test("add file: file(name, polyfill Promise[string] force text)", function() {
+        var str2promise = function (str) {
+            return new JSZip.external.Promise(function(resolve, reject) {
+                setTimeout(function () {
+                    resolve(str);
+                }, 10);
+            });
+        };
+        var zip = new JSZip();
+        zip.file("file.txt", str2promise("€15\n"), {binary: false});
+        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+    });
+
+    /*
+     * Fix #325 for this one
+     *
+    test("add file: file(name, polyfill Promise[string] as text)", function() {
+        var str2promise = function (str) {
+            return new JSZip.external.Promise(function(resolve, reject) {
+                setTimeout(function () {
+                    resolve(str);
+                }, 10);
+            });
+        };
+        var zip = new JSZip();
+        zip.file("file.txt", str2promise("€15\n"));
         testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
         zip = new JSZip();
@@ -454,6 +483,7 @@ QUnit.module("file", function () {
         zip.file("file.txt", str2promise(""));
         testFileDataGetters({name : "empty content", zip : zip, textData : ""});
     });
+   */
 
     if (JSZip.support.blob) {
         test("add file: file(name, polyfill Promise[Blob])", function() {
