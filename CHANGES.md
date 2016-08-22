@@ -4,6 +4,12 @@ layout: default
 section: main
 ---
 
+### v3.1.2 2016-08-23
+- fix support of nodejs `process.platform` in `generate*` methods (see [#335](https://github.com/Stuk/jszip/pull/335)).
+- improve browserify/webpack support (see [#333](https://github.com/Stuk/jszip/pull/333)).
+- partial support of a promise of text (see [#337](https://github.com/Stuk/jszip/pull/337)).
+- fix streamed zip files containing folders (see [#342](https://github.com/Stuk/jszip/pull/342)).
+
 ### v3.1.1 2016-08-08
 - Use a hard-coded JSZip.version, fix an issue with webpack (see [#328](https://github.com/Stuk/jszip/pull/328)).
 
