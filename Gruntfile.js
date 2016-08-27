@@ -29,10 +29,6 @@ module.exports = function(grunt) {
   }, {
       browserName: "internet explorer",
       platform: "XP",
-      version: "6"
-  }, {
-      browserName: "internet explorer",
-      platform: "XP",
       version: "7"
   }, {
       browserName: "internet explorer",
@@ -100,7 +96,7 @@ module.exports = function(grunt) {
                   urls: ["http://127.0.0.1:9999/test/index.html?hidepassed"],
                   build: process.env.TRAVIS_JOB_ID,
                   throttled: 3,
-                  "max-duration" : 600, // seconds, IE6 is slow
+                  "max-duration" : 600,
                   browsers: browsers,
                   testname: "qunit tests",
                   tags: tags
