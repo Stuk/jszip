@@ -2,6 +2,8 @@ language: node_js
 sudo: false
 matrix:
   include:
+    - node_js: "stable"
+      env: COMMAND=lint
     - node_js: "0.10"
       env: COMMAND=test-node
     - node_js: "0.12"
