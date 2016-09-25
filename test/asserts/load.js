@@ -473,6 +473,18 @@ QUnit.module("load", function () {
         });
     }
 
+    JSZipTestUtils.testZipFile("valid crc32", "ref/all.zip", function(file) {
+        stop();
+        JSZip.loadAsync(file, {checkCRC32:true})
+        .then(function success() {
+            start();
+            ok(true, "no exception were thrown");
+        }, function failure(e) {
+            start();
+            ok(false, "An exception were thrown: " + e.message);
+        });
+    });
+
     QUnit.module("not supported features");
 
     // zip -0 -X -e encrypted.zip Hello.txt
