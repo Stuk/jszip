@@ -109,7 +109,7 @@ QUnit.module("file", function () {
             assert.ok(false, "generateAsync should fail");
             start();
         })['catch'](function (e) {
-            assert.ok(e.message, "Invalid base64 input, bad content length.", "triggers the correct error");
+            assert.equal(e.message, "Invalid base64 input, bad content length.", "triggers the correct error");
             start();
         });
     });
@@ -122,7 +122,7 @@ QUnit.module("file", function () {
             assert.ok(false, "generateAsync should fail");
             start();
         })['catch'](function (e) {
-            assert.ok(e.message, "Invalid base64 input, it looks like a data url.", "triggers the correct error");
+            assert.equal(e.message, "Invalid base64 input, it looks like a data url.", "triggers the correct error");
             start();
         });
     });
