@@ -12,6 +12,12 @@ global.JSZipTestUtils.loadZipFile = function(name, callback) {
 };
 process.on('uncaughtException', function(err) {
       console.log('uncaughtException: ' + err, err.stack);
+      process.exit(1);
+});
+
+process.on('unhandledRejection', function(err) {
+      console.log('unhandledRejection: ' + err, err.stack);
+      process.exit(1);
 });
 
 
