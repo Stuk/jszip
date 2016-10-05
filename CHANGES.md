@@ -4,6 +4,12 @@ layout: default
 section: main
 ---
 
+### v3.1.3 2016-10-06
+- instanceof failing in window / iframe contexts (see [#350](https://github.com/Stuk/jszip/pull/350)).
+- remove a copy with blob output (see [#357](https://github.com/Stuk/jszip/pull/357)).
+- fix crc32 check for empty entries (see [#358](https://github.com/Stuk/jszip/pull/358)).
+- fix the base64 error message with data uri (see [#359](https://github.com/Stuk/jszip/pull/359)).
+
 ### v3.1.2 2016-08-23
 - fix support of nodejs `process.platform` in `generate*` methods (see [#335](https://github.com/Stuk/jszip/pull/335)).
 - improve browserify/webpack support (see [#333](https://github.com/Stuk/jszip/pull/333)).
