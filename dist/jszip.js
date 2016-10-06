@@ -1,6 +1,6 @@
 /*!
 
-JSZip v3.1.2 - A Javascript class for generating and reading zip files
+JSZip v3.1.3 - A Javascript class for generating and reading zip files
 <http://stuartk.com/jszip>
 
 (c) 2009-2016 Stuart Knightley <stuart [at] stuartk.com>
@@ -58,7 +58,7 @@ exports.decode = function(input) {
 
     var dataUrlPrefix = "data:";
 
-    if (input.substr(dataUrlPrefix.length) === dataUrlPrefix) {
+    if (input.substr(0, dataUrlPrefix.length) === dataUrlPrefix) {
         // This is a common error: people give a data url
         // (data:image/png;base64,iVBOR...) with a {base64: true} and
         // wonders why things don't work.
@@ -1041,7 +1041,7 @@ JSZip.defaults = require('./defaults');
 
 // TODO find a better way to handle this version,
 // a require('package.json').version doesn't work with webpack, see #327
-JSZip.version = "3.1.2";
+JSZip.version = "3.1.3";
 
 JSZip.loadAsync = function (content, options) {
     return new JSZip().loadAsync(content, options);
@@ -2036,6 +2036,7 @@ var utils = require('../utils');
  */
 function Crc32Probe() {
     GenericWorker.call(this, "Crc32Probe");
+    this.withStreamInfo("crc32", 0);
 }
 utils.inherits(Crc32Probe, GenericWorker);
 
@@ -2483,19 +2484,24 @@ if (support.nodestream) {
  * Apply the final transformation of the data. If the user wants a Blob for
  * example, it's easier to work with an U8intArray and finally do the
  * ArrayBuffer/Blob conversion.
- * @param {String} type the name of the final type
+ * @param {String} resultType the name of the final type
+ * @param {String} chunkType the type of the data in the given array.
+ * @param {Array} dataArray the array containing the data chunks to concatenate
  * @param {String|Uint8Array|Buffer} content the content to transform
  * @param {String} mimeType the mime type of the content, if applicable.
  * @return {String|Uint8Array|ArrayBuffer|Buffer|Blob} the content in the right format.
  */
-function transformZipOutput(type, content, mimeType) {
-    switch(type) {
+function transformZipOutput(resultType, chunkType, dataArray, mimeType) {
+    var content = null;
+    switch(resultType) {
         case "blob" :
-            return utils.newBlob(utils.transformTo("arraybuffer", content), mimeType);
+            return utils.newBlob(dataArray, mimeType);
         case "base64" :
+            content = concat(chunkType, dataArray);
             return base64.encode(content);
         default :
-            return utils.transformTo(type, content);
+            content = concat(chunkType, dataArray);
+            return utils.transformTo(resultType, content);
     }
 }
 
@@ -2558,7 +2564,7 @@ function accumulate(helper, updateCallback) {
         })
         .on('end', function (){
             try {
-                var result = transformZipOutput(resultType, concat(chunkType, dataArray), mimeType);
+                var result = transformZipOutput(resultType, chunkType, dataArray, mimeType);
                 resolve(result);
             } catch (e) {
                 reject(e);
@@ -2580,6 +2586,8 @@ function StreamHelper(worker, outputType, mimeType) {
     var internalType = outputType;
     switch(outputType) {
         case "blob":
+            internalType = "arraybuffer";
+        break;
         case "arraybuffer":
             internalType = "uint8array";
         break;
@@ -3022,18 +3030,18 @@ function string2binary(str) {
 
 /**
  * Create a new blob with the given content and the given type.
- * @param {String|ArrayBuffer} part the content to put in the blob. DO NOT use
+ * @param {Array[String|ArrayBuffer]} parts the content to put in the blob. DO NOT use
  * an Uint8Array because the stock browser of android 4 won't accept it (it
  * will be silently converted to a string, "[object Uint8Array]").
  * @param {String} type the mime type of the blob.
  * @return {Blob} the created blob.
  */
-exports.newBlob = function(part, type) {
+exports.newBlob = function(parts, type) {
     exports.checkSupport("blob");
 
     try {
         // Blob constructor
-        return new Blob([part], {
+        return new Blob(parts, {
             type: type
         });
     }
@@ -3043,7 +3051,9 @@ exports.newBlob = function(part, type) {
             // deprecated, browser only, old way
             var Builder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
             var builder = new Builder();
-            builder.append(part);
+            for (var i = 0; i < parts.length; i++) {
+                builder.append(parts[i]);
+            }
             return builder.getBlob(type);
         }
         catch (e) {
@@ -3262,7 +3272,13 @@ transform["uint8array"] = {
         return arrayLikeToArrayLike(input, new Array(input.length));
     },
     "arraybuffer": function(input) {
-        return input.buffer;
+        // copy the uint8array: DO NOT propagate the original ArrayBuffer, it
+        // can be way larger (the whole zip file for example).
+        var copy = new Uint8Array(input.length);
+        if (input.length) {
+            copy.set(input, 0);
+        }
+        return copy.buffer;
     },
     "uint8array": identity,
     "nodebuffer": function(input) {
@@ -3416,7 +3432,11 @@ exports.prepareContent = function(name, inputData, isBinary, isOptimizedBinarySt
 
     // if inputData is already a promise, this flatten it.
     var promise = external.Promise.resolve(inputData).then(function(data) {
-        if (support.blob && data instanceof Blob && typeof FileReader !== "undefined") {
+        
+        
+        var isBlob = support.blob && (data instanceof Blob || ['[object File]', '[object Blob]'].indexOf(Object.prototype.toString.call(data)) !== -1);
+
+        if (isBlob && typeof FileReader !== "undefined") {
             return new external.Promise(function (resolve, reject) {
                 var reader = new FileReader();
 
