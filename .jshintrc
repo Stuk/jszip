@@ -9,7 +9,7 @@
     "undef": true,
     "strict": true,
     "sub": true,
-    "esversion": 3,
+    "esversion": 6,
 
     "globals": {
         "TextEncoder": false,

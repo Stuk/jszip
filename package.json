@@ -25,7 +25,7 @@
   ],
   "main": "./lib/index",
   "browser": {
-      "readable-stream": "./lib/readable-stream-browser.js"
+    "readable-stream": "./lib/readable-stream-browser.js"
   },
   "repository": {
     "type": "git",
@@ -37,16 +37,17 @@
     "inflate"
   ],
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-cli": "~1.1.0",
-    "grunt-saucelabs": "~8.6.2",
-    "grunt-contrib-connect": "1.0.0",
-    "jshint": "~2.9.1",
+    "babelify": "^7.3.0",
     "browserify": "~13.0.0",
+    "grunt": "~0.4.1",
     "grunt-browserify": "~5.0.0",
+    "grunt-cli": "~1.1.0",
+    "grunt-contrib-connect": "1.0.0",
     "grunt-contrib-jshint": "~1.0.0",
     "grunt-contrib-qunit": "~1.2.0",
     "grunt-contrib-uglify": "~1.0.0",
+    "grunt-saucelabs": "~8.6.2",
+    "jshint": "~2.9.1",
     "jszip-utils": "~0.0.2",
     "package-json-versionify": "~1.0.2",
     "qunit-cli": "~0.2.0",

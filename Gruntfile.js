@@ -137,7 +137,7 @@ module.exports = function(grunt) {
         options: {
           browserifyOptions: {
             standalone: 'JSZip',
-            transform: ['package-json-versionify'],
+            transform: ['package-json-versionify', ['babelify', {presets: ['es2015']}]],
             insertGlobalVars: {
                 process: undefined,
                 Buffer: undefined,
