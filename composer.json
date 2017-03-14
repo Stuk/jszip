@@ -1,0 +1,25 @@
+{
+  "name": "stuk/jszip",
+  "type": "library",
+  "description": "Create, read and edit .zip files with Javascript",
+  "keywords": ["jszip", "create", "edit", "pdf"],
+  "homepage": "https://github.com/Stuk/jszip",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Stuart Knightley",
+      "email": "stuart@Stuartk.com",
+      "homepage": "http://stuartk.com/",
+      "role": "Developer"
+    },
+    {
+      "name": "Thiago Pereira Rosa",
+      "email": "thiagor@engineer.com",
+      "homepage": "http://coderi.com.br",
+      "role": "Contributor"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/Stuk/jszip/issues"
+  }
+}
