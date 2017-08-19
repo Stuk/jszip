@@ -4,50 +4,94 @@ layout: default
 section: example
 ---
 
-<p>Tip : check the source of the page !</p>
-
 <h3>With JSZipUtils</h3>
-<div id="jszip_utils"></div>
+
+Note: JSZipUtils is a library available <a href="https://github.com/stuk/jszip-utils">here</a>.
+
+<ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#jszip-utils-result" aria-controls="jszip-utils-result" role="tab" data-toggle="tab">
+            result
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#jszip-utils-js" aria-controls="jszip-utils-js" role="tab" data-toggle="tab">
+            js code
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#jszip-utils-html" aria-controls="jszip-utils-html" role="tab" data-toggle="tab">
+            html code
+        </a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="jszip-utils-result">
+        <div class="show-example">
+            {% include_relative get-binary-files-ajax.inc/jszip_utils.html %}
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="jszip-utils-js">
+{% highlight js %}
+{% include_relative get-binary-files-ajax.inc/jszip_utils.js %}
+{% endhighlight %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="jszip-utils-html">
+{% highlight html %}
+{% include_relative get-binary-files-ajax.inc/jszip_utils.html %}
+{% endhighlight %}
+    </div>
+</div>
 
 <h3>With the Fetch API</h3>
-<div id="fetch"></div>
+
+Note: the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">
+Fetch API</a> is a new javascript API which may not be available everywhere.
+
+<ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#fetch-api-result" aria-controls="fetch-api-result" role="tab" data-toggle="tab">
+            js code
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#fetch-api-js" aria-controls="fetch-api-js" role="tab" data-toggle="tab">
+            js code
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#fetch-api-html" aria-controls="fetch-api-html" role="tab" data-toggle="tab">
+            html code
+        </a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="fetch-api-result">
+        <div class="show-example">
+            {% include_relative get-binary-files-ajax.inc/fetch_api.html %}
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="fetch-api-js">
+{% highlight js %}
+{% include_relative get-binary-files-ajax.inc/fetch_api.js %}
+{% endhighlight %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="fetch-api-html">
+{% highlight html %}
+{% include_relative get-binary-files-ajax.inc/fetch_api.html %}
+{% endhighlight %}
+    </div>
+</div>
 
 <script type="text/javascript">
 (function () {
 
-  function showError(elt, err) {
-    elt.innerHTML = "<p class='alert alert-danger'>" + err + "</p>";
-  }
-
-  function showContent(elt, content) {
-    elt.innerHTML = "<p class='alert alert-success'>loaded !<br/>" +
-      "Content = " + content + "</p>";
-  }
-
   //=========================
   // JSZipUtils
   //=========================
-  JSZipUtils.getBinaryContent('{{site.baseurl}}/test/ref/text.zip', function(err, data) {
-    var elt = document.getElementById('jszip_utils');
-    if(err) {
-      showError(elt, err);
-      return;
-    }
-
-    try {
-      JSZip.loadAsync(data)
-      .then(function(zip) {
-        return zip.file("Hello.txt").async("string");
-      })
-      .then(function success(text) {
-        showContent(elt, text);
-      }, function error(e) {
-        showError(elt, e);
-      });
-    } catch(e) {
-      showError(elt, e);
-    }
-  });
+  (function () {
+      {% include_relative get-binary-files-ajax.inc/jszip_utils.js %}
+  })();
 
   //=========================
   // Fetch API
@@ -55,26 +99,13 @@ section: example
   (function () {
     var elt = document.getElementById('fetch');
     if(typeof window.fetch === "function") {
-      fetch('{{site.baseurl}}/test/ref/text.zip')
-      .then(function (response) {
-        if (response.status === 200 || response.status === 0) {
-          return Promise.resolve(response.arrayBuffer())
-        } else {
-          return Promise.reject(new Error(response.statusText))
-        }
-      })
-      .then(JSZip.loadAsync)
-      .then(function (zip) {
-        return zip.file("Hello.txt").async("string");
-      })
-      .then(function success(text) {
-        showContent(elt, text);
-      }, function error(e) {
-        showError(elt, e);
-      });
+      {% include_relative get-binary-files-ajax.inc/fetch_api.js %}
     } else {
-      showError(elt, "This browser doesn't support the Fetch API.");
-    } 
+        $("#fetch").append($("<p>", {
+            "class": "alert alert-danger",
+            text: "This browser doesn't support the Fetch API."
+        }));
+    }
   })();
 
 })();

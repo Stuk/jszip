@@ -115,13 +115,10 @@ module.exports = function(grunt) {
           test: ['./test/helpers/**/*.js', './test/asserts/**/*.js'],
           documentation: {
               options: {
-                  globals: {
-                      jQuery: false,
-                      JSZip: false,
-                      JSZipUtils: false,
-                      saveAs: false
-                  },
-                  // implied still give false positives in our case
+                  // we include js files with jekyll, jshint can't see all
+                  // variables and we can't declare all of them
+                  undef: false,
+                  // 'implied' still give false positives in our case
                   strict: false
               },
               files: {

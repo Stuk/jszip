@@ -4,24 +4,22 @@ layout: default
 section: api
 ---
 
-__Description__ : Create a directory if it doesn't exist, return a new JSZip
+Create a directory if it doesn't exist, return a new JSZip
 object with the new folder as root.
 
 See also [the `dir` option of file()]({{site.baseurl}}/documentation/api_jszip/file_data.html).
 
-__Arguments__
+__Returns__ : A new JSZip (for chaining), with the new folder as root.
+
+__Since__: v1.0.0
+
+## Arguments
 
 name | type   | description
 -----|--------|------------
 name | string | the name of the directory.
 
-__Returns__ : A new JSZip (for chaining), with the new folder as root.
-
-__Throws__ : Nothing.
-
-<!-- __Complexity__ : **O(1)** -->
-
-__Example__
+## Examples
 
 ```js
 zip.folder("images");

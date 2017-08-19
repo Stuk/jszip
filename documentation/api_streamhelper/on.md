@@ -4,33 +4,38 @@ layout: default
 section: api
 ---
 
-__Description__ : Register a listener on an event.
+Register a listener on an event.
 
-__Arguments__
+__Returns__ : The current StreamHelper object, for chaining.
+
+__Throws__ : An exception if the event is unkown.
+
+## Arguments
 
 name      | type     | description
 ----------|----------|------------
 event     | string   | the name of the event. Only 3 events are supported : `data`, `end` and `error`.
 callback  | function | the function called when the event occurs. See below for the arguments.
 
+The callbacks are executed in with the current `StreamHelper` as `this`.
 
-A `data` callback takes 2 parameters :
+### `data` callback
+
+It takes 2 parameters:
 
 - the current chunk of data (in a format specified by the method which
   generated this StreamHelper)
 - the metadata (see each method to know what's inside)
 
-A `end` callback does not take any parameter.
+### `end` callback
 
-A `error` callback takes an `Error` as parameter.
+It does not take any parameter.
 
-The callbacks are executed in with the current `StreamHelper` as `this`.
+### `error` callback
 
-__Returns__ : The current StreamHelper object, for chaining.
+It takes an `Error` as parameter.
 
-__Throws__ : An exception if the event is unkown.
-
-__Example__
+## Example
 
 ```js
 zip

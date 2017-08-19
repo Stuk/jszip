@@ -4,19 +4,44 @@ layout: default
 section: example
 ---
 
-<h3>Choose the local(s) zip file(s)</h3>
-<p class="note">Note : your browser will process the zip file, don't choose a file too big !</p>
-<input type="file" id="file" name="file" multiple /><br />
+<ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#load-result" aria-controls="load-result" role="tab" data-toggle="tab">
+            result
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#load-js" aria-controls="load-js" role="tab" data-toggle="tab">
+            js code
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#load-html" aria-controls="load-html" role="tab" data-toggle="tab">
+            html code
+        </a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="load-result">
+        <div class="show-example">
+            {% include_relative read-local-file-api.inc/read.html %}
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="load-js">
+{% highlight js %}
+{% include_relative read-local-file-api.inc/read.js %}
+{% endhighlight %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="load-html">
+{% highlight html %}
+{% include_relative read-local-file-api.inc/read.html %}
+{% endhighlight %}
+    </div>
+</div>
 
 <div id="error_block" class="alert alert-danger hidden">
   You will need a recent browser to use this demo :(
 </div>
-
-<div id="result_block" class="hidden">
-  <h3>Content :</h3>
-  <div id="result"></div>
-</div>
-<script type="text/javascript" src="{{site.baseurl}}/test/jquery-1.8.3.min.js"></script>
 <script type="text/javascript">
 (function () {
   if (!window.FileReader || !window.ArrayBuffer) {
@@ -24,49 +49,7 @@ section: example
     return;
   }
 
+{% include_relative read-local-file-api.inc/read.js %}
 
-  var $result = $("#result");
-  $("#file").on("change", function(evt) {
-    // remove content
-    $result.html("");
-    // be sure to show the results
-    $("#result_block").removeClass("hidden").addClass("show");
-
-    // Closure to capture the file information.
-    function handleFile(f) {
-      var $title = $("<h4>", {
-        text : f.name
-      });
-      var $fileContent = $("<ul>");
-      $result.append($title);
-      $result.append($fileContent);
-    
-      var dateBefore = new Date();
-      JSZip.loadAsync(f)
-      .then(function(zip) {
-        var dateAfter = new Date();
-        $title.append($("<span>", {
-          text:" (loaded in " + (dateAfter - dateBefore) + "ms)"
-        }));
-
-
-        zip.forEach(function (relativePath, zipEntry) {
-          $fileContent.append($("<li>", {
-            text : zipEntry.name
-          }));
-        });
-      }, function (e) {
-        $fileContent = $("<div>", {
-          "class" : "alert alert-danger",
-          text : "Error reading " + f.name + " : " + e.message
-        });
-      });
-    }
-
-    var files = evt.target.files;
-    for (var i = 0, f; f = files[i]; i++) {
-        handleFile(f);
-    }
-  });
 })();
 </script>

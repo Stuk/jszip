@@ -4,58 +4,90 @@ layout: default
 section: example
 ---
 
-<p>Tip : check the source of the page !</p>
 <h2>The FileSaver API</h2>
-<div>
-  Works on firefox, chrome , opera &gt;= 15 and IE &gt;= 10 (but NOT in compatibility view).<br/>
-  <button id="blob" class="btn btn-primary">click to download</button>
+<ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#file-saver-result" aria-controls="file-saver-result" role="tab" data-toggle="tab">
+            result
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#file-saver-js" aria-controls="file-saver-js" role="tab" data-toggle="tab">
+            js code
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#file-saver-html" aria-controls="file-saver-html" role="tab" data-toggle="tab">
+            html code
+        </a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="file-saver-result">
+        <div class="show-example">
+            {% include_relative download-zip-file.inc/blob.html %}
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="file-saver-js">
+{% highlight js %}
+{% include_relative download-zip-file.inc/blob.js %}
+{% endhighlight %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="file-saver-html">
+{% highlight html %}
+{% include_relative download-zip-file.inc/blob.html %}
+{% endhighlight %}
+    </div>
 </div>
+
 <h2>The data URL</h2>
-<div>
-  Does not work in IE, has restrictions on the length.<br/>
-  <button id="data_uri" class="btn btn-primary">click to download</button>
+<ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#data-uri-result" aria-controls="data-uri-result" role="tab" data-toggle="tab">
+            result
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#data-uri-js" aria-controls="data-uri-js" role="tab" data-toggle="tab">
+            js code
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#data-uri-html" aria-controls="data-uri-html" role="tab" data-toggle="tab">
+            html code
+        </a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="data-uri-result">
+        <div class="show-example">
+            {% include_relative download-zip-file.inc/data_uri.html %}
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="data-uri-js">
+{% highlight js %}
+{% include_relative download-zip-file.inc/data_uri.js %}
+{% endhighlight %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="data-uri-html">
+{% highlight html %}
+{% include_relative download-zip-file.inc/data_uri.html %}
+{% endhighlight %}
+    </div>
 </div>
+
 <script type="text/javascript">
 (function () {
-  var zip = new JSZip();
-  zip.file("Hello.txt", "Hello world\n");
-
-  function bindEvent(el, eventName, eventHandler) {
-    if (el.addEventListener){
-      // standard way
-      el.addEventListener(eventName, eventHandler, false);
-    } else if (el.attachEvent){
-      // old IE
-      el.attachEvent('on'+eventName, eventHandler);
+    // Blob
+    if (JSZip.support.blob) {
+        {% include_relative download-zip-file.inc/blob.js %}
+    } else {
+        blobLink.innerHTML += " (not supported on this browser)";
     }
-  }
+})();
 
-  // Blob
-  var blobLink = document.getElementById('blob');
-  if (JSZip.support.blob) {
-    function downloadWithBlob() {
-      zip.generateAsync({type:"blob"}).then(function (blob) {
-        saveAs(blob, "hello.zip");
-      }, function (err) {
-          blobLink.innerHTML += " " + err;
-      });
-      return false;
-    }
-    bindEvent(blobLink, 'click', downloadWithBlob);
-  } else {
-    blobLink.innerHTML += " (not supported on this browser)";
-  }
-
-  // data URI
-  function downloadWithDataURI() {
-    zip.generateAsync({type:"base64"}).then(function (base64) {
-      window.location = "data:application/zip;base64," + base64;
-    }, function (err) {
-      // shouldn't happen with a base64...
-    });
-  }
-  var dataUriLink = document.getElementById('data_uri');
-  bindEvent(dataUriLink, 'click', downloadWithDataURI);
-
+(function () {
+    // data URI
+    {% include_relative download-zip-file.inc/data_uri.js %}
 })();
 </script>

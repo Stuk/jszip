@@ -4,7 +4,7 @@ layout: default
 section: main
 ---
 
-### "Corrupted zip or bug : unexpected signature"
+### "Corrupted zip or bug: unexpected signature"
 
 If you are sure that the zip file is correct, that error often comes from a
 corrupted content. An ajax request, if not prepared correctly, will try to

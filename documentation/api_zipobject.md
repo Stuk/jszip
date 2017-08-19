@@ -21,3 +21,32 @@ attribute name              | type        | description
 `options`                   | object      | the options of the file. The available options are :
 `options.compression`       | compression | see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
 
+Example:
+
+```js
+{ name: 'docs/',
+  dir: true,
+  date: 2016-12-25T08:09:27.153Z,
+  comment: null,
+  unixPermissions: 16877,
+  dosPermissions: null,
+  options: {
+    compression: 'STORE',
+    compressionOptions: null
+  }
+}
+```
+
+```js
+{ name: 'docs/list.txt',
+  dir: false,
+  date: 2016-12-25T08:09:27.152Z,
+  comment: null,
+  unixPermissions: 33206,
+  dosPermissions: null,
+  options: {
+    compression: 'DEFLATE',
+    compressionOptions: null
+  }
+}
+```

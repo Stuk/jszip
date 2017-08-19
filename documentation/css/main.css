@@ -22,3 +22,15 @@ ul.nav ul {
 .support_cr {border-bottom-color: #39B642 !important;}
 .support_op {border-bottom-color: #C42122 !important;}
 .support_nd {border-bottom-color: #8CC84B !important;}
+
+.show-example {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 0 0 10px;
+}
+
+.tab-pane > figure.highlight > pre, .tab-pane > .show-example {
+    border-radius: 0 0 4px 4px;
+    border-top: 0px;
+}

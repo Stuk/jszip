@@ -4,9 +4,13 @@ layout: default
 section: api
 ---
 
-__Description__ : Call a callback function for each entry at this folder level.
+Call a callback function for each entry at this folder level.
 
-__Arguments__
+__Returns__ : Nothing.
+
+__Since__: v3.0.0
+
+## Arguments
 
 name      | type     | description
 ----------|----------|------------
@@ -20,13 +24,7 @@ relativePath | string    | the filename and its path, reliatively to the current
 file         | ZipObject | the current file. See [ZipObject]({{site.baseurl}}/documentation/api_zipobject.html).
 
 
-__Returns__ : Nothing.
-
-__Throws__ : Nothing.
-
-<!-- __Complexity__ : **O(k)** where k is the number of entries. -->
-
-__Example__
+## Examples
 
 ```js
 var zip = new JSZip();

@@ -4,8 +4,6 @@ layout: default
 section: example
 ---
 
-<p>Tip : check the source of the page !</p>
-
 <p>
   This mini application let you choose the files you want in a list, download
   them, zip them and give the result to the user.
@@ -14,49 +12,66 @@ section: example
   This demo requires a recent browser, see <a href="{{site.baseurl}}/documentation/howto/write_zip.html">
   the howto</a>.
 </p>
-
-
-
-<div id="downloader_application">
-  <h3>Please select your files</h3>
-  <form action="#" id="download_form">
+<p>
+  This demo depends on the following libraries:
   <ul>
-    <li>
-      <label>
-        <input type="checkbox" data-url="{{site.baseurl}}/test/ref/complex_files/Franz Kafka - The Metamorphosis.epub" checked />
-        Franz Kafka - The Metamorphosis.epub
-      </label>
-    </li>
-    <li>
-      <label>
-        <input type="checkbox" data-url="{{site.baseurl}}/documentation/css/pygments.css" checked />
-        pygments.css
-      </label>
-    </li>
-    <li>
-      <label>
-        <input type="checkbox" data-url="{{site.baseurl}}/dist/jszip.js" />
-        jszip.js
-      </label>
-    </li>
-    <li>
-      <label>
-        <input type="checkbox" data-url="{{site.baseurl}}/test/ref/all.zip" />
-        all.zip
-      </label>
-    </li>
+      <li><a href="https://jquery.com/">jQuery</a> (to manipulate the DOM)</li>
+      <li><a href="https://github.com/stuk/jszip-utils">JSZipUtils</a> (to download files)</li>
+      <li><a href="https://getbootstrap.com/">bootstrap</a> (for the progress bar)</li>
   </ul>
+</p>
 
-  <button type="submit" class="btn btn-primary">pack them !</button>
-</form>
 
-<div class="progress hide" id="progress_bar">
-    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+<ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#downloader-result" aria-controls="downloader-result" role="tab" data-toggle="tab">
+            result
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#downloader-js" aria-controls="downloader-js" role="tab" data-toggle="tab">
+            js code
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#downloader-helpers-js" aria-controls="downloader-helpers-js" role="tab" data-toggle="tab">
+            js helpers
+        </a>
+    </li>
+    <li role="presentation">
+        <a href="#downloader-html" aria-controls="downloader-html" role="tab" data-toggle="tab">
+            html code
+        </a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="downloader-result">
+        <div class="show-example">
+            <div id="downloader_application">
+                {% include_relative downloader.inc/downloader.html %}
+            </div>
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="downloader-js">
+{% highlight js %}
+{% include_relative downloader.inc/downloader.js %}
+{% endhighlight %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="downloader-helpers-js">
+{% highlight js %}
+{% include_relative downloader.inc/helpers.js %}
+{% endhighlight %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="downloader-html">
+{% highlight html %}
+{% include_relative downloader.inc/downloader.html %}
+{% endhighlight %}
     </div>
 </div>
 
-<p class="hide" id="result"></p>
-
-</div>
-
-<script type="text/javascript" src="{{site.baseurl}}/documentation/examples/downloader.js"></script>
+<script type="text/javascript">
+jQuery(function ($) {
+    {% include_relative downloader.inc/downloader.js %}
+    {% include_relative downloader.inc/helpers.js %}
+});
+</script>

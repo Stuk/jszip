@@ -21,3 +21,10 @@ dataAsPromise
 .then(JSZip.loadAsync)
 .then(function(zip) {...})
 ```
+
+same as:
+
+```js
+JSZip.loadAsync(dataAsPromise)
+.then(function(zip) {...})
+```

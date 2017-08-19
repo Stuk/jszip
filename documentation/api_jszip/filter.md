@@ -4,9 +4,13 @@ layout: default
 section: api
 ---
 
-__Description__ : Filter nested files/folders with the specified function.
+Filter nested files/folders with the specified function.
 
-__Arguments__
+__Returns__ : An array of matching ZipObject.
+
+__Since__: v1.0.0
+
+## Arguments
 
 name      | type     | description
 ----------|----------|------------
@@ -22,13 +26,7 @@ file         | ZipObject | the file being tested. See [ZipObject]({{site.baseurl
 The predicate must return true if the file should be included, false otherwise.
 
 
-__Returns__ : An array of matching ZipObject.
-
-__Throws__ : Nothing.
-
-<!-- __Complexity__ : **O(k)** where k is the number of entries. -->
-
-__Example__
+## Examples
 
 ```js
 var zip = new JSZip().folder("dir");

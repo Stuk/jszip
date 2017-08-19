@@ -485,6 +485,44 @@ QUnit.module("load", function () {
         });
     });
 
+    JSZipTestUtils.testZipFile("loading in a sub folder", "ref/all.zip", function(file) {
+        stop();
+        var zip = new JSZip();
+        zip.folder("sub").loadAsync(file)
+        .then(function success(zip) {
+            start();
+            ok(zip.file("Hello.txt"), "the zip was correctly read.");
+            equal(zip.file("Hello.txt").name, "sub/Hello.txt", "the zip was read in a sub folder");
+            equal(zip.root, "sub/", "the promise contains the correct folder level");
+        }, function failure(e) {
+            start();
+            ok(false, "An exception were thrown: " + e.message);
+        });
+    });
+
+    JSZipTestUtils.testZipFile("loading overwrite files", "ref/all.zip", function(file) {
+        stop();
+        var zip = new JSZip();
+        zip.file("Hello.txt", "bonjour à tous");
+        zip.file("Bye.txt", "au revoir");
+        zip.loadAsync(file)
+        .then(function success(zip) {
+            return JSZip.external.Promise.all([
+                zip.file("Hello.txt").async("text"),
+                zip.file("Bye.txt").async("text")
+            ]);
+        }).then(function (result) {
+            start();
+            var hello = result[0];
+            var bye = result[1];
+            equal(hello, "Hello World\n", "conflicting content was overwritten.");
+            equal(bye, "au revoir", "other content was kept.");
+        }, function failure(e) {
+            start();
+            ok(false, "An exception were thrown: " + e.message);
+        });
+    });
+
     QUnit.module("not supported features");
 
     // zip -0 -X -e encrypted.zip Hello.txt
