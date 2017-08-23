@@ -68,14 +68,22 @@ QUnit.module("stream", function () {
                 fs.readFile(tempFile, function (e, data) {
                     var actual = JSZipTestUtils.toString(data);
                     ok(JSZipTestUtils.similar(actual, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
-                    start();
-                    fs.unlink(tempFile);
+                    fs.unlink(tempFile, function (err) {
+                        if (err) {
+                            ok(false, err);
+                        }
+                        start();
+                    });
                 });
             })
             .on("error", function (e) {
                 ok(false, e.message);
-                start();
-                fs.unlink(tempFile);
+                fs.unlink(tempFile, function (err) {
+                    if (err) {
+                        ok(false, err);
+                    }
+                    start();
+                });
             });
         });
     }
@@ -88,14 +96,22 @@ QUnit.module("stream", function () {
                 fs.readFile(tempFile, function (e, data) {
                     var actual = JSZipTestUtils.toString(data);
                     equal(actual, "Hello World\n", "the generated content is ok");
-                    done();
-                    fs.unlink(tempFile);
+                    fs.unlink(tempFile, function (err) {
+                        if (err) {
+                            assert.ok(false, err);
+                        }
+                        done();
+                    });
                 });
             })
             .on("error", function (e) {
                 ok(false, e.message);
-                done();
-                fs.unlink(tempFile);
+                fs.unlink(tempFile, function (err) {
+                    if (err) {
+                        assert.ok(false, err);
+                    }
+                    done();
+                });
             });
         });
     }
