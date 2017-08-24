@@ -289,7 +289,6 @@ module.exports = function crc32wrapper(input, crc) {
         return crc32str(crc|0, input, input.length, 0);
     }
 };
-// vim: set shiftwidth=4 softtabstop=4:
 
 },{"./utils":32}],5:[function(require,module,exports){
 'use strict';
@@ -346,21 +345,12 @@ exports.magic = "\x08\x00";
 function FlateWorker(action, options) {
     GenericWorker.call(this, "FlateWorker/" + action);
 
-    this._pako = new pako[action]({
-        raw:true,
-        level : options.level || -1 // default compression
-    });
+    this._pako = null;
+    this._pakoAction = action;
+    this._pakoOptions = options;
     // the `meta` object from the last chunk received
     // this allow this worker to pass around metadata
     this.meta = {};
-
-    var self = this;
-    this._pako.onData = function(data) {
-        self.push({
-            data : data,
-            meta : self.meta
-        });
-    };
 }
 
 utils.inherits(FlateWorker, GenericWorker);
@@ -370,6 +360,9 @@ utils.inherits(FlateWorker, GenericWorker);
  */
 FlateWorker.prototype.processChunk = function (chunk) {
     this.meta = chunk.meta;
+    if (this._pako === null) {
+        this._createPako();
+    }
     this._pako.push(utils.transformTo(ARRAY_TYPE, chunk.data), false);
 };
 
@@ -378,6 +371,9 @@ FlateWorker.prototype.processChunk = function (chunk) {
  */
 FlateWorker.prototype.flush = function () {
     GenericWorker.prototype.flush.call(this);
+    if (this._pako === null) {
+        this._createPako();
+    }
     this._pako.push([], true);
 };
 /**
@@ -386,6 +382,26 @@ FlateWorker.prototype.flush = function () {
 FlateWorker.prototype.cleanUp = function () {
     GenericWorker.prototype.cleanUp.call(this);
     this._pako = null;
+};
+
+/**
+ * Create the _pako object.
+ * TODO: lazy-loading this object isn't the best solution but it's the
+ * quickest. The best solution is to lazy-load the worker list. See also the
+ * issue #446.
+ */
+FlateWorker.prototype._createPako = function () {
+    this._pako = new pako[this._pakoAction]({
+        raw: true,
+        level: this._pakoOptions.level || -1 // default compression
+    });
+    var self = this;
+    this._pako.onData = function(data) {
+        self.push({
+            data : data,
+            meta : self.meta
+        });
+    };
 };
 
 exports.compressWorker = function (compressionOptions) {
@@ -1215,8 +1231,8 @@ module.exports = NodejsStreamInputAdapter;
 
 var Readable = require('readable-stream').Readable;
 
-var util = require('util');
-util.inherits(NodejsStreamOutputAdapter, Readable);
+var utils = require('../utils');
+utils.inherits(NodejsStreamOutputAdapter, Readable);
 
 /**
 * A nodejs stream using a worker as source.
@@ -1254,7 +1270,7 @@ NodejsStreamOutputAdapter.prototype._read = function() {
 
 module.exports = NodejsStreamOutputAdapter;
 
-},{"readable-stream":16,"util":undefined}],14:[function(require,module,exports){
+},{"../utils":32,"readable-stream":16}],14:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -1983,8 +1999,6 @@ module.exports = function (data) {
     }
     return new ArrayReader(utils.transformTo("array", data));
 };
-
-// vim: set shiftwidth=4 softtabstop=4:
 
 },{"../support":30,"../utils":32,"./ArrayReader":17,"./NodeBufferReader":19,"./StringReader":20,"./Uint8ArrayReader":21}],23:[function(require,module,exports){
 'use strict';
@@ -3509,7 +3523,7 @@ ZipEntries.prototype = {
         if (!this.reader.readAndCheckSignature(expectedSignature)) {
             this.reader.index -= 4;
             var signature = this.reader.readString(4);
-            throw new Error("Corrupted zip or bug : unexpected signature " + "(" + utils.pretty(signature) + ", expected " + utils.pretty(expectedSignature) + ")");
+            throw new Error("Corrupted zip or bug: unexpected signature " + "(" + utils.pretty(signature) + ", expected " + utils.pretty(expectedSignature) + ")");
         }
     },
     /**
@@ -3650,9 +3664,9 @@ ZipEntries.prototype = {
 
             if (isGarbage) {
                 throw new Error("Can't find end of central directory : is this a zip file ? " +
-                                "If it is, see http://stuk.github.io/jszip/documentation/howto/read_zip.html");
+                                "If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html");
             } else {
-                throw new Error("Corrupted zip : can't find end of central directory");
+                throw new Error("Corrupted zip: can't find end of central directory");
             }
 
         }
@@ -3687,7 +3701,7 @@ ZipEntries.prototype = {
             // should look for a zip64 EOCD locator
             offset = this.reader.lastIndexOfSignature(sig.ZIP64_CENTRAL_DIRECTORY_LOCATOR);
             if (offset < 0) {
-                throw new Error("Corrupted zip : can't find the ZIP64 end of central directory locator");
+                throw new Error("Corrupted zip: can't find the ZIP64 end of central directory locator");
             }
             this.reader.setIndex(offset);
             this.checkSignature(sig.ZIP64_CENTRAL_DIRECTORY_LOCATOR);
@@ -3698,7 +3712,7 @@ ZipEntries.prototype = {
                 // console.warn("ZIP64 end of central directory not where expected.");
                 this.relativeOffsetEndOfZip64CentralDir = this.reader.lastIndexOfSignature(sig.ZIP64_CENTRAL_DIRECTORY_END);
                 if (this.relativeOffsetEndOfZip64CentralDir < 0) {
-                    throw new Error("Corrupted zip : can't find the ZIP64 end of central directory");
+                    throw new Error("Corrupted zip: can't find the ZIP64 end of central directory");
                 }
             }
             this.reader.setIndex(this.relativeOffsetEndOfZip64CentralDir);
@@ -4647,7 +4661,7 @@ handlers.reject = function (self, error) {
 function getThen(obj) {
   // Make sure we only access the accessor once as required by the spec
   var then = obj && obj.then;
-  if (obj && typeof obj === 'object' && typeof then === 'function') {
+  if (obj && (typeof obj === 'object' || typeof obj === 'function') && typeof then === 'function') {
     return function appyThen() {
       then.apply(obj, arguments);
     };
@@ -5160,7 +5174,7 @@ function deflate(input, options) {
   deflator.push(input, true);
 
   // That will never happens, if you don't cheat with options :)
-  if (deflator.err) { throw deflator.msg; }
+  if (deflator.err) { throw deflator.msg || msg[deflator.err]; }
 
   return deflator.result;
 }
@@ -5585,7 +5599,7 @@ function inflate(input, options) {
   inflator.push(input, true);
 
   // That will never happens, if you don't cheat with options :)
-  if (inflator.err) { throw inflator.msg; }
+  if (inflator.err) { throw inflator.msg || msg[inflator.err]; }
 
   return inflator.result;
 }
@@ -5919,6 +5933,25 @@ exports.utf8border = function (buf, max) {
 // It doesn't worth to make additional optimizationa as in original.
 // Small size is preferable.
 
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
+
 function adler32(adler, buf, len, pos) {
   var s1 = (adler & 0xffff) |0,
       s2 = ((adler >>> 16) & 0xffff) |0,
@@ -5949,6 +5982,24 @@ module.exports = adler32;
 },{}],65:[function(require,module,exports){
 'use strict';
 
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
 
 module.exports = {
 
@@ -6005,6 +6056,24 @@ module.exports = {
 // So write code to minimize size - no pregenerated tables
 // and array tools dependencies.
 
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
 
 // Use ordinary array, since untyped makes no boost here
 function makeTable() {
@@ -6043,6 +6112,25 @@ module.exports = crc32;
 
 },{}],67:[function(require,module,exports){
 'use strict';
+
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
 
 var utils   = require('../utils/common');
 var trees   = require('./trees');
@@ -7901,6 +7989,24 @@ exports.deflateTune = deflateTune;
 },{"../utils/common":62,"./adler32":64,"./crc32":66,"./messages":72,"./trees":73}],68:[function(require,module,exports){
 'use strict';
 
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
 
 function GZheader() {
   /* true if compressed data believed to be text */
@@ -7942,6 +8048,25 @@ module.exports = GZheader;
 
 },{}],69:[function(require,module,exports){
 'use strict';
+
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
 
 // See state defs from inflate.js
 var BAD = 30;       /* got a data error -- remain here until reset */
@@ -8271,6 +8396,24 @@ module.exports = function inflate_fast(strm, start) {
 },{}],70:[function(require,module,exports){
 'use strict';
 
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
 
 var utils         = require('../utils/common');
 var adler32       = require('./adler32');
@@ -9811,6 +9954,24 @@ exports.inflateUndermine = inflateUndermine;
 },{"../utils/common":62,"./adler32":64,"./crc32":66,"./inffast":69,"./inftrees":71}],71:[function(require,module,exports){
 'use strict';
 
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
 
 var utils = require('../utils/common');
 
@@ -10038,10 +10199,8 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
     return 1;
   }
 
-  var i = 0;
   /* process all codes and make table entries */
   for (;;) {
-    i++;
     /* create table entry */
     here_bits = len - drop;
     if (work[sym] < end) {
@@ -10140,6 +10299,25 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
 },{"../utils/common":62}],72:[function(require,module,exports){
 'use strict';
 
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
+
 module.exports = {
   2:      'need dictionary',     /* Z_NEED_DICT       2  */
   1:      'stream end',          /* Z_STREAM_END      1  */
@@ -10155,6 +10333,24 @@ module.exports = {
 },{}],73:[function(require,module,exports){
 'use strict';
 
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
 
 var utils = require('../utils/common');
 
@@ -11359,6 +11555,24 @@ exports._tr_align = _tr_align;
 },{"../utils/common":62}],74:[function(require,module,exports){
 'use strict';
 
+// (C) 1995-2013 Jean-loup Gailly and Mark Adler
+// (C) 2014-2017 Vitaly Puzrin and Andrey Tupitsin
+//
+// This software is provided 'as-is', without any express or implied
+// warranty. In no event will the authors be held liable for any damages
+// arising from the use of this software.
+//
+// Permission is granted to anyone to use this software for any purpose,
+// including commercial applications, and to alter it and redistribute it
+// freely, subject to the following restrictions:
+//
+// 1. The origin of this software must not be misrepresented; you must not
+//   claim that you wrote the original software. If you use this software
+//   in a product, an acknowledgment in the product documentation would be
+//   appreciated but is not required.
+// 2. Altered source versions must be plainly marked as such, and must not be
+//   misrepresented as being the original software.
+// 3. This notice may not be removed or altered from any source distribution.
 
 function ZStream() {
   /* next input byte */

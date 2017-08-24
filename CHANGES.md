@@ -4,6 +4,10 @@ layout: default
 section: main
 ---
 
+### v3.1.4 2017-08-24
+- consistently use our own utils object for inheritance (see [#395](https://github.com/Stuk/jszip/pull/395)).
+- lower the memory consumption in `generate*` with a lot of files (see [#449](https://github.com/Stuk/jszip/pull/449)).
+
 ### v3.1.3 2016-10-06
 - instanceof failing in window / iframe contexts (see [#350](https://github.com/Stuk/jszip/pull/350)).
 - remove a copy with blob output (see [#357](https://github.com/Stuk/jszip/pull/357)).
