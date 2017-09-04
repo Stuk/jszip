@@ -709,7 +709,7 @@ QUnit.module("file", function () {
             assert.equal(content, "Bonjour tout le monde!\n", "Exact match found");
             start();
         })['catch'](JSZipTestUtils.assertNoError);
-        assert.equal(zip.file("Readme.Deutch"), null, "Match exactly nothing");
+        assert.equal(zip.file("Readme.Deutsch"), null, "Match exactly nothing");
         assert.equal(zip.file(/Readme\../).length, 2, "Match regex free text");
         assert.equal(zip.file(/pirate/i).length, 1, "Match regex 1 result");
     });
