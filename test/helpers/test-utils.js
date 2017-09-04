@@ -198,7 +198,7 @@
     };
     JSZipTestUtils.base64encode = function(input) {
         if (!(input in base64Dict)){
-            throw new Error("unkown key '" + input + "' in the base64 dictionary");
+            throw new Error("unknown key '" + input + "' in the base64 dictionary");
         }
         return base64Dict[input];
     };

@@ -15,7 +15,7 @@ method will return a failed promise.
 ### ZIP64 and 32bit integers
 
 ZIP64 files can be loaded, but only if the zip file is not "too big". ZIP64 uses 64bits integers
-but Javascript represents all numbers as
+but JavaScript represents all numbers as
 [64-bit double precision IEEE 754 floating point numbers](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf)
 (see section 8.5). So, we have 53bits for integers and
 [bitwise operations treat everything as 32bits](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_Operators).

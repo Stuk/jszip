@@ -3,7 +3,7 @@ JSZip [![Build Status](https://api.travis-ci.org/Stuk/jszip.svg?branch=master)](
 
 [![Selenium Test Status](https://saucelabs.com/browser-matrix/jszip.svg)](https://saucelabs.com/u/jszip)
 
-A library for creating, reading and editing .zip files with Javascript, with a
+A library for creating, reading and editing .zip files with JavaScript, with a
 lovely and simple API.
 
 See https://stuk.github.io/jszip for all the documentation.

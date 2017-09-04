@@ -66,7 +66,7 @@ testGenerateFor([{
     JSZipTestUtils.testZipFile("generate : type:base64. " + testName, file, function(expected) {
         testGenerate({
             prepare : function () {
-                // fix date to get a predictible output
+                // fix date to get a predictable output
                 var zip = new JSZip();
                 zip.file("Hello.txt", "Hello World\n", {date: new Date(1234567891011)});
                 zip.file("images", null, {dir:true, date: new Date(1234876591011)});

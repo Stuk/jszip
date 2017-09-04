@@ -2,7 +2,7 @@
   "name": "jszip",
   "version": "3.1.4",
   "author": "Stuart Knightley <stuart@stuartk.com>",
-  "description": "Create, read and edit .zip files with Javascript http://stuartk.com/jszip",
+  "description": "Create, read and edit .zip files with JavaScript http://stuartk.com/jszip",
   "scripts": {
     "test": "npm run test-node && npm run test-browser",
     "test-node": "qunit-cli -c test/helpers/test-utils.js test/helpers/node-test-utils.js test/asserts/*.js",

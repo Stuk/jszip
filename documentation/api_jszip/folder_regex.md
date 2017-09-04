@@ -9,7 +9,7 @@ Search a subdirectory in the current directory with a
 The regex is tested against the relative path.
 
 __Returns__ : An array of matching folders (an empty array if none matched).
-Each maching folder is an instance of [ZipObject]({{site.baseurl}}/documentation/api_zipobject.html).
+Each matching folder is an instance of [ZipObject]({{site.baseurl}}/documentation/api_zipobject.html).
 
 __Since__: v1.0.0
 

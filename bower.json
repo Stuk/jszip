@@ -4,7 +4,7 @@
   "authors": [
     "Stuart Knightley <stuart@stuartk.com>"
   ],
-  "description": "Create, read and edit .zip files with Javascript http://stuartk.com/jszip",
+  "description": "Create, read and edit .zip files with JavaScript http://stuartk.com/jszip",
   "main": "dist/jszip.js",
   "keywords": [
     "zip",

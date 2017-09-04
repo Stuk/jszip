@@ -20,7 +20,7 @@ The callback has the following signature : `function (relativePath, file) {...}`
 
 name         | type      | description
 -------------|-----------|------------
-relativePath | string    | the filename and its path, reliatively to the current folder.
+relativePath | string    | the filename and its path, relative to the current folder.
 file         | ZipObject | the current file. See [ZipObject]({{site.baseurl}}/documentation/api_zipobject.html).
 
 
