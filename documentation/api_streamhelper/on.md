@@ -8,7 +8,7 @@ Register a listener on an event.
 
 __Returns__ : The current StreamHelper object, for chaining.
 
-__Throws__ : An exception if the event is unkown.
+__Throws__ : An exception if the event is unknown.
 
 ## Arguments
 
