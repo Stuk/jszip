@@ -98,7 +98,7 @@ Note, this won't change the content of the file, only the other programs *may*
 see it.
 
 ```js
-//This example will Generate a Open Document Spreasheet, with the correct mime type
+//This example will Generate a Open Document Spreadsheet, with the correct mime type
 var zip = new JSZip();
 zip.file("mimetype", "application/vnd.oasis.opendocument.spreadsheet");
 var metaInf = zip.folder("META-INF");
