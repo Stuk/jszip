@@ -34,7 +34,7 @@ Note : when using type = "uint8array", "arraybuffer" or "blob", be sure to
 check if the browser supports it (you can use [`JSZip.support`]({{site.baseurl}}/documentation/api_jszip/support.html)).
 
 ```js
-zip.file("image.png").async({type: "uint8array"}).then(function (u8) {
+zip.file("image.png").async("uint8array").then(function (u8) {
     // ...
 });
 ```
@@ -54,7 +54,7 @@ name        | type   | description
 percent     | number | the percent of completion (a double between 0 and 100)
 
 ```js
-zip.file("image.png").async({type: "uint8array"}, function updateCallback(metadata) {
+zip.file("image.png").async("uint8array", function updateCallback(metadata) {
     console.log("progression: " + metadata.percent.toFixed(2) + " %");
 }).then(function (u8) {
     // ...
