@@ -345,7 +345,7 @@ QUnit.module("file", function () {
             ok(false, "An unsupported object was added, but no exception thrown");
         }, function (e) {
             start();
-            ok(e.message.match("unsupported format"), "the error message is useful");
+            ok(e.message.match("Is it in a supported JavaScript type"), "the error message is useful");
         });
     });
 

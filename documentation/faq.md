@@ -16,3 +16,26 @@ decode the binary content as a text and corrupt it. See
 That happens if you try to handle to much data with the synchronous API. If
 possible, try the asynchronous API, see
 [this page]({{site.baseurl}}/documentation/limitations.html) for more informations.
+
+### Can't read the data of [...]. Is it in a supported JavaScript type ?
+
+Or the old message:
+
+> The data of [...] is in an unsupported format
+
+The method [`file(name, data [,options])`]({{site.baseurl}}/documentation/api_jszip/file_data.html)
+accepts string and binary inputs for `data`.
+
+If you use an unsupported type, an object for example, you will get this error:
+
+```js
+// WRONG
+var data = {
+    content: new ArrayBuffer(...)
+};
+zip.file("my.data", data); // won't work, data is an object
+
+// CORRECT
+var data = new ArrayBuffer(...);
+zip.file("my.data", data); // will work, JSZip accepts ArrayBuffer
+```
