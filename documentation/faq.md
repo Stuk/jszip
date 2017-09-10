@@ -39,3 +39,20 @@ zip.file("my.data", data); // won't work, data is an object
 var data = new ArrayBuffer(...);
 zip.file("my.data", data); // will work, JSZip accepts ArrayBuffer
 ```
+
+### My mac generates a `.cpgz` file when I try to extract the zip file
+
+MacOS Finder has a lot of bug related to zip files (the `unzip` command line
+tool is fine). When something goes wrong, Finder will generate this cpgz file
+instead of showing an error.
+
+To get a correct result, try to enable compression in `generateAsync`:
+
+```js
+zip.generateAsync({
+    type:"...",
+    compression: "DEFLATE" // <-- here
+});
+```
+
+Using `platform: "UNIX"` may help too.
