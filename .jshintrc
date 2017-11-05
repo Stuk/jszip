@@ -13,7 +13,8 @@
 
     "globals": {
         "TextEncoder": false,
-        "TextDecoder": false
+        "TextDecoder": false,
+        "self": true
     },
     "browser": true,
     "node": true
