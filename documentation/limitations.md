@@ -7,7 +7,7 @@ fullpage: true
 
 ### Not supported features
 
-All the features of zip files are not supported. Classic zip files will work
+Not all features of zip files are supported. Classic zip files will work
 but encrypted zip, multi-volume, etc are not supported and the loadAsync()
 method will return a failed promise.
 
