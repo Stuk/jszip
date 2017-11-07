@@ -141,6 +141,7 @@ QUnit.module("file", function () {
         _actualTestFileDataGetters.testGetter(opts, "nodebuffer");
         _actualTestFileDataGetters.testGetter(opts, "blob");
         _actualTestFileDataGetters.testGetter(opts, "unknown");
+        _actualTestFileDataGetters.testGetter(opts, null);
 
         stop();
         opts.zip.generateAsync({type:"binarystring"})
@@ -162,6 +163,7 @@ QUnit.module("file", function () {
             _actualTestFileDataGetters.testGetter(reloaded, "nodebuffer");
             _actualTestFileDataGetters.testGetter(reloaded, "blob");
             _actualTestFileDataGetters.testGetter(reloaded, "unknown");
+            _actualTestFileDataGetters.testGetter(reloaded, null);
 
             opts.zip.file("file.txt", "changing the content after the call won't change the result");
             start();
@@ -253,6 +255,10 @@ QUnit.module("file", function () {
         assert_unknown : function (opts, err, buffer, testName) {
             equal(buffer, null, testName + "no data");
             ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
+        },
+        assert_null : function (opts, err, buffer, testName) {
+            equal(buffer, null, testName + "no data");
+            ok(err.message.match("No output type specified"), testName + "the error message is useful");
         }
     };
 
