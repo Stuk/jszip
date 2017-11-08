@@ -39,7 +39,7 @@
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-cli": "~1.1.0",
-    "grunt-saucelabs": "~8.6.2",
+    "grunt-saucelabs": "8.6.2",
     "grunt-contrib-connect": "1.0.0",
     "jshint": "~2.9.1",
     "browserify": "~13.0.0",
@@ -47,8 +47,9 @@
     "grunt-contrib-jshint": "~1.0.0",
     "grunt-contrib-qunit": "~1.2.0",
     "grunt-contrib-uglify": "~1.0.0",
+    "phantomjs-prebuilt": "2.1.15",
     "jszip-utils": "~0.0.2",
-    "package-json-versionify": "~1.0.2",
+    "package-json-versionify": "1.0.2",
     "qunit-cli": "~0.2.0",
     "qunitjs": "~1.23.0",
     "tmp": "0.0.28"
