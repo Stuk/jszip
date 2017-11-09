@@ -143,6 +143,7 @@ module.exports = function(grunt) {
             },
             builtins: false
           },
+          exclude: ["lib/readable-stream-browser.js"],
           banner : grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
         }
       }
