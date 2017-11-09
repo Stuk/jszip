@@ -4,6 +4,14 @@ layout: default
 section: main
 ---
 
+### v3.1.5 2017-11-09
+- Fix IE11 memory leak (see [#429](https://github.com/Stuk/jszip/pull/429)).
+- Handle 2 nodejs deprecations (see [#459](https://github.com/Stuk/jszip/pull/459)).
+- Improve the "unsupported format" error message (see [#461](https://github.com/Stuk/jszip/pull/461)).
+- Improve webworker compatibility (see [#468](https://github.com/Stuk/jszip/pull/468)).
+- Fix nodejs 0.10 compatibility (see [#480](https://github.com/Stuk/jszip/pull/480)).
+- Improve the error without type in async() (see [#481](https://github.com/Stuk/jszip/pull/481)).
+
 ### v3.1.4 2017-08-24
 - consistently use our own utils object for inheritance (see [#395](https://github.com/Stuk/jszip/pull/395)).
 - lower the memory consumption in `generate*` with a lot of files (see [#449](https://github.com/Stuk/jszip/pull/449)).
