@@ -150,6 +150,7 @@ module.exports = function(grunt) {
     uglify: {
       options: {
         mangle: true,
+        ASCIIOnly: true,
         preserveComments: false,
         banner : grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
       },
