@@ -27,6 +27,8 @@
   "browser": {
     "readable-stream": "./lib/readable-stream-browser.js"
   },
+  "unpkg": "./dist/jszip.min.js",
+  "jsdelivr": "./dist/jszip.min.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Stuk/jszip.git"
