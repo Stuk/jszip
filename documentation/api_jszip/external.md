@@ -11,7 +11,7 @@ contains the following properties :
 
 * `Promise` : the [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) implementation used.
 
-The global object is prefered when available.
+The global object is preferred when available.
 
 __Example__
 

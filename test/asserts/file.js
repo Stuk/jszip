@@ -247,7 +247,7 @@ QUnit.module("file", function () {
             if (JSZip.support.blob) {
                 QUnit.assert.equal(err, null, testName + "no error");
                 QUnit.assert.ok(blob instanceof Blob, testName + "the result is a instance of Blob");
-                QUnit.assert.equal(blob.type,  "", testName + "the result has the rigth mime type");
+                QUnit.assert.equal(blob.type,  "", testName + "the result has the right mime type");
                 QUnit.assert.equal(blob.size, opts.rawData.length, testName + "the result has the right length");
             } else {
                 QUnit.assert.equal(blob, null, testName + "no data");

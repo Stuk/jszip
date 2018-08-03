@@ -91,7 +91,7 @@ zip.remove("photos"); // by removing the folder, you also remove its content.
 With `.generateAsync(options)` or `.generateNodeStream(options)` you can generate
 a zip file (not a real file but its representation in memory). Check
 [this page]({{site.baseurl}}/documentation/howto/write_zip.html) for more
-informations on how to write / give the file to the user.
+information on how to write / give the file to the user.
 
 ```js
 var promise = null;

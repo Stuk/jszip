@@ -149,7 +149,7 @@ testGenerateFor([{
                 if (JSZip.support.blob) {
                     assert.equal(err, null, "no error");
                     assert.ok(result instanceof Blob, "the result is a instance of Blob");
-                    assert.equal(result.type, "application/zip", "the result has the rigth mime type");
+                    assert.equal(result.type, "application/zip", "the result has the right mime type");
                     assert.equal(result.size, expected.length, "the result has the right length");
                 } else {
                     assert.equal(result, null, "no data");
@@ -168,7 +168,7 @@ testGenerateFor([{
                 if (JSZip.support.blob) {
                     assert.equal(err, null, "no error");
                     assert.ok(result instanceof Blob, "the result is a instance of Blob");
-                    assert.equal(result.type, "application/ods", "the result has the rigth mime type");
+                    assert.equal(result.type, "application/ods", "the result has the right mime type");
                     assert.equal(result.size, expected.length, "the result has the right length");
                 } else {
                     assert.equal(result, null, "no data");
