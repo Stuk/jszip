@@ -2,17 +2,17 @@ language: node_js
 sudo: false
 matrix:
   include:
-    - node_js: "stable"
+    - node_js: "6"
       env: COMMAND=lint
-    - node_js: "0.10"
+    - node_js: "7"
       env: COMMAND=test-node
-    - node_js: "0.12"
+    - node_js: "8"
       env: COMMAND=test-node
-    - node_js: "4.4"
+    - node_js: "9"
       env: COMMAND=test-node
-    - node_js: "stable"
+    - node_js: "6"
       env: COMMAND=test-node
-    - node_js: "stable"
+    - node_js: "6"
       env: COMMAND=test-browser
 env:
   global:
