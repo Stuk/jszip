@@ -4,6 +4,10 @@ layout: default
 section: main
 ---
 
+### v3.2.0 2019-02-21
+- Update dependencies to reduce bundle size (see [#532](https://github.com/Stuk/jszip/pull/532)).
+- Fix deprecated Buffer constructor usage and add safeguards (see [#506](https://github.com/Stuk/jszip/pull/506)).
+
 ### v3.1.5 2017-11-09
 - Fix IE11 memory leak (see [#429](https://github.com/Stuk/jszip/pull/429)).
 - Handle 2 nodejs deprecations (see [#459](https://github.com/Stuk/jszip/pull/459)).
