@@ -4,22 +4,16 @@ module.exports = function(grunt) {
   // see https://saucelabs.com/rest/v1/info/browsers/webdriver
   var browsers = [{
       browserName: "iphone",
-      version: "7.0"
+      version: "9.3"
   }, {
       browserName: "iphone",
-      version: "9.2"
+      version: "12.0"
   }, {
       browserName: "android",
-      platform: "Linux",
-      version: "4.0"
-  }, {
-      browserName: "android",
-      platform: "Linux",
       version: "4.4"
   }, {
       browserName: "android",
-      platform: "Linux",
-      version: "5.1"
+      version: "8.0",
   }, {
       browserName: "firefox",
       platform: "Windows 10"
@@ -28,52 +22,16 @@ module.exports = function(grunt) {
       platform: "Windows 10"
   }, {
       browserName: "internet explorer",
-      platform: "XP",
-      version: "6"
-  }, {
-      browserName: "internet explorer",
-      platform: "XP",
-      version: "7"
-  }, {
-      browserName: "internet explorer",
-      platform: "Windows 7",
-      version: "8"
-  }, {
-      browserName: "internet explorer",
-      platform: "Windows 7",
-      version: "9"
-  }, {
-      browserName: "internet explorer",
-      platform: "Windows 8",
-      version: "10"
-  }, {
-      browserName: "internet explorer",
-      platform: "Windows 10",
       version: "11"
-  }, {
-      browserName: "MicrosoftEdge",
-      platform: "Windows 10",
-      version: "13"
-  }, {
-      browserName: "opera",
-      platform: "Windows 2008",
-      version: "12"
+  // }, {
+  // Disabled due to flakeyness
+  //     browserName: "MicrosoftEdge",
   }, {
       browserName: "safari",
-      platform: "OS X 10.8",
-      version: "6"
-  }, {
-      browserName: "safari",
-      platform: "OS X 10.9",
-      version: "7"
-  }, {
-      browserName: "safari",
-      platform: "OS X 10.10",
       version: "8"
   }, {
       browserName: "safari",
-      platform: "OS X 10.11",
-      version: "9"
+      version: "11"
   }];
 
   var tags = [];
@@ -99,11 +57,15 @@ module.exports = function(grunt) {
               options: {
                   urls: ["http://127.0.0.1:9999/test/index.html?hidepassed"],
                   build: process.env.TRAVIS_JOB_ID,
-                  throttled: 3,
-                  "max-duration" : 600, // seconds, IE6 is slow
+                  throttled: 4,
+                  "max-duration" : 1200, // seconds, IE6 is slow
                   browsers: browsers,
                   testname: "qunit tests",
-                  tags: tags
+                  tags: tags,
+                  // Tests have statusCheckAttempts * pollInterval seconds to
+                  // complete
+                  pollInterval: 2000,
+                  statusCheckAttempts: 240
               }
           }
       },
