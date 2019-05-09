@@ -45,6 +45,15 @@ interface OutputByType {
     nodebuffer: Buffer;
 }
 
+
+interface CompressedObject {
+    compressedSize: number;
+    uncompressedSize: number;
+    crc32: number;
+    compression: object;
+    compressedContent: string|ArrayBuffer|Uint8Array|Buffer;
+}
+
 type InputFileFormat = InputByType[keyof InputByType];
 
 declare namespace JSZip {
@@ -62,6 +71,8 @@ declare namespace JSZip {
         /** The UNIX permissions of the file, if any. */
         dosPermissions: number | null;
         options: JSZipObjectOptions;
+
+        _data: CompressedObject;
         /**
          * Prepare the content in the asked type.
          * @param type the type of the result.
