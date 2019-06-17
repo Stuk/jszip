@@ -114,7 +114,7 @@ var new_zip = new JSZip();
 new_zip.loadAsync(content)
 .then(function(zip) {
     // you now have every files contained in the loaded zip
-    new_zip.file("hello.txt").async("string"); // a promise of "Hello World\n"
+    zip.file("hello.txt").async("string"); // a promise of "Hello World\n"
 });
 ```
 
