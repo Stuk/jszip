@@ -22,52 +22,52 @@ module.exports = function(grunt) {
   var version = require("./package.json").version;
 
   grunt.initConfig({
-      connect: {
-          server: {
-              options: {
-                  base: "",
-                  port: 8080
-              }
-          }
-      },
-      'saucelabs-qunit': {
-          all: {
-              options: {
-                  urls: ["http://127.0.0.1:8080/test/index.html?hidepassed"],
-                  build: process.env.TRAVIS_JOB_ID,
-                  throttled: 4,
-                  "max-duration" : 1200, // seconds, IE6 is slow
-                  browsers: browsers,
-                  testname: "qunit tests",
-                  tags: tags,
-                  // Tests have statusCheckAttempts * pollInterval seconds to complete
-                  pollInterval: 2000,
-                  statusCheckAttempts: 240,
-                  "max-duration": 1200,
-                  browsers: browsers,
-                  maxRetries: 2
-              }
-          }
-      },
-      jshint: {
-          // see https://github.com/gruntjs/grunt-contrib-jshint/issues/198
-          // we can't override the options using the jshintrc path
-          options: grunt.file.readJSON('.jshintrc'),
-          production: ['./lib/**/*.js'],
-          test: ['./test/helpers/**/*.js', './test/asserts/**/*.js'],
-          documentation: {
-              options: {
-                  // we include js files with jekyll, jshint can't see all
-                  // variables and we can't declare all of them
-                  undef: false,
-                  // 'implied' still give false positives in our case
-                  strict: false
-              },
-              files: {
-                  src: ['./documentation/**/*.js']
-              }
-          }
-      },
+    connect: {
+      server: {
+        options: {
+          base: "",
+          port: 8080
+        }
+      }
+    },
+    'saucelabs-qunit': {
+      all: {
+        options: {
+          urls: ["http://127.0.0.1:8080/test/index.html?hidepassed"],
+          build: process.env.TRAVIS_JOB_ID,
+          throttled: 4,
+          "max-duration": 1200, // seconds, IE6 is slow
+          browsers: browsers,
+          testname: "qunit tests",
+          tags: tags,
+          // Tests have statusCheckAttempts * pollInterval seconds to complete
+          pollInterval: 2000,
+          statusCheckAttempts: 240,
+          "max-duration": 1200,
+          browsers: browsers,
+          maxRetries: 2
+        }
+      }
+    },
+    jshint: {
+      // see https://github.com/gruntjs/grunt-contrib-jshint/issues/198
+      // we can't override the options using the jshintrc path
+      options: grunt.file.readJSON('.jshintrc'),
+      production: ['./lib/**/*.js'],
+      test: ['./test/helpers/**/*.js', './test/asserts/**/*.js'],
+      documentation: {
+        options: {
+          // we include js files with jekyll, jshint can't see all
+          // variables and we can't declare all of them
+          undef: false,
+          // 'implied' still give false positives in our case
+          strict: false
+        },
+        files: {
+          src: ['./documentation/**/*.js']
+        }
+      }
+    },
     browserify: {
       all: {
         files: {
@@ -78,14 +78,14 @@ module.exports = function(grunt) {
             standalone: 'JSZip',
             transform: ['package-json-versionify'],
             insertGlobalVars: {
-                process: undefined,
-                Buffer: undefined,
-                __filename: undefined,
-                __dirname: undefined
+              process: undefined,
+              Buffer: undefined,
+              __filename: undefined,
+              __dirname: undefined
             },
             builtins: false
           },
-          banner : grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
+          banner: grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
         }
       }
     },
@@ -93,7 +93,7 @@ module.exports = function(grunt) {
       options: {
         mangle: true,
         preserveComments: false,
-        banner : grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
+        banner: grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
       },
       all: {
         src: 'dist/jszip.js',
@@ -101,7 +101,7 @@ module.exports = function(grunt) {
       }
     },
     qunit: {
-        all: ['test/**/*.html']
+      all: ['test/**/*.html']
     }
   });
 
