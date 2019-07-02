@@ -4,11 +4,7 @@ matrix:
   include:
     - node_js: "stable"
       env: COMMAND=lint
-    - node_js: "0.10"
-      env: COMMAND=test-node
-    - node_js: "0.12"
-      env: COMMAND=test-node
-    - node_js: "4.4"
+    - node_js: "lts/*"
       env: COMMAND=test-node
     - node_js: "stable"
       env: COMMAND=test-node
