@@ -1,38 +1,16 @@
 /*jshint node: true */
-'use strict';
+"use strict";
+
 module.exports = function(grunt) {
-  // see https://saucelabs.com/rest/v1/info/browsers/webdriver
-  var browsers = [{
-      browserName: "iphone",
-      version: "9.3"
-  }, {
-      browserName: "iphone",
-      version: "12.0"
-  }, {
-      browserName: "android",
-      version: "4.4"
-  }, {
-      browserName: "android",
-      version: "8.0",
-  }, {
-      browserName: "firefox",
-      platform: "Windows 10"
-  }, {
-      browserName: "chrome",
-      platform: "Windows 10"
-  }, {
-      browserName: "internet explorer",
-      version: "11"
-  // }, {
-  // Disabled due to flakeyness
-  //     browserName: "MicrosoftEdge",
-  }, {
-      browserName: "safari",
-      version: "8"
-  }, {
-      browserName: "safari",
-      version: "11"
-  }];
+  // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator
+  // A lot of the browsers seem to time out with Saucelab's unit testing
+  // framework. Here are the browsers that work and get enough coverage for our
+  // needs.
+  var browsers = [
+    {browserName: "chrome"},
+    {browserName: "firefox", platform: "Linux"},
+    {browserName: "internet explorer"}
+  ];
 
   var tags = [];
   if (process.env.TRAVIS_PULL_REQUEST && process.env.TRAVIS_PULL_REQUEST != "false") {
@@ -48,24 +26,26 @@ module.exports = function(grunt) {
           server: {
               options: {
                   base: "",
-                  port: 9999
+                  port: 8080
               }
           }
       },
       'saucelabs-qunit': {
           all: {
               options: {
-                  urls: ["http://127.0.0.1:9999/test/index.html?hidepassed"],
+                  urls: ["http://127.0.0.1:8080/test/index.html?hidepassed"],
                   build: process.env.TRAVIS_JOB_ID,
                   throttled: 4,
                   "max-duration" : 1200, // seconds, IE6 is slow
                   browsers: browsers,
                   testname: "qunit tests",
                   tags: tags,
-                  // Tests have statusCheckAttempts * pollInterval seconds to
-                  // complete
+                  // Tests have statusCheckAttempts * pollInterval seconds to complete
                   pollInterval: 2000,
-                  statusCheckAttempts: 240
+                  statusCheckAttempts: 240,
+                  "max-duration": 1200,
+                  browsers: browsers,
+                  maxRetries: 2
               }
           }
       },
@@ -125,17 +105,25 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks("grunt-saucelabs");
   grunt.loadNpmTasks("grunt-contrib-connect");
+  grunt.loadNpmTasks("grunt-saucelabs");
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-qunit');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+
+  // A task to cause Grunt to sit and wait, keeping the test server running
+  grunt.registerTask("wait", function() {
+    this.async();
+  });
+
+  grunt.registerTask("test-local", ["build", "qunit", "connect", "wait"]);
+  grunt.registerTask("test-remote", ["build", "qunit", "connect", "saucelabs-qunit"]);
 
   if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
-    grunt.registerTask("test", ["qunit", "connect", "saucelabs-qunit"]);
+    grunt.registerTask("test", ["jshint", "test-remote"]);
   } else {
-    grunt.registerTask("test", ["qunit"]);
+    grunt.registerTask("test", ["jshint", "test-local"]);
   }
   grunt.registerTask("build", ["browserify", "uglify"]);
   grunt.registerTask("default", ["jshint", "build"]);
