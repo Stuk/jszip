@@ -99,9 +99,6 @@ module.exports = function(grunt) {
         src: 'dist/jszip.js',
         dest: 'dist/jszip.min.js'
       }
-    },
-    qunit: {
-      all: ['test/**/*.html']
     }
   });
 
@@ -117,8 +114,8 @@ module.exports = function(grunt) {
     this.async();
   });
 
-  grunt.registerTask("test-local", ["build", "qunit", "connect", "wait"]);
-  grunt.registerTask("test-remote", ["build", "qunit", "connect", "saucelabs-qunit"]);
+  grunt.registerTask("test-local", ["build", "connect", "wait"]);
+  grunt.registerTask("test-remote", ["build", "connect", "saucelabs-qunit"]);
 
   if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
     grunt.registerTask("test", ["jshint", "test-remote"]);
