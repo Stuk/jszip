@@ -106,7 +106,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-saucelabs");
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
   // A task to cause Grunt to sit and wait, keeping the test server running
