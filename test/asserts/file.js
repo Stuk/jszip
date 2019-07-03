@@ -45,7 +45,7 @@ QUnit.module("file", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    JSZipTestUtils.testZipFile("Add a assert, file to overwrite", "ref/text.zip", function(assert, expected) {
+    JSZipTestUtils.testZipFile("Add a file to overwrite", "ref/text.zip", function(assert, expected) {
         var zip = new JSZip();
         zip.file("Hello.txt", "hello ?");
         zip.file("Hello.txt", "Hello World\n");
@@ -58,7 +58,7 @@ QUnit.module("file", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    JSZipTestUtils.testZipFile("Zip text assert, file with date", "ref/text.zip", function(assert, expected) {
+    JSZipTestUtils.testZipFile("Zip text file with date", "ref/text.zip", function(assert, expected) {
         var zip = new JSZip();
         zip.file("Hello.txt", "Hello World\n", {date : new Date("July 17, 2009 14:36:57")});
         var done = assert.async();

@@ -126,7 +126,7 @@ JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filenam
 });
 
 // zip --entry-comments --archive-comment -X -0 pile_of_poo.zip Iñtërnâtiônàlizætiøn☃$'\360\237\222\251'.txt
-JSZipTestUtils.testZipFile("Zip text assert, file and UTF-8, Pile Of Poo test", "ref/pile_of_poo.zip", function(assert, expected) {
+JSZipTestUtils.testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pile_of_poo.zip", function(assert, expected) {
     var zip = new JSZip();
     // this is the string "Iñtërnâtiônàlizætiøn☃💩",
     // see http://mathiasbynens.be/notes/javascript-unicode
