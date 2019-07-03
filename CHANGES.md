@@ -4,6 +4,13 @@ layout: default
 section: main
 ---
 
+### v3.2.2 2019-07-04
+- No public changes, but a number of testing dependencies have been updated.
+- Tested browsers are now: Internet Explorer 11, Chrome (most recent) and Firefox (most recent). Other browsers (specifically Safari) are still supported however testing them on Saucelabs is broken and so they were removed from the test matrix.
+
+### v3.2.1 2019-03-22
+- Corrected built dist files
+
 ### v3.2.0 2019-02-21
 - Update dependencies to reduce bundle size (see [#532](https://github.com/Stuk/jszip/pull/532)).
 - Fix deprecated Buffer constructor usage and add safeguards (see [#506](https://github.com/Stuk/jszip/pull/506)).
