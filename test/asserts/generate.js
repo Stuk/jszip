@@ -11,7 +11,7 @@ function testGenerateFor(testCases, fn) {
 }
 
 function testGenerate(options) {
-    QUnit.stop();
+    var done = assert.async();
     var triggeredCallback = false;
     new JSZip.external.Promise(function(resolve, reject) {
         resolve(options.prepare());
@@ -32,13 +32,13 @@ function testGenerate(options) {
         if (!options.skipReloadTest) {
             JSZipTestUtils.checkGenerateStability(result, options.options);
         }
-        QUnit.start();
+        done();
     }, function (err) {
         triggeredCallback = true;
         options.assertions(err, null);
-        QUnit.start();
+        done();
     });
-    QUnit.ok(!triggeredCallback, "the async callback is async");
+    assert.ok(!triggeredCallback, "the async callback is async");
 }
 
 testGenerateFor([{
@@ -57,8 +57,8 @@ testGenerateFor([{
             prepare : JSZipTestUtils.createZipAll,
             options : {type:"binarystring",streamFiles:streamFiles},
             assertions : function (err, result) {
-                QUnit.equal(err, null, "no error");
-                QUnit.ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+                assert.equal(err, null, "no error");
+                assert.ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
             }
         });
     });
@@ -75,8 +75,8 @@ testGenerateFor([{
             skipReloadTest : true,
             options : {type:"base64",streamFiles:streamFiles},
             assertions : function (err, result) {
-                QUnit.equal(err, null, "no error");
-                QUnit.equal(result, JSZipTestUtils.base64encode("all.zip.base64,stream=" + streamFiles), "generated ZIP matches reference ZIP");
+                assert.equal(err, null, "no error");
+                assert.equal(result, JSZipTestUtils.base64encode("all.zip.base64,stream=" + streamFiles), "generated ZIP matches reference ZIP");
             }
         });
     });
@@ -87,15 +87,15 @@ testGenerateFor([{
             options : {type:"uint8array",streamFiles:streamFiles},
             assertions : function (err, result) {
                 if (JSZip.support.uint8array) {
-                    QUnit.equal(err, null, "no error");
-                    QUnit.ok(result instanceof Uint8Array, "the result is a instance of Uint8Array");
+                    assert.equal(err, null, "no error");
+                    assert.ok(result instanceof Uint8Array, "the result is a instance of Uint8Array");
 
                     // var actual = JSZipTestUtils.toString(result);
 
-                    QUnit.ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+                    assert.ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
                 } else {
-                    QUnit.equal(result, null, "no data");
-                    QUnit.ok(err.message.match("not supported by this platform"), "the error message is useful");
+                    assert.equal(result, null, "no data");
+                    assert.ok(err.message.match("not supported by this platform"), "the error message is useful");
                 }
             }
         });
@@ -107,13 +107,13 @@ testGenerateFor([{
             options : {type:"arraybuffer",streamFiles:streamFiles},
             assertions : function (err, result) {
                 if (JSZip.support.arraybuffer) {
-                    QUnit.equal(err, null, "no error");
-                    QUnit.ok(result instanceof ArrayBuffer, "the result is a instance of ArrayBuffer");
+                    assert.equal(err, null, "no error");
+                    assert.ok(result instanceof ArrayBuffer, "the result is a instance of ArrayBuffer");
 
-                    QUnit.ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+                    assert.ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
                 } else {
-                    QUnit.equal(result, null, "no data");
-                    QUnit.ok(err.message.match("not supported by this platform"), "the error message is useful");
+                    assert.equal(result, null, "no data");
+                    assert.ok(err.message.match("not supported by this platform"), "the error message is useful");
                 }
             }
         });
@@ -126,15 +126,15 @@ testGenerateFor([{
             options : {type:"nodebuffer",streamFiles:streamFiles},
             assertions : function (err, result) {
                 if (JSZip.support.nodebuffer) {
-                    QUnit.equal(err, null, "no error");
-                    QUnit.ok(result instanceof Buffer, "the result is a instance of ArrayBuffer");
+                    assert.equal(err, null, "no error");
+                    assert.ok(result instanceof Buffer, "the result is a instance of ArrayBuffer");
 
                     var actual = JSZipTestUtils.toString(result);
 
-                    QUnit.ok(JSZipTestUtils.similar(actual, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+                    assert.ok(JSZipTestUtils.similar(actual, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
                 } else {
-                    QUnit.equal(result, null, "no data");
-                    QUnit.ok(err.message.match("not supported by this platform"), "the error message is useful");
+                    assert.equal(result, null, "no data");
+                    assert.ok(err.message.match("not supported by this platform"), "the error message is useful");
                 }
             }
         });
@@ -147,13 +147,13 @@ testGenerateFor([{
             skipReloadTest : true,
             assertions : function (err, result) {
                 if (JSZip.support.blob) {
-                    QUnit.equal(err, null, "no error");
-                    QUnit.ok(result instanceof Blob, "the result is a instance of Blob");
-                    QUnit.equal(result.type, "application/zip", "the result has the rigth mime type");
-                    QUnit.equal(result.size, expected.length, "the result has the right length");
+                    assert.equal(err, null, "no error");
+                    assert.ok(result instanceof Blob, "the result is a instance of Blob");
+                    assert.equal(result.type, "application/zip", "the result has the rigth mime type");
+                    assert.equal(result.size, expected.length, "the result has the right length");
                 } else {
-                    QUnit.equal(result, null, "no data");
-                    QUnit.ok(err.message.match("not supported by this platform"), "the error message is useful");
+                    assert.equal(result, null, "no data");
+                    assert.ok(err.message.match("not supported by this platform"), "the error message is useful");
                 }
             }
         });
@@ -166,13 +166,13 @@ testGenerateFor([{
             skipReloadTest : true,
             assertions : function (err, result) {
                 if (JSZip.support.blob) {
-                    QUnit.equal(err, null, "no error");
-                    QUnit.ok(result instanceof Blob, "the result is a instance of Blob");
-                    QUnit.equal(result.type, "application/ods", "the result has the rigth mime type");
-                    QUnit.equal(result.size, expected.length, "the result has the right length");
+                    assert.equal(err, null, "no error");
+                    assert.ok(result instanceof Blob, "the result is a instance of Blob");
+                    assert.equal(result.type, "application/ods", "the result has the rigth mime type");
+                    assert.equal(result.size, expected.length, "the result has the right length");
                 } else {
-                    QUnit.equal(result, null, "no data");
-                    QUnit.ok(err.message.match("not supported by this platform"), "the error message is useful");
+                    assert.equal(result, null, "no data");
+                    assert.ok(err.message.match("not supported by this platform"), "the error message is useful");
                 }
             }
         });
@@ -200,8 +200,8 @@ testGenerateFor([{
             },
             options : {type:"binarystring", compression:"STORE",streamFiles:streamFiles},
             assertions : function (err, result) {
-                QUnit.equal(err, null, "no error");
-                QUnit.ok(JSZipTestUtils.similar(result, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+                assert.equal(err, null, "no error");
+                assert.ok(JSZipTestUtils.similar(result, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
             }
         });
     });
@@ -227,8 +227,8 @@ testGenerateFor([{
             },
             options : {type:"binarystring", compression:"DEFLATE",streamFiles:streamFiles},
             assertions : function (err, result) {
-                QUnit.equal(err, null, "no error");
-                QUnit.ok(JSZipTestUtils.similar(result, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+                assert.equal(err, null, "no error");
+                assert.ok(JSZipTestUtils.similar(result, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
             }
         });
     });
@@ -237,19 +237,19 @@ testGenerateFor([{
 JSZipTestUtils.testZipFile("STORE is the default method", "ref/text.zip", function(expected) {
     var zip = new JSZip();
     zip.file("Hello.txt", "Hello World\n");
-    QUnit.stop();
+    var done = assert.async();
     zip.generateAsync({type:"binarystring", compression:'STORE'}).then(function(content) {
         // no difference with the "Zip text file" test.
-        QUnit.ok(JSZipTestUtils.similar(content, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        QUnit.start();
+        assert.ok(JSZipTestUtils.similar(content, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
 
 function testLazyDecompression(from, to) {
-    QUnit.stop();
+    var done = assert.async();
     JSZipTestUtils.createZipAll().generateAsync({type:"binarystring", compression:from}).then(function(actual) {
-        QUnit.start();
+        done();
         testGenerate({
             prepare : function () {
                 // the zip object will contain compressed objects
@@ -258,7 +258,7 @@ function testLazyDecompression(from, to) {
             skipReloadTest : true,
             options : {type:"binarystring", compression:to},
             assertions : function (err, result) {
-                QUnit.equal(err, null, from + " -> " + to + " : no error");
+                assert.equal(err, null, from + " -> " + to + " : no error");
             }
         });
     })['catch'](JSZipTestUtils.assertNoError);
@@ -280,8 +280,8 @@ JSZipTestUtils.testZipFile("empty zip", "ref/empty.zip", function(expected) {
         },
         options : {type:"binarystring"},
         assertions : function (err, result) {
-            QUnit.equal(err, null, "no error");
-            QUnit.ok(JSZipTestUtils.similar(result, expected, 0 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+            assert.equal(err, null, "no error");
+            assert.ok(JSZipTestUtils.similar(result, expected, 0 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
         }
     });
 });
@@ -291,8 +291,8 @@ QUnit.test("unknown compression throws an exception", function () {
         prepare : JSZipTestUtils.createZipAll,
         options : {type:"string",compression:'MAYBE'},
         assertions : function (err, result) {
-            QUnit.equal(result, null, "no data");
-            QUnit.ok(err.message.match("not a valid compression"), "the error message is useful");
+            assert.equal(result, null, "no data");
+            assert.ok(err.message.match("not a valid compression"), "the error message is useful");
         }
     });
 });
@@ -302,8 +302,8 @@ QUnit.test("missing type throws an exception", function () {
         prepare : JSZipTestUtils.createZipAll,
         options : {},
         assertions : function (err, result) {
-            QUnit.equal(result, null, "no data");
-            QUnit.ok(err.message.match("No output type specified."), "the error message is useful");
+            assert.equal(result, null, "no data");
+            assert.ok(err.message.match("No output type specified."), "the error message is useful");
         }
     });
 });
@@ -345,7 +345,7 @@ QUnit.test("generateAsync keep the explicit / folder", function (assert) {
 });
 
 JSZipTestUtils.testZipFile("generate with promises as files", "ref/all.zip", function (expected) {
-    QUnit.stop();
+    var done = assert.async();
     var zip = new JSZip();
     zip.file("Hello.txt", new JSZip.external.Promise(function (resolve, reject) {
         setTimeout(function () {
@@ -360,7 +360,7 @@ JSZipTestUtils.testZipFile("generate with promises as files", "ref/all.zip", fun
 
     zip.generateAsync({type:"string"})
     .then(function (result) {
-        QUnit.ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
-        QUnit.start();
+        assert.ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 });

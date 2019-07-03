@@ -55,7 +55,7 @@ QUnit.module("stream", function () {
 
     function generateStreamTest(name, ref, createFunction, generateOptions, updateStream) {
         JSZipTestUtils.testZipFile(name,ref, function(expected) {
-            QUnit.stop();
+            var done = assert.async();
 
             var tempFile = require('tmp').tmpNameSync({postfix:".zip"});
 
@@ -66,22 +66,22 @@ QUnit.module("stream", function () {
             .on("close", function () {
                 fs.readFile(tempFile, function (e, data) {
                     var actual = JSZipTestUtils.toString(data);
-                    QUnit.ok(JSZipTestUtils.similar(actual, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+                    assert.ok(JSZipTestUtils.similar(actual, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
                     fs.unlink(tempFile, function (err) {
                         if (err) {
-                            QUnit.ok(false, err);
+                            assert.ok(false, err);
                         }
-                        QUnit.start();
+                        done();
                     });
                 });
             })
             .on("error", function (e) {
-                QUnit.ok(false, e.message);
+                assert.ok(false, e.message);
                 fs.unlink(tempFile, function (err) {
                     if (err) {
-                        QUnit.ok(false, err);
+                        assert.ok(false, err);
                     }
-                    QUnit.start();
+                    done();
                 });
             });
         });
@@ -94,7 +94,7 @@ QUnit.module("stream", function () {
             .on("close", function () {
                 fs.readFile(tempFile, function (e, data) {
                     var actual = JSZipTestUtils.toString(data);
-                    QUnit.equal(actual, "Hello World\n", "the generated content is ok");
+                    assert.equal(actual, "Hello World\n", "the generated content is ok");
                     fs.unlink(tempFile, function (err) {
                         if (err) {
                             assert.ok(false, err);
@@ -104,7 +104,7 @@ QUnit.module("stream", function () {
                 });
             })
             .on("error", function (e) {
-                QUnit.ok(false, e.message);
+                assert.ok(false, e.message);
                 fs.unlink(tempFile, function (err) {
                     if (err) {
                         assert.ok(false, err);
@@ -185,7 +185,7 @@ QUnit.module("stream", function () {
             var zip = new JSZip();
             zip.file("Hello.txt", stream);
             zip.file("Hello.txt").async("text").then(function(actual) {
-                QUnit.equal(actual, "Hello World\n", "the stream has been read correctly");
+                assert.equal(actual, "Hello World\n", "the stream has been read correctly");
                 done();
             })['catch'](JSZipTestUtils.assertNoError);
         });

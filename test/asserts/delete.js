@@ -8,10 +8,10 @@ JSZipTestUtils.testZipFile("Delete file", "ref/text.zip", function(expected) {
     zip.file("Remove.txt", "This file should be deleted\n");
     zip.file("Hello.txt", "Hello World\n");
     zip.remove("Remove.txt");
-    QUnit.stop();
+    var done = assert.async();
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
-        QUnit.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        QUnit.start();
+        assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
@@ -19,10 +19,10 @@ JSZipTestUtils.testZipFile("Delete file in folder", "ref/folder.zip", function(e
     var zip = new JSZip();
     zip.folder("folder").file("Remove.txt", "This folder and file should be deleted\n");
     zip.remove("folder/Remove.txt");
-    QUnit.stop();
+    var done = assert.async();
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
-        QUnit.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        QUnit.start();
+        assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
@@ -31,10 +31,10 @@ JSZipTestUtils.testZipFile("Delete file in folder, with a relative path", "ref/f
     var folder = zip.folder("folder");
     folder.file("Remove.txt", "This folder and file should be deleted\n");
     folder.remove("Remove.txt");
-    QUnit.stop();
+    var done = assert.async();
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
-        QUnit.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        QUnit.start();
+        assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
@@ -43,10 +43,10 @@ JSZipTestUtils.testZipFile("Delete folder", "ref/text.zip", function(expected) {
     zip.folder("remove").file("Remove.txt", "This folder and file should be deleted\n");
     zip.file("Hello.txt", "Hello World\n");
     zip.remove("remove");
-    QUnit.stop();
+    var done = assert.async();
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
-        QUnit.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        QUnit.start();
+        assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
@@ -55,10 +55,10 @@ JSZipTestUtils.testZipFile("Delete folder with a final /", "ref/text.zip", funct
     zip.folder("remove").file("Remove.txt", "This folder and file should be deleted\n");
     zip.file("Hello.txt", "Hello World\n");
     zip.remove("remove/");
-    QUnit.stop();
+    var done = assert.async();
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
-        QUnit.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        QUnit.start();
+        assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
@@ -67,10 +67,10 @@ JSZipTestUtils.testZipFile("Delete unknown path", "ref/text.zip", function(expec
     zip.file("Hello.txt", "Hello World\n");
     zip.remove("unknown_file");
     zip.remove("unknown_folder/Hello.txt");
-    QUnit.stop();
+    var done = assert.async();
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
-        QUnit.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        QUnit.start();
+        assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
@@ -81,10 +81,10 @@ JSZipTestUtils.testZipFile("Delete nested folders", "ref/text.zip", function(exp
     zip.file("remove/second/another.txt", "Another file");
     zip.file("Hello.txt", "Hello World\n");
     zip.remove("remove");
-    QUnit.stop();
+    var done = assert.async();
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
-        QUnit.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        QUnit.start();
+        assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
@@ -93,11 +93,11 @@ JSZipTestUtils.testZipFile("Delete nested folders from relative path", "ref/fold
     zip.folder("folder");
     zip.folder("folder/1/2/3");
     zip.folder("folder").remove("1");
-    QUnit.stop();
+    var done = assert.async();
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
-        QUnit.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
+        assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
         JSZipTestUtils.checkGenerateStability(actual);
-        QUnit.start();
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 

@@ -16,7 +16,7 @@ QUnit.test("forEach works on /", function (assert) {
         calls.push(path);
     });
 
-    QUnit.equal(count, 3, "the callback has been called the right number of times");
+    assert.equal(count, 3, "the callback has been called the right number of times");
     assert.deepEqual(calls, ["Hello.txt", "images/", "images/smile.gif"], "all paths have been called");
 });
 
@@ -37,6 +37,6 @@ QUnit.test("forEach works on a sub folder", function (assert) {
         calls.push(path);
     });
 
-    QUnit.equal(count, 3, "the callback has been called the right number of times");
+    assert.equal(count, 3, "the callback has been called the right number of times");
     assert.deepEqual(calls, ["Hello.txt", "images/", "images/smile.gif"], "all paths have been called");
 });

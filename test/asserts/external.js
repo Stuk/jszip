@@ -65,7 +65,7 @@ QUnit.test("external.Promise can be replaced in .async()", function (assert) {
     JSZip.external.Promise = MyShinyPromise;
 
     var promise = JSZipTestUtils.createZipAll().file("Hello.txt").async("string").then(function (result) {
-        QUnit.ok(MyShinyPromise.calls > 0, "at least 1 call of the new Promise");
+        assert.ok(MyShinyPromise.calls > 0, "at least 1 call of the new Promise");
         JSZip.external.Promise = OriginalPromise;
         done();
     })['catch'](JSZipTestUtils.assertNoError);
@@ -81,7 +81,7 @@ QUnit.test("external.Promise can be replaced in .generateAsync()", function (ass
     JSZip.external.Promise = MyShinyPromise;
 
     var promise = JSZipTestUtils.createZipAll().generateAsync({type:"string"}).then(function (result) {
-        QUnit.ok(MyShinyPromise.calls > 0, "at least 1 call of the new Promise");
+        assert.ok(MyShinyPromise.calls > 0, "at least 1 call of the new Promise");
         JSZip.external.Promise = OriginalPromise;
         done();
     })['catch'](JSZipTestUtils.assertNoError);
@@ -90,17 +90,17 @@ QUnit.test("external.Promise can be replaced in .generateAsync()", function (ass
 });
 
 JSZipTestUtils.testZipFile("external.Promise can be replaced in .loadAsync()", "ref/all.zip", function (all) {
-    QUnit.stop();
+    var done = assert.async();
     var OriginalPromise = JSZip.external.Promise;
     var MyShinyPromise = createPromiseProxy(OriginalPromise);
 
     JSZip.external.Promise = MyShinyPromise;
 
     var promise = JSZip.loadAsync(all).then(function (result) {
-        QUnit.ok(MyShinyPromise.calls > 0, "at least 1 call of the new Promise");
+        assert.ok(MyShinyPromise.calls > 0, "at least 1 call of the new Promise");
         JSZip.external.Promise = OriginalPromise;
-        QUnit.start();
+        done();
     })['catch'](JSZipTestUtils.assertNoError);
 
-    QUnit.ok(promise.isACustomImplementation, "the custom implementation is used");
+    assert.ok(promise.isACustomImplementation, "the custom implementation is used");
 });

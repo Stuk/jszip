@@ -16,15 +16,15 @@ QUnit.module("permissions", function () {
     function assertUnixPermissions(file){
         function doAsserts(zip, fileName, dir, octal) {
             var mode = parseInt(octal, 8);
-            QUnit.equal(zip.files[fileName].dosPermissions, null, fileName + ", no DOS permissions");
-            QUnit.equal(zip.files[fileName].dir, dir, fileName + " dir flag");
-            QUnit.equal(zip.files[fileName].unixPermissions, mode, fileName + " mode " + octal);
+            assert.equal(zip.files[fileName].dosPermissions, null, fileName + ", no DOS permissions");
+            assert.equal(zip.files[fileName].dir, dir, fileName + " dir flag");
+            assert.equal(zip.files[fileName].unixPermissions, mode, fileName + " mode " + octal);
         }
 
-        QUnit.stop();
+        var done = assert.async();
         JSZip.loadAsync(file, {createFolders:false})
         .then(function(zip) {
-            QUnit.start();
+            done();
             doAsserts(zip, "dir_777/", true,  "40777");
             doAsserts(zip, "dir_755/", true,  "40755");
             doAsserts(zip, "dir_500/", true,  "40500");
@@ -38,15 +38,15 @@ QUnit.module("permissions", function () {
     function assertDosPermissions(file){
         function doAsserts(zip, fileName, dir, binary) {
             var mode = parseInt(binary, 2);
-            QUnit.equal(zip.files[fileName].unixPermissions, null, fileName + ", no UNIX permissions");
-            QUnit.equal(zip.files[fileName].dir, dir, fileName + " dir flag");
-            QUnit.equal(zip.files[fileName].dosPermissions, mode, fileName + " mode " + mode);
+            assert.equal(zip.files[fileName].unixPermissions, null, fileName + ", no UNIX permissions");
+            assert.equal(zip.files[fileName].dir, dir, fileName + " dir flag");
+            assert.equal(zip.files[fileName].dosPermissions, mode, fileName + " mode " + mode);
         }
 
-        QUnit.stop();
+        var done = assert.async();
         JSZip.loadAsync(file, {createFolders:false})
         .then(function(zip) {
-            QUnit.start();
+            done();
             if (zip.files["dir/"]) {
                 doAsserts(zip, "dir/",           true,  "010000");
             }
@@ -61,24 +61,24 @@ QUnit.module("permissions", function () {
     }
 
     function reloadAndAssertUnixPermissions(file){
-        QUnit.stop();
+        var done = assert.async();
         JSZip.loadAsync(file, {createFolders:false})
         .then(function (zip) {
             return zip.generateAsync({type:"string", platform:"UNIX"});
         })
         .then(function (content) {
-            QUnit.start();
+            done();
             assertUnixPermissions(content);
         })['catch'](JSZipTestUtils.assertNoError);
     }
     function reloadAndAssertDosPermissions(file){
-        QUnit.stop();
+        var done = assert.async();
         JSZip.loadAsync(file, {createFolders:false})
         .then(function (zip) {
             return zip.generateAsync({type:"string", platform:"DOS"});
         })
         .then(function (content) {
-            QUnit.start();
+            done();
             assertDosPermissions(content);
         })['catch'](JSZipTestUtils.assertNoError);
     }
