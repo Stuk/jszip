@@ -5,8 +5,8 @@ QUnit.module("load", function () {
 
 
     JSZipTestUtils.testZipFile("load(string) works", "ref/all.zip", function(assert, file) {
-        assert.ok(typeof file === "string");
         var done = assert.async();
+        assert.ok(typeof file === "string");
         JSZip.loadAsync(file)
         .then(function (zip) {
             return zip.file("Hello.txt").async("string");
@@ -18,6 +18,7 @@ QUnit.module("load", function () {
     });
 
     JSZipTestUtils.testZipFile("load(string) handles bytes > 255", "ref/all.zip", function(assert, file) {
+        var done = assert.async();
         // the method used to load zip with ajax will remove the extra bits.
         // adding extra bits :)
         var updatedFile = "";
@@ -25,7 +26,6 @@ QUnit.module("load", function () {
             updatedFile += String.fromCharCode((file.charCodeAt(i) & 0xff) + 0x4200);
         }
 
-        var done = assert.async();
         JSZip.loadAsync(updatedFile)
         .then(function (zip) {
             return zip.file("Hello.txt").async("string");
@@ -38,11 +38,11 @@ QUnit.module("load", function () {
 
 
     JSZipTestUtils.testZipFile("load(Array) works", "ref/deflate.zip", function(assert, file) {
+        var done = assert.async();
         var updatedFile = new Array(file.length);
         for( var i = 0; i < file.length; ++i ) {
             updatedFile[i] = file.charCodeAt(i);
         }
-        var done = assert.async();
         JSZip.loadAsync(updatedFile)
         .then(function (zip) {
             return zip.file("Hello.txt").async("string");
@@ -54,11 +54,11 @@ QUnit.module("load", function () {
     });
 
     JSZipTestUtils.testZipFile("load(array) handles bytes > 255", "ref/deflate.zip", function(assert, file) {
+        var done = assert.async();
         var updatedFile = new Array(file.length);
         for( var i = 0; i < file.length; ++i ) {
             updatedFile[i] = file.charCodeAt(i) + 0x4200;
         }
-        var done = assert.async();
         JSZip.loadAsync(updatedFile)
         .then(function (zip) {
             return zip.file("Hello.txt").async("string");
@@ -71,6 +71,7 @@ QUnit.module("load", function () {
 
     if (JSZip.support.arraybuffer) {
         JSZipTestUtils.testZipFile("load(ArrayBuffer) works", "ref/all.zip", function(assert, fileAsString) {
+            var done = assert.async(3);
             var file = new ArrayBuffer(fileAsString.length);
             var bufferView = new Uint8Array(file);
             for( var i = 0; i < fileAsString.length; ++i ) {
@@ -81,7 +82,6 @@ QUnit.module("load", function () {
 
             // when reading an arraybuffer, the CompressedObject mechanism will keep it and subarray() a Uint8Array.
             // if we request a file in the same format, we might get the same Uint8Array or its ArrayBuffer (the original zip file).
-            var done = assert.async(3);
             JSZip.loadAsync(file)
             .then(function (zip) {
                 return zip.file("Hello.txt").async("arraybuffer");
@@ -110,12 +110,12 @@ QUnit.module("load", function () {
 
     if (JSZip.support.nodebuffer) {
         JSZipTestUtils.testZipFile("load(Buffer) works", "ref/all.zip", function(assert, fileAsString) {
+            var done = assert.async();
             var file = new Buffer(fileAsString.length);
             for( var i = 0; i < fileAsString.length; ++i ) {
                 file[i] = fileAsString.charCodeAt(i);
             }
 
-            var done = assert.async();
             JSZip.loadAsync(file)
             .then(function (zip) {
                 return zip.file("Hello.txt").async("string");
@@ -128,6 +128,7 @@ QUnit.module("load", function () {
 
     if (JSZip.support.uint8array) {
         JSZipTestUtils.testZipFile("load(Uint8Array) works", "ref/all.zip", function(assert, fileAsString) {
+            var done = assert.async(3);
             var file = new Uint8Array(fileAsString.length);
             for( var i = 0; i < fileAsString.length; ++i ) {
                 file[i] = fileAsString.charCodeAt(i);
@@ -137,7 +138,6 @@ QUnit.module("load", function () {
 
             // when reading an arraybuffer, the CompressedObject mechanism will keep it and subarray() a Uint8Array.
             // if we request a file in the same format, we might get the same Uint8Array or its ArrayBuffer (the original zip file).
-            var done = assert.async(3);
             JSZip.loadAsync(file)
             .then(function (zip) {
                 return zip.file("Hello.txt").async("arraybuffer");
@@ -384,8 +384,8 @@ QUnit.module("load", function () {
         .then(function success(zip) {
             return zip.file("Hello.txt").async("string");
         }).then(function (content) {
-            done();
             assert.equal(content, "Hello World\n", "the zip was correctly read.");
+            done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
@@ -396,8 +396,8 @@ QUnit.module("load", function () {
         .then(function success(zip) {
             return zip.file("Hello.txt").async("string");
         }).then(function (content) {
-            done();
             assert.equal(content, "Hello World\n", "the zip was correctly read.");
+            done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
@@ -408,8 +408,8 @@ QUnit.module("load", function () {
         .then(function success(zip) {
             return zip.file("Hello.txt").async("string");
         }).then(function (content) {
-            done();
             assert.equal(content, "Hello World\n", "the zip was correctly read.");
+            done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
@@ -420,8 +420,8 @@ QUnit.module("load", function () {
         .then(function success(zip) {
             return zip.file("Hello.txt").async("string");
         }).then(function (content) {
-            done();
             assert.equal(content, "Hello World\n", "the zip was correctly read.");
+            done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
@@ -469,11 +469,11 @@ QUnit.module("load", function () {
         var done = assert.async();
         JSZip.loadAsync(file, {checkCRC32:true})
         .then(function success() {
-            done();
             assert.ok(true, "no exception were thrown");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.ok(false, "An exception were thrown: " + e.message);
+            done();
         });
     });
 
@@ -482,13 +482,13 @@ QUnit.module("load", function () {
         var zip = new JSZip();
         zip.folder("sub").loadAsync(file)
         .then(function success(zip) {
-            done();
             assert.ok(zip.file("Hello.txt"), "the zip was correctly read.");
             assert.equal(zip.file("Hello.txt").name, "sub/Hello.txt", "the zip was read in a sub folder");
             assert.equal(zip.root, "sub/", "the promise contains the correct folder level");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.ok(false, "An exception were thrown: " + e.message);
+            done();
         });
     });
 
@@ -504,14 +504,14 @@ QUnit.module("load", function () {
                 zip.file("Bye.txt").async("text")
             ]);
         }).then(function (result) {
-            done();
             var hello = result[0];
             var bye = result[1];
             assert.equal(hello, "Hello World\n", "conflicting content was overwritten.");
             assert.equal(bye, "au revoir", "other content was kept.");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.ok(false, "An exception were thrown: " + e.message);
+            done();
         });
     });
 
@@ -522,11 +522,11 @@ QUnit.module("load", function () {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success() {
-            done();
             assert.ok(false, "Encryption is not supported, but no exception were thrown");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.equal(e.message, "Encrypted zip are not supported", "the error message is useful");
+            done();
         });
     });
 
@@ -536,11 +536,11 @@ QUnit.module("load", function () {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success() {
-            done();
             assert.ok(false, "no exception were thrown");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.ok(e.message.match("Corrupted zip"), "the error message is useful");
+            done();
         });
     });
 
@@ -549,11 +549,11 @@ QUnit.module("load", function () {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success() {
-            done();
             assert.ok(false, "no exception were thrown");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.ok(e.message.match("Corrupted zip"), "the error message is useful");
+            done();
         });
     });
 
@@ -562,11 +562,11 @@ QUnit.module("load", function () {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success() {
-            done();
             assert.ok(false, "no exception were thrown");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.ok(e.message.match("Corrupted zip"), "the error message is useful");
+            done();
         });
     });
 
@@ -574,11 +574,11 @@ QUnit.module("load", function () {
         var done = assert.async();
         JSZip.loadAsync("this is not a zip file")
         .then(function success() {
-            done();
             assert.ok(false, "no exception were thrown");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.ok(e.message.match("stuk.github.io/jszip/documentation"), "the error message is useful");
+            done();
         });
     });
 
@@ -589,8 +589,8 @@ QUnit.module("load", function () {
             done();
             assert.ok(false, "no exception were thrown");
         }, function failure(e) {
-            done();
             assert.ok(e.message.match("Corrupted zip"), "the error message is useful");
+            done();
         });
     });
 
@@ -598,11 +598,11 @@ QUnit.module("load", function () {
         var done = assert.async();
         JSZip.loadAsync(file, {checkCRC32:false})
         .then(function success() {
-            done();
             assert.ok(true, "no exception were thrown");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.ok(false, "An exception were thrown but the check should have been disabled.");
+            done();
         });
     });
 
@@ -610,11 +610,11 @@ QUnit.module("load", function () {
         var done = assert.async();
         JSZip.loadAsync(file, {checkCRC32:true})
         .then(function success() {
-            done();
             assert.ok(false, "no exception were thrown");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.ok(e.message.match("Corrupted zip"), "the error message is useful");
+            done();
         });
     });
 
@@ -622,11 +622,11 @@ QUnit.module("load", function () {
         var done = assert.async();
         JSZip.loadAsync(file, {checkCRC32:false})
         .then(function success() {
-            done();
             assert.ok(false, "no exception were thrown");
-        }, function failure(e) {
             done();
+        }, function failure(e) {
             assert.ok(e.message.match("Corrupted zip"), "the error message is useful");
+            done();
         });
     });
 

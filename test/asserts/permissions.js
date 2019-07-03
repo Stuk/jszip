@@ -24,7 +24,6 @@ QUnit.module("permissions", function () {
         var done = assert.async();
         JSZip.loadAsync(file, {createFolders:false})
         .then(function(zip) {
-            done();
             doAsserts(zip, "dir_777/", true,  "40777");
             doAsserts(zip, "dir_755/", true,  "40755");
             doAsserts(zip, "dir_500/", true,  "40500");
@@ -32,6 +31,7 @@ QUnit.module("permissions", function () {
             doAsserts(zip, "file_640", false, "100640");
             doAsserts(zip, "file_400", false, "100400");
             doAsserts(zip, "file_755", false, "100755");
+            done();
         })['catch'](JSZipTestUtils.assertNoError);
     }
 
@@ -46,7 +46,6 @@ QUnit.module("permissions", function () {
         var done = assert.async();
         JSZip.loadAsync(file, {createFolders:false})
         .then(function(zip) {
-            done();
             if (zip.files["dir/"]) {
                 doAsserts(zip, "dir/",           true,  "010000");
             }
@@ -57,6 +56,7 @@ QUnit.module("permissions", function () {
             doAsserts(zip, "file_ro",        false, "100001");
             doAsserts(zip, "file_hidden",    false, "100010");
             doAsserts(zip, "file_ro_hidden", false, "100011");
+            done();
         })['catch'](JSZipTestUtils.assertNoError);
     }
 
@@ -67,8 +67,8 @@ QUnit.module("permissions", function () {
             return zip.generateAsync({type:"string", platform:"UNIX"});
         })
         .then(function (content) {
-            done();
             assertUnixPermissions(assert, content);
+            done();
         })['catch'](JSZipTestUtils.assertNoError);
     }
     function reloadAndAssertDosPermissions(assert, file){
@@ -78,8 +78,8 @@ QUnit.module("permissions", function () {
             return zip.generateAsync({type:"string", platform:"DOS"});
         })
         .then(function (content) {
-            done();
             assertDosPermissions(assert, content);
+            done();
         })['catch'](JSZipTestUtils.assertNoError);
     }
     JSZipTestUtils.testZipFile("permissions on linux : file created by zip", "ref/permissions/linux_zip.zip", assertUnixPermissions);

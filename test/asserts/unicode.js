@@ -134,12 +134,11 @@ JSZipTestUtils.testZipFile("Zip text assert, file and UTF-8, Pile Of Poo test", 
     // thanks http://mothereff.in/js-escapes#1I%C3%B1t%C3%ABrn%C3%A2ti%C3%B4n%C3%A0liz%C3%A6ti%C3%B8n%E2%98%83%F0%9F%92%A9
     var text = 'I\xF1t\xEBrn\xE2ti\xF4n\xE0liz\xE6ti\xF8n\u2603\uD83D\uDCA9';
     zip.file(text + ".txt", text, {comment : text});
-    var done = assert.async();
+    var done = assert.async(3);
     zip.generateAsync({type:"binarystring", comment : text}).then(function(actual) {
 
         JSZipTestUtils.checkGenerateStability(assert, actual);
 
-        var done = assert.async(3);
         JSZip.loadAsync(expected)
         .then(function (zip) {
             var file = zip.file(text + ".txt");

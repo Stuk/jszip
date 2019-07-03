@@ -180,10 +180,13 @@ QUnit.module("file", function () {
             var stream = opts.zip.file("file.txt").internalStream(askedType);
             JSZipTestUtils.checkBasicStreamBehavior(assert, stream, asyncTestName);
 
+            var done = assert.async();
             opts.zip.file("file.txt").async(askedType).then(function(result) {
                 _actualTestFileDataGetters["assert_" + askedType](opts, null, result, asyncTestName);
+                done();
             }, function (err) {
                 _actualTestFileDataGetters["assert_" + askedType](opts, err, null, asyncTestName);
+                done();
             });
         },
         assert_string: function (opts, err, txt, testName) {
@@ -346,11 +349,11 @@ QUnit.module("file", function () {
         // XXX zip.file(name, data) returns a ZipObject for chaining,
         // we need to try to get the value to get the error
         .then(function () {
-            done();
             assert.ok(false, "An unsupported object was added, but no exception thrown");
-        }, function (e) {
             done();
+        }, function (e) {
             assert.ok(e.message.match("Is it in a supported JavaScript type"), "the error message is useful");
+            done();
         });
     });
 
@@ -604,13 +607,13 @@ QUnit.module("file", function () {
         zip.generateAsync({type:"string", platform:"UNIX"})
         .then(JSZip.loadAsync)
         .then(function (reloaded) {
-            done();
             assert.ok(reloaded.files['folder/'].dir, "the folder with options is marked as a folder");
 
             assert.ok(reloaded.files['folder/'].dir, "the folder with options is marked as a folder");
             assert.equal(reloaded.files['folder/'].date.getTime(), referenceDate.getTime(), "the folder with options has the correct date");
             assert.equal(reloaded.files['folder/'].comment, referenceComment, "the folder with options has the correct comment");
             assert.equal(reloaded.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
+            done();
         })['catch'](JSZipTestUtils.assertNoError);
 
     });
