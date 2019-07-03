@@ -88,7 +88,7 @@ QUnit.test("external.Promise can be replaced in .generateAsync()", function (ass
     assert.ok(promise.isACustomImplementation, "the custom implementation is used");
 });
 
-JSZipTestUtils.testZipFile("external.Promise can be replaced in .loadAsync()", "ref/all.zip", function (all) {
+JSZipTestUtils.testZipFile("external.Promise can be replaced in .loadAsync()", "ref/all.zip", function (assert, all) {
     var done = assert.async();
     var OriginalPromise = JSZip.external.Promise;
     var MyShinyPromise = createPromiseProxy(OriginalPromise);

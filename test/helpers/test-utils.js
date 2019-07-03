@@ -54,7 +54,7 @@
        */
     JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY = 18;
 
-    JSZipTestUtils.checkGenerateStability = function checkGenerateStability(bytesStream, options) {
+    JSZipTestUtils.checkGenerateStability = function checkGenerateStability(assert, bytesStream, options) {
         var done = assert.async();
 
         options = options || {type:"binarystring"};
@@ -67,7 +67,7 @@
         })['catch'](JSZipTestUtils.assertNoError);
     };
 
-    JSZipTestUtils.checkBasicStreamBehavior = function checkBasicStreamBehavior(stream, testName) {
+    JSZipTestUtils.checkBasicStreamBehavior = function checkBasicStreamBehavior(assert, stream, testName) {
         var done = assert.async();
         if (!testName) {
             testName = "";
@@ -135,10 +135,7 @@
         if (typeof console !== "undefined" && console.error) {
             console.error(err.stack);
         }
-        assert.ok(false, "unexpected error : " + err + ",  " + err.stack);
-        while(QUnit.config.semaphore) {
-            done();
-        }
+        QUnit.assert.ok(false, "unexpected error : " + err + ",  " + err.stack);
     };
 
     JSZipTestUtils.testZipFile = function testZipFile(testName, zipName, testFunction) {
@@ -150,7 +147,7 @@
             filesToFetch = zipName;
         }
 
-        QUnit.test(testName, function () {
+        QUnit.test(testName, function (assert) {
             var done = assert.async();
 
             var results = new Array(filesToFetch.length);
@@ -170,9 +167,9 @@
                         return;
                     }
                     if(simpleForm) {
-                        testFunction.call(null, results[0]);
+                        testFunction.call(null, assert, results[0]);
                     } else {
-                        testFunction.call(null, results);
+                        testFunction.call(null, assert, results);
                     }
                 }
 

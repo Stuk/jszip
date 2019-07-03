@@ -4,7 +4,7 @@
 QUnit.module("load", function () {
 
 
-    JSZipTestUtils.testZipFile("load(string) works", "ref/all.zip", function(file) {
+    JSZipTestUtils.testZipFile("load(string) works", "ref/all.zip", function(assert, file) {
         assert.ok(typeof file === "string");
         var done = assert.async();
         JSZip.loadAsync(file)
@@ -17,7 +17,7 @@ QUnit.module("load", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    JSZipTestUtils.testZipFile("load(string) handles bytes > 255", "ref/all.zip", function(file) {
+    JSZipTestUtils.testZipFile("load(string) handles bytes > 255", "ref/all.zip", function(assert, file) {
         // the method used to load zip with ajax will remove the extra bits.
         // adding extra bits :)
         var updatedFile = "";
@@ -37,7 +37,7 @@ QUnit.module("load", function () {
     });
 
 
-    JSZipTestUtils.testZipFile("load(Array) works", "ref/deflate.zip", function(file) {
+    JSZipTestUtils.testZipFile("load(Array) works", "ref/deflate.zip", function(assert, file) {
         var updatedFile = new Array(file.length);
         for( var i = 0; i < file.length; ++i ) {
             updatedFile[i] = file.charCodeAt(i);
@@ -53,7 +53,7 @@ QUnit.module("load", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    JSZipTestUtils.testZipFile("load(array) handles bytes > 255", "ref/deflate.zip", function(file) {
+    JSZipTestUtils.testZipFile("load(array) handles bytes > 255", "ref/deflate.zip", function(assert, file) {
         var updatedFile = new Array(file.length);
         for( var i = 0; i < file.length; ++i ) {
             updatedFile[i] = file.charCodeAt(i) + 0x4200;
@@ -70,7 +70,7 @@ QUnit.module("load", function () {
     });
 
     if (JSZip.support.arraybuffer) {
-        JSZipTestUtils.testZipFile("load(ArrayBuffer) works", "ref/all.zip", function(fileAsString) {
+        JSZipTestUtils.testZipFile("load(ArrayBuffer) works", "ref/all.zip", function(assert, fileAsString) {
             var file = new ArrayBuffer(fileAsString.length);
             var bufferView = new Uint8Array(file);
             for( var i = 0; i < fileAsString.length; ++i ) {
@@ -109,7 +109,7 @@ QUnit.module("load", function () {
     }
 
     if (JSZip.support.nodebuffer) {
-        JSZipTestUtils.testZipFile("load(Buffer) works", "ref/all.zip", function(fileAsString) {
+        JSZipTestUtils.testZipFile("load(Buffer) works", "ref/all.zip", function(assert, fileAsString) {
             var file = new Buffer(fileAsString.length);
             for( var i = 0; i < fileAsString.length; ++i ) {
                 file[i] = fileAsString.charCodeAt(i);
@@ -127,7 +127,7 @@ QUnit.module("load", function () {
     }
 
     if (JSZip.support.uint8array) {
-        JSZipTestUtils.testZipFile("load(Uint8Array) works", "ref/all.zip", function(fileAsString) {
+        JSZipTestUtils.testZipFile("load(Uint8Array) works", "ref/all.zip", function(assert, fileAsString) {
             var file = new Uint8Array(fileAsString.length);
             for( var i = 0; i < fileAsString.length; ++i ) {
                 file[i] = fileAsString.charCodeAt(i);
@@ -165,7 +165,7 @@ QUnit.module("load", function () {
     }
 
     // zip -6 -X deflate.zip Hello.txt
-    JSZipTestUtils.testZipFile("zip with DEFLATE", "ref/deflate.zip", function(file) {
+    JSZipTestUtils.testZipFile("zip with DEFLATE", "ref/deflate.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip) {
@@ -177,7 +177,7 @@ QUnit.module("load", function () {
     });
 
     // zip -0 -X -z -c archive_comment.zip Hello.txt
-    JSZipTestUtils.testZipFile("read zip with comment", "ref/archive_comment.zip", function(file) {
+    JSZipTestUtils.testZipFile("read zip with comment", "ref/archive_comment.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip) {
@@ -189,19 +189,19 @@ QUnit.module("load", function () {
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
-    JSZipTestUtils.testZipFile("generate zip with comment", "ref/archive_comment.zip", function(file) {
+    JSZipTestUtils.testZipFile("generate zip with comment", "ref/archive_comment.zip", function(assert, file) {
         var zip = new JSZip();
         zip.file("Hello.txt", "Hello World\n", {comment:"entry comment"});
         var done = assert.async();
         zip.generateAsync({type:"binarystring", comment:"file comment"}).then(function(generated) {
             assert.ok(JSZipTestUtils.similar(generated, file, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-            JSZipTestUtils.checkGenerateStability(generated);
+            JSZipTestUtils.checkGenerateStability(assert, generated);
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
     // zip -0 extra_attributes.zip Hello.txt
-    JSZipTestUtils.testZipFile("zip with extra attributes", "ref/extra_attributes.zip", function(file) {
+    JSZipTestUtils.testZipFile("zip with extra attributes", "ref/extra_attributes.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip) {
@@ -214,7 +214,7 @@ QUnit.module("load", function () {
 
     // use -fz to force use of Zip64 format
     // zip -fz -0 zip64.zip Hello.txt
-    JSZipTestUtils.testZipFile("zip 64", "ref/zip64.zip", function(file) {
+    JSZipTestUtils.testZipFile("zip 64", "ref/zip64.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip) {
@@ -227,7 +227,7 @@ QUnit.module("load", function () {
 
     // use -fd to force data descriptors as if streaming
     // zip -fd -0 data_descriptor.zip Hello.txt
-    JSZipTestUtils.testZipFile("zip with data descriptor", "ref/data_descriptor.zip", function(file) {
+    JSZipTestUtils.testZipFile("zip with data descriptor", "ref/data_descriptor.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip) {
@@ -244,7 +244,7 @@ QUnit.module("load", function () {
     // TODO : find how to get the two features
 
     // zip -0 -X zip_within_zip.zip Hello.txt && zip -0 -X nested.zip Hello.txt zip_within_zip.zip
-    JSZipTestUtils.testZipFile("nested zip", "ref/nested.zip", function(file) {
+    JSZipTestUtils.testZipFile("nested zip", "ref/nested.zip", function(assert, file) {
         var done = assert.async(2);
         JSZip.loadAsync(file)
         .then(function (zip) {
@@ -268,7 +268,7 @@ QUnit.module("load", function () {
     });
 
     // zip -fd -0 nested_data_descriptor.zip data_descriptor.zip
-    JSZipTestUtils.testZipFile("nested zip with data descriptors", "ref/nested_data_descriptor.zip", function(file) {
+    JSZipTestUtils.testZipFile("nested zip with data descriptors", "ref/nested_data_descriptor.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip) {
@@ -284,7 +284,7 @@ QUnit.module("load", function () {
     });
 
     // zip -fz -0 nested_zip64.zip zip64.zip
-    JSZipTestUtils.testZipFile("nested zip 64", "ref/nested_zip64.zip", function(file) {
+    JSZipTestUtils.testZipFile("nested zip 64", "ref/nested_zip64.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip) {
@@ -305,7 +305,7 @@ QUnit.module("load", function () {
     // TODO : find how to get the two features
 
     // zip -X -0 utf8_in_name.zip €15.txt
-    JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(file) {
+    JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(assert, file) {
         var done = assert.async(2);
         JSZip.loadAsync(file)
         .then(function (zip){
@@ -329,7 +329,7 @@ QUnit.module("load", function () {
 
     // Created with winrar
     // winrar will replace the euro symbol with a '_' but set the correct unicode path in an extra field.
-    JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters in filename and windows compatibility", "ref/winrar_utf8_in_name.zip", function(file) {
+    JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters in filename and windows compatibility", "ref/winrar_utf8_in_name.zip", function(assert, file) {
         var done = assert.async(2);
         JSZip.loadAsync(file)
         .then(function (zip){
@@ -352,7 +352,7 @@ QUnit.module("load", function () {
     });
 
     // zip backslash.zip -0 -X Hel\\lo.txt
-    JSZipTestUtils.testZipFile("Zip text file with backslash in filename", "ref/backslash.zip", function(file) {
+    JSZipTestUtils.testZipFile("Zip text file with backslash in filename", "ref/backslash.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip){
@@ -365,7 +365,7 @@ QUnit.module("load", function () {
     });
 
     // use izarc to generate a zip file on windows
-    JSZipTestUtils.testZipFile("Zip text file from windows with \\ in central dir", "ref/slashes_and_izarc.zip", function(file) {
+    JSZipTestUtils.testZipFile("Zip text file from windows with \\ in central dir", "ref/slashes_and_izarc.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip){
@@ -378,7 +378,7 @@ QUnit.module("load", function () {
     });
 
     // cat Hello.txt all.zip > all_prepended_bytes.zip
-    JSZipTestUtils.testZipFile("zip file with prepended bytes", "ref/all_prepended_bytes.zip", function(file) {
+    JSZipTestUtils.testZipFile("zip file with prepended bytes", "ref/all_prepended_bytes.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success(zip) {
@@ -390,7 +390,7 @@ QUnit.module("load", function () {
     });
 
     // cat all.zip Hello.txt > all_appended_bytes.zip
-    JSZipTestUtils.testZipFile("zip file with appended bytes", "ref/all_appended_bytes.zip", function(file) {
+    JSZipTestUtils.testZipFile("zip file with appended bytes", "ref/all_appended_bytes.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success(zip) {
@@ -402,7 +402,7 @@ QUnit.module("load", function () {
     });
 
     // cat Hello.txt zip64.zip > zip64_prepended_bytes.zip
-    JSZipTestUtils.testZipFile("zip64 file with extra bytes", "ref/zip64_prepended_bytes.zip", function(file) {
+    JSZipTestUtils.testZipFile("zip64 file with extra bytes", "ref/zip64_prepended_bytes.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success(zip) {
@@ -414,7 +414,7 @@ QUnit.module("load", function () {
     });
 
     // cat zip64.zip Hello.txt > zip64_appended_bytes.zip
-    JSZipTestUtils.testZipFile("zip64 file with extra bytes", "ref/zip64_appended_bytes.zip", function(file) {
+    JSZipTestUtils.testZipFile("zip64 file with extra bytes", "ref/zip64_appended_bytes.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success(zip) {
@@ -426,7 +426,7 @@ QUnit.module("load", function () {
     });
 
 
-    JSZipTestUtils.testZipFile("load(promise) works", "ref/all.zip", function(fileAsString) {
+    JSZipTestUtils.testZipFile("load(promise) works", "ref/all.zip", function(assert, fileAsString) {
         var done = assert.async();
         JSZip.loadAsync(JSZip.external.Promise.resolve(fileAsString))
         .then(function (zip) {
@@ -438,7 +438,7 @@ QUnit.module("load", function () {
     });
 
     if (JSZip.support.blob) {
-        JSZipTestUtils.testZipFile("load(blob) works", "ref/all.zip", function(fileAsString) {
+        JSZipTestUtils.testZipFile("load(blob) works", "ref/all.zip", function(assert, fileAsString) {
             var u8 = new Uint8Array(fileAsString.length);
             for( var i = 0; i < fileAsString.length; ++i ) {
                 u8[i] = fileAsString.charCodeAt(i);
@@ -465,7 +465,7 @@ QUnit.module("load", function () {
         });
     }
 
-    JSZipTestUtils.testZipFile("valid crc32", "ref/all.zip", function(file) {
+    JSZipTestUtils.testZipFile("valid crc32", "ref/all.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file, {checkCRC32:true})
         .then(function success() {
@@ -477,7 +477,7 @@ QUnit.module("load", function () {
         });
     });
 
-    JSZipTestUtils.testZipFile("loading in a sub folder", "ref/all.zip", function(file) {
+    JSZipTestUtils.testZipFile("loading in a sub folder", "ref/all.zip", function(assert, file) {
         var done = assert.async();
         var zip = new JSZip();
         zip.folder("sub").loadAsync(file)
@@ -492,7 +492,7 @@ QUnit.module("load", function () {
         });
     });
 
-    JSZipTestUtils.testZipFile("loading overwrite files", "ref/all.zip", function(file) {
+    JSZipTestUtils.testZipFile("loading overwrite files", "ref/all.zip", function(assert, file) {
         var done = assert.async();
         var zip = new JSZip();
         zip.file("Hello.txt", "bonjour à tous");
@@ -518,7 +518,7 @@ QUnit.module("load", function () {
     QUnit.module("not supported features");
 
     // zip -0 -X -e encrypted.zip Hello.txt
-    JSZipTestUtils.testZipFile("basic encryption", "ref/encrypted.zip", function(file) {
+    JSZipTestUtils.testZipFile("basic encryption", "ref/encrypted.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success() {
@@ -532,7 +532,7 @@ QUnit.module("load", function () {
 
     QUnit.module("corrupted zip");
 
-    JSZipTestUtils.testZipFile("bad compression method", "ref/invalid/compression.zip", function(file) {
+    JSZipTestUtils.testZipFile("bad compression method", "ref/invalid/compression.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success() {
@@ -545,7 +545,7 @@ QUnit.module("load", function () {
     });
 
     // dd if=all.zip of=all_missing_bytes.zip bs=32 skip=1
-    JSZipTestUtils.testZipFile("zip file with missing bytes", "ref/all_missing_bytes.zip", function(file) {
+    JSZipTestUtils.testZipFile("zip file with missing bytes", "ref/all_missing_bytes.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success() {
@@ -558,7 +558,7 @@ QUnit.module("load", function () {
     });
 
     // dd if=zip64.zip of=zip64_missing_bytes.zip bs=32 skip=1
-    JSZipTestUtils.testZipFile("zip64 file with missing bytes", "ref/zip64_missing_bytes.zip", function(file) {
+    JSZipTestUtils.testZipFile("zip64 file with missing bytes", "ref/zip64_missing_bytes.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success() {
@@ -570,7 +570,7 @@ QUnit.module("load", function () {
         });
     });
 
-    QUnit.test("not a zip file", function() {
+    QUnit.test("not a zip file", function(assert) {
         var done = assert.async();
         JSZip.loadAsync("this is not a zip file")
         .then(function success() {
@@ -582,7 +582,7 @@ QUnit.module("load", function () {
         });
     });
 
-    QUnit.test("truncated zip file", function() {
+    QUnit.test("truncated zip file", function(assert) {
         var done = assert.async();
         JSZip.loadAsync("PK\x03\x04\x0A\x00\x00\x00<cut>")
         .then(function success() {
@@ -594,7 +594,7 @@ QUnit.module("load", function () {
         });
     });
 
-    JSZipTestUtils.testZipFile("invalid crc32 but no check", "ref/invalid/crc32.zip", function(file) {
+    JSZipTestUtils.testZipFile("invalid crc32 but no check", "ref/invalid/crc32.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file, {checkCRC32:false})
         .then(function success() {
@@ -606,7 +606,7 @@ QUnit.module("load", function () {
         });
     });
 
-    JSZipTestUtils.testZipFile("invalid crc32", "ref/invalid/crc32.zip", function(file) {
+    JSZipTestUtils.testZipFile("invalid crc32", "ref/invalid/crc32.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file, {checkCRC32:true})
         .then(function success() {
@@ -618,7 +618,7 @@ QUnit.module("load", function () {
         });
     });
 
-    JSZipTestUtils.testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(file) {
+    JSZipTestUtils.testZipFile("bad offset", "ref/invalid/bad_offset.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file, {checkCRC32:false})
         .then(function success() {
@@ -630,7 +630,7 @@ QUnit.module("load", function () {
         });
     });
 
-    JSZipTestUtils.testZipFile("bad decompressed size, read a file", "ref/invalid/bad_decompressed_size.zip", function(file) {
+    JSZipTestUtils.testZipFile("bad decompressed size, read a file", "ref/invalid/bad_decompressed_size.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip) {
@@ -645,7 +645,7 @@ QUnit.module("load", function () {
         });
     });
 
-    JSZipTestUtils.testZipFile("bad decompressed size, generate a zip", "ref/invalid/bad_decompressed_size.zip", function(file) {
+    JSZipTestUtils.testZipFile("bad decompressed size, generate a zip", "ref/invalid/bad_decompressed_size.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip) {
@@ -672,7 +672,7 @@ QUnit.module("load", function () {
     if (typeof window === "undefined" || QUnit.urlParams.complexfiles) {
 
         // http://www.feedbooks.com/book/8/the-metamorphosis
-        JSZipTestUtils.testZipFile("Franz Kafka - The Metamorphosis.epub", "ref/complex_files/Franz Kafka - The Metamorphosis.epub", function(file) {
+        JSZipTestUtils.testZipFile("Franz Kafka - The Metamorphosis.epub", "ref/complex_files/Franz Kafka - The Metamorphosis.epub", function(assert, file) {
             var done = assert.async(2);
             JSZip.loadAsync(file)
             .then(function(zip) {
@@ -696,7 +696,7 @@ QUnit.module("load", function () {
         });
 
         // a showcase in http://msdn.microsoft.com/en-us/windows/hardware/gg463429
-        JSZipTestUtils.testZipFile("Outlook2007_Calendar.xps, createFolders: false", "ref/complex_files/Outlook2007_Calendar.xps", function(file) {
+        JSZipTestUtils.testZipFile("Outlook2007_Calendar.xps, createFolders: false", "ref/complex_files/Outlook2007_Calendar.xps", function(assert, file) {
 
             var done = assert.async();
             JSZip.loadAsync(file, {createFolders: false})
@@ -712,7 +712,7 @@ QUnit.module("load", function () {
         });
 
         // Same test as above, but with createFolders option set to true
-        JSZipTestUtils.testZipFile("Outlook2007_Calendar.xps, createFolders: true", "ref/complex_files/Outlook2007_Calendar.xps", function(file) {
+        JSZipTestUtils.testZipFile("Outlook2007_Calendar.xps, createFolders: true", "ref/complex_files/Outlook2007_Calendar.xps", function(assert, file) {
             var done = assert.async();
             JSZip.loadAsync(file, {createFolders: true})
             .then(function(zip) {
@@ -728,7 +728,7 @@ QUnit.module("load", function () {
 
         // an example file in http://cheeso.members.winisp.net/srcview.aspx?dir=js-unzip
         // the data come from http://www.antarctica.ac.uk/met/READER/upper_air/
-        JSZipTestUtils.testZipFile("AntarcticaTemps.xlsx, createFolders: false", "ref/complex_files/AntarcticaTemps.xlsx", function(file) {
+        JSZipTestUtils.testZipFile("AntarcticaTemps.xlsx, createFolders: false", "ref/complex_files/AntarcticaTemps.xlsx", function(assert, file) {
             var done = assert.async();
             JSZip.loadAsync(file, {createFolders: false})
             .then(function(zip) {
@@ -742,7 +742,7 @@ QUnit.module("load", function () {
         });
 
         // Same test as above, but with createFolders option set to true
-        JSZipTestUtils.testZipFile("AntarcticaTemps.xlsx, createFolders: true", "ref/complex_files/AntarcticaTemps.xlsx", function(file) {
+        JSZipTestUtils.testZipFile("AntarcticaTemps.xlsx, createFolders: true", "ref/complex_files/AntarcticaTemps.xlsx", function(assert, file) {
             var done = assert.async();
             JSZip.loadAsync(file, {createFolders: true})
             .then(function(zip) {
@@ -756,7 +756,7 @@ QUnit.module("load", function () {
         });
 
         // same as two up, but in the Open Document format
-        JSZipTestUtils.testZipFile("AntarcticaTemps.ods, createFolders: false", "ref/complex_files/AntarcticaTemps.ods", function (file) {
+        JSZipTestUtils.testZipFile("AntarcticaTemps.ods, createFolders: false", "ref/complex_files/AntarcticaTemps.ods", function (assert, file) {
             var done = assert.async();
             JSZip.loadAsync(file, {createFolders: false})
             .then(function(zip) {
@@ -771,7 +771,7 @@ QUnit.module("load", function () {
         });
 
         // same as above, but in the Open Document format
-        JSZipTestUtils.testZipFile("AntarcticaTemps.ods, createFolders: true", "ref/complex_files/AntarcticaTemps.ods", function (file) {
+        JSZipTestUtils.testZipFile("AntarcticaTemps.ods, createFolders: true", "ref/complex_files/AntarcticaTemps.ods", function (assert, file) {
             var done = assert.async();
             JSZip.loadAsync(file, {createFolders: true})
             .then(function(zip) {

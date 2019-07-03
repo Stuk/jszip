@@ -3,7 +3,7 @@
 
 QUnit.module("delete");
 
-JSZipTestUtils.testZipFile("Delete file", "ref/text.zip", function(expected) {
+JSZipTestUtils.testZipFile("Delete file", "ref/text.zip", function(assert, expected) {
     var zip = new JSZip();
     zip.file("Remove.txt", "This file should be deleted\n");
     zip.file("Hello.txt", "Hello World\n");
@@ -15,7 +15,7 @@ JSZipTestUtils.testZipFile("Delete file", "ref/text.zip", function(expected) {
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-JSZipTestUtils.testZipFile("Delete file in folder", "ref/folder.zip", function(expected) {
+JSZipTestUtils.testZipFile("Delete file in folder", "ref/folder.zip", function(assert, expected) {
     var zip = new JSZip();
     zip.folder("folder").file("Remove.txt", "This folder and file should be deleted\n");
     zip.remove("folder/Remove.txt");
@@ -26,7 +26,7 @@ JSZipTestUtils.testZipFile("Delete file in folder", "ref/folder.zip", function(e
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-JSZipTestUtils.testZipFile("Delete file in folder, with a relative path", "ref/folder.zip", function(expected) {
+JSZipTestUtils.testZipFile("Delete file in folder, with a relative path", "ref/folder.zip", function(assert, expected) {
     var zip = new JSZip();
     var folder = zip.folder("folder");
     folder.file("Remove.txt", "This folder and file should be deleted\n");
@@ -38,7 +38,7 @@ JSZipTestUtils.testZipFile("Delete file in folder, with a relative path", "ref/f
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-JSZipTestUtils.testZipFile("Delete folder", "ref/text.zip", function(expected) {
+JSZipTestUtils.testZipFile("Delete folder", "ref/text.zip", function(assert, expected) {
     var zip = new JSZip();
     zip.folder("remove").file("Remove.txt", "This folder and file should be deleted\n");
     zip.file("Hello.txt", "Hello World\n");
@@ -50,7 +50,7 @@ JSZipTestUtils.testZipFile("Delete folder", "ref/text.zip", function(expected) {
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-JSZipTestUtils.testZipFile("Delete folder with a final /", "ref/text.zip", function(expected) {
+JSZipTestUtils.testZipFile("Delete folder with a final /", "ref/text.zip", function(assert, expected) {
     var zip = new JSZip();
     zip.folder("remove").file("Remove.txt", "This folder and file should be deleted\n");
     zip.file("Hello.txt", "Hello World\n");
@@ -62,7 +62,7 @@ JSZipTestUtils.testZipFile("Delete folder with a final /", "ref/text.zip", funct
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-JSZipTestUtils.testZipFile("Delete unknown path", "ref/text.zip", function(expected) {
+JSZipTestUtils.testZipFile("Delete unknown path", "ref/text.zip", function(assert, expected) {
     var zip = new JSZip();
     zip.file("Hello.txt", "Hello World\n");
     zip.remove("unknown_file");
@@ -74,7 +74,7 @@ JSZipTestUtils.testZipFile("Delete unknown path", "ref/text.zip", function(expec
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-JSZipTestUtils.testZipFile("Delete nested folders", "ref/text.zip", function(expected) {
+JSZipTestUtils.testZipFile("Delete nested folders", "ref/text.zip", function(assert, expected) {
     var zip = new JSZip();
     zip.folder("remove").file("Remove.txt", "This folder and file should be deleted\n");
     zip.folder("remove/second").file("Sub.txt", "This should be removed");
@@ -88,7 +88,7 @@ JSZipTestUtils.testZipFile("Delete nested folders", "ref/text.zip", function(exp
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-JSZipTestUtils.testZipFile("Delete nested folders from relative path", "ref/folder.zip", function(expected) {
+JSZipTestUtils.testZipFile("Delete nested folders from relative path", "ref/folder.zip", function(assert, expected) {
     var zip = new JSZip();
     zip.folder("folder");
     zip.folder("folder/1/2/3");
@@ -96,7 +96,7 @@ JSZipTestUtils.testZipFile("Delete nested folders from relative path", "ref/fold
     var done = assert.async();
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
         assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        JSZipTestUtils.checkGenerateStability(actual);
+        JSZipTestUtils.checkGenerateStability(assert, actual);
         done();
     })['catch'](JSZipTestUtils.assertNoError);
 });

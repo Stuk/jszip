@@ -10,14 +10,14 @@ function testGenerateFor(testCases, fn) {
     }
 }
 
-function testGenerate(options) {
+function testGenerate(assert, options) {
     var done = assert.async();
     var triggeredCallback = false;
     new JSZip.external.Promise(function(resolve, reject) {
         resolve(options.prepare());
     })
     .then(function (zip) {
-        JSZipTestUtils.checkBasicStreamBehavior(zip.generateInternalStream(options.options));
+        JSZipTestUtils.checkBasicStreamBehavior(assert, zip.generateInternalStream(options.options));
         return zip;
     })
     .then(function(zip) {
@@ -30,7 +30,7 @@ function testGenerate(options) {
         options.assertions(null, result);
 
         if (!options.skipReloadTest) {
-            JSZipTestUtils.checkGenerateStability(result, options.options);
+            JSZipTestUtils.checkGenerateStability(assert, result, options.options);
         }
         done();
     }, function (err) {
@@ -52,8 +52,8 @@ testGenerateFor([{
     streamFiles : true
 }], function(testName, file, streamFiles) {
 
-    JSZipTestUtils.testZipFile("generate : type:string. " + testName, file, function(expected) {
-        testGenerate({
+    JSZipTestUtils.testZipFile("generate : type:string. " + testName, file, function(assert, expected) {
+        testGenerate(assert, {
             prepare : JSZipTestUtils.createZipAll,
             options : {type:"binarystring",streamFiles:streamFiles},
             assertions : function (err, result) {
@@ -62,8 +62,8 @@ testGenerateFor([{
             }
         });
     });
-    JSZipTestUtils.testZipFile("generate : type:base64. " + testName, file, function(expected) {
-        testGenerate({
+    JSZipTestUtils.testZipFile("generate : type:base64. " + testName, file, function(assert, expected) {
+        testGenerate(assert, {
             prepare : function () {
                 // fix date to get a predictable output
                 var zip = new JSZip();
@@ -81,8 +81,8 @@ testGenerateFor([{
         });
     });
 
-    JSZipTestUtils.testZipFile("generate : type:uint8array. " + testName, file, function(expected) {
-        testGenerate({
+    JSZipTestUtils.testZipFile("generate : type:uint8array. " + testName, file, function(assert, expected) {
+        testGenerate(assert, {
             prepare : JSZipTestUtils.createZipAll,
             options : {type:"uint8array",streamFiles:streamFiles},
             assertions : function (err, result) {
@@ -101,8 +101,8 @@ testGenerateFor([{
         });
     });
 
-    JSZipTestUtils.testZipFile("generate : type:arraybuffer. " + testName, file, function(expected) {
-        testGenerate({
+    JSZipTestUtils.testZipFile("generate : type:arraybuffer. " + testName, file, function(assert, expected) {
+        testGenerate(assert, {
             prepare : JSZipTestUtils.createZipAll,
             options : {type:"arraybuffer",streamFiles:streamFiles},
             assertions : function (err, result) {
@@ -120,8 +120,8 @@ testGenerateFor([{
     });
 
 
-    JSZipTestUtils.testZipFile("generate : type:nodebuffer. " + testName, file, function(expected) {
-        testGenerate({
+    JSZipTestUtils.testZipFile("generate : type:nodebuffer. " + testName, file, function(assert, expected) {
+        testGenerate(assert, {
             prepare : JSZipTestUtils.createZipAll,
             options : {type:"nodebuffer",streamFiles:streamFiles},
             assertions : function (err, result) {
@@ -140,8 +140,8 @@ testGenerateFor([{
         });
     });
 
-    JSZipTestUtils.testZipFile("generate : type:blob. " + testName, file, function(expected) {
-        testGenerate({
+    JSZipTestUtils.testZipFile("generate : type:blob. " + testName, file, function(assert, expected) {
+        testGenerate(assert, {
             prepare : JSZipTestUtils.createZipAll,
             options : {type:"blob",streamFiles:streamFiles},
             skipReloadTest : true,
@@ -159,8 +159,8 @@ testGenerateFor([{
         });
     });
 
-    JSZipTestUtils.testZipFile("generate : type:blob mimeType:application/ods. " + testName, file, function(expected) {
-        testGenerate({
+    JSZipTestUtils.testZipFile("generate : type:blob mimeType:application/ods. " + testName, file, function(assert, expected) {
+        testGenerate(assert, {
             prepare : JSZipTestUtils.createZipAll,
             options : {type:"blob",mimeType: "application/ods",streamFiles:streamFiles},
             skipReloadTest : true,
@@ -191,8 +191,8 @@ testGenerateFor([{
     file : "ref/store-stream.zip",
     streamFiles : true
 }], function(testName, file, streamFiles) {
-    JSZipTestUtils.testZipFile("STORE doesn't compress, " + testName, file, function(expected) {
-        testGenerate({
+    JSZipTestUtils.testZipFile("STORE doesn't compress, " + testName, file, function(assert, expected) {
+        testGenerate(assert, {
             prepare : function () {
                 var zip = new JSZip();
                 zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
@@ -218,8 +218,8 @@ testGenerateFor([{
     file : "ref/deflate-stream.zip",
     streamFiles : true
 }], function(testName, file, streamFiles) {
-    JSZipTestUtils.testZipFile("DEFLATE compress, " + testName, file, function(expected) {
-        testGenerate({
+    JSZipTestUtils.testZipFile("DEFLATE compress, " + testName, file, function(assert, expected) {
+        testGenerate(assert, {
             prepare : function () {
                 var zip = new JSZip();
                 zip.file("Hello.txt", "This a looong file : we need to see the difference between the different compression methods.\n");
@@ -234,7 +234,7 @@ testGenerateFor([{
     });
 });
 
-JSZipTestUtils.testZipFile("STORE is the default method", "ref/text.zip", function(expected) {
+JSZipTestUtils.testZipFile("STORE is the default method", "ref/text.zip", function(assert, expected) {
     var zip = new JSZip();
     zip.file("Hello.txt", "Hello World\n");
     var done = assert.async();
@@ -246,11 +246,11 @@ JSZipTestUtils.testZipFile("STORE is the default method", "ref/text.zip", functi
 });
 
 
-function testLazyDecompression(from, to) {
+function testLazyDecompression(assert, from, to) {
     var done = assert.async();
     JSZipTestUtils.createZipAll().generateAsync({type:"binarystring", compression:from}).then(function(actual) {
         done();
-        testGenerate({
+        testGenerate(assert, {
             prepare : function () {
                 // the zip object will contain compressed objects
                 return JSZip.loadAsync(actual);
@@ -263,17 +263,17 @@ function testLazyDecompression(from, to) {
         });
     })['catch'](JSZipTestUtils.assertNoError);
 }
-QUnit.test("Lazy decompression works", function() {
-    testLazyDecompression("STORE", "STORE");
-    testLazyDecompression("DEFLATE", "STORE");
-    testLazyDecompression("STORE", "DEFLATE");
-    testLazyDecompression("DEFLATE", "DEFLATE");
+QUnit.test("Lazy decompression works", function(assert) {
+    testLazyDecompression(assert, "STORE", "STORE");
+    testLazyDecompression(assert, "DEFLATE", "STORE");
+    testLazyDecompression(assert, "STORE", "DEFLATE");
+    testLazyDecompression(assert, "DEFLATE", "DEFLATE");
 });
 
 
 // zip -0 -X empty.zip plop && zip -d empty.zip plop
-JSZipTestUtils.testZipFile("empty zip", "ref/empty.zip", function(expected) {
-    testGenerate({
+JSZipTestUtils.testZipFile("empty zip", "ref/empty.zip", function(assert, expected) {
+    testGenerate(assert, {
         prepare : function () {
             var zip = new JSZip();
             return zip;
@@ -286,8 +286,8 @@ JSZipTestUtils.testZipFile("empty zip", "ref/empty.zip", function(expected) {
     });
 });
 
-QUnit.test("unknown compression throws an exception", function () {
-    testGenerate({
+QUnit.test("unknown compression throws an exception", function (assert) {
+    testGenerate(assert, {
         prepare : JSZipTestUtils.createZipAll,
         options : {type:"string",compression:'MAYBE'},
         assertions : function (err, result) {
@@ -297,8 +297,8 @@ QUnit.test("unknown compression throws an exception", function () {
     });
 });
 
-QUnit.test("missing type throws an exception", function () {
-    testGenerate({
+QUnit.test("missing type throws an exception", function (assert) {
+    testGenerate(assert, {
         prepare : JSZipTestUtils.createZipAll,
         options : {},
         assertions : function (err, result) {
@@ -344,7 +344,7 @@ QUnit.test("generateAsync keep the explicit / folder", function (assert) {
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-JSZipTestUtils.testZipFile("generate with promises as files", "ref/all.zip", function (expected) {
+JSZipTestUtils.testZipFile("generate with promises as files", "ref/all.zip", function (assert, expected) {
     var done = assert.async();
     var zip = new JSZip();
     zip.file("Hello.txt", new JSZip.external.Promise(function (resolve, reject) {

@@ -21,31 +21,31 @@ QUnit.module("file", function () {
 
     QUnit.module("add");
 
-    JSZipTestUtils.testZipFile("Zip text file !", "ref/text.zip", function(expected) {
+    JSZipTestUtils.testZipFile("Zip text file !", "ref/text.zip", function(assert, expected) {
         var done = assert.async();
         var zip = new JSZip();
         zip.file("Hello.txt", "Hello World\n");
-        JSZipTestUtils.checkBasicStreamBehavior(zip.generateInternalStream({type:"binarystring"}));
+        JSZipTestUtils.checkBasicStreamBehavior(assert, zip.generateInternalStream({type:"binarystring"}));
         zip.generateAsync({type:"binarystring"}).then(function (actual) {
             assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-            JSZipTestUtils.checkGenerateStability(actual);
+            JSZipTestUtils.checkGenerateStability(assert, actual);
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    JSZipTestUtils.testZipFile("Zip text, folder and image", "ref/all.zip", function(expected) {
+    JSZipTestUtils.testZipFile("Zip text, folder and image", "ref/all.zip", function(assert, expected) {
         var zip = new JSZip();
         zip.file("Hello.txt", "Hello World\n");
         zip.folder("images").file("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
         var done = assert.async();
         zip.generateAsync({type:"binarystring"}).then(function(actual) {
             assert.ok(JSZipTestUtils.similar(actual, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-            JSZipTestUtils.checkGenerateStability(actual);
+            JSZipTestUtils.checkGenerateStability(assert, actual);
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    JSZipTestUtils.testZipFile("Add a file to overwrite", "ref/text.zip", function(expected) {
+    JSZipTestUtils.testZipFile("Add a assert, file to overwrite", "ref/text.zip", function(assert, expected) {
         var zip = new JSZip();
         zip.file("Hello.txt", "hello ?");
         zip.file("Hello.txt", "Hello World\n");
@@ -53,12 +53,12 @@ QUnit.module("file", function () {
         var done = assert.async();
         zip.generateAsync({type:"binarystring"}).then(function (actual) {
             assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-            JSZipTestUtils.checkGenerateStability(actual);
+            JSZipTestUtils.checkGenerateStability(assert, actual);
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    JSZipTestUtils.testZipFile("Zip text file with date", "ref/text.zip", function(expected) {
+    JSZipTestUtils.testZipFile("Zip text assert, file with date", "ref/text.zip", function(assert, expected) {
         var zip = new JSZip();
         zip.file("Hello.txt", "Hello World\n", {date : new Date("July 17, 2009 14:36:57")});
         var done = assert.async();
@@ -72,30 +72,30 @@ QUnit.module("file", function () {
                10 Total
                */
             assert.ok(JSZipTestUtils.similar(actual, expected, 10) , "Generated ZIP matches reference ZIP");
-            JSZipTestUtils.checkGenerateStability(actual);
+            JSZipTestUtils.checkGenerateStability(assert, actual);
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
 
-    JSZipTestUtils.testZipFile("Zip image file", "ref/image.zip", function(expected) {
+    JSZipTestUtils.testZipFile("Zip image file", "ref/image.zip", function(assert, expected) {
         var zip = new JSZip();
         zip.file("smile.gif", "R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=", {base64: true});
         var done = assert.async();
         zip.generateAsync({type:"binarystring"}).then(function(actual) {
             assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-            JSZipTestUtils.checkGenerateStability(actual);
+            JSZipTestUtils.checkGenerateStability(assert, actual);
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    JSZipTestUtils.testZipFile("add file: from XHR (with bytes > 255)", "ref/text.zip", function(textZip) {
+    JSZipTestUtils.testZipFile("add file: from XHR (with bytes > 255)", "ref/text.zip", function(assert, textZip) {
         var zip = new JSZip();
         zip.file("text.zip", textZip, {binary:true});
         var done = assert.async();
         zip.generateAsync({type:"binarystring"}).then(function(actual) {
             // high-order byte is discarded and won't mess up the result
-            JSZipTestUtils.checkGenerateStability(actual);
+            JSZipTestUtils.checkGenerateStability(assert, actual);
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
@@ -126,21 +126,21 @@ QUnit.module("file", function () {
         });
     });
 
-    function testFileDataGetters (opts) {
+    function testFileDataGetters (assert, opts) {
         if (typeof opts.rawData === "undefined") {
             opts.rawData = opts.textData;
         }
-        _actualTestFileDataGetters.testGetter(opts, "string");
-        _actualTestFileDataGetters.testGetter(opts, "text");
-        _actualTestFileDataGetters.testGetter(opts, "base64");
-        _actualTestFileDataGetters.testGetter(opts, "array");
-        _actualTestFileDataGetters.testGetter(opts, "binarystring");
-        _actualTestFileDataGetters.testGetter(opts, "arraybuffer");
-        _actualTestFileDataGetters.testGetter(opts, "uint8array");
-        _actualTestFileDataGetters.testGetter(opts, "nodebuffer");
-        _actualTestFileDataGetters.testGetter(opts, "blob");
-        _actualTestFileDataGetters.testGetter(opts, "unknown");
-        _actualTestFileDataGetters.testGetter(opts, null);
+        _actualTestFileDataGetters.testGetter(assert, opts, "string");
+        _actualTestFileDataGetters.testGetter(assert, opts, "text");
+        _actualTestFileDataGetters.testGetter(assert, opts, "base64");
+        _actualTestFileDataGetters.testGetter(assert, opts, "array");
+        _actualTestFileDataGetters.testGetter(assert, opts, "binarystring");
+        _actualTestFileDataGetters.testGetter(assert, opts, "arraybuffer");
+        _actualTestFileDataGetters.testGetter(assert, opts, "uint8array");
+        _actualTestFileDataGetters.testGetter(assert, opts, "nodebuffer");
+        _actualTestFileDataGetters.testGetter(assert, opts, "blob");
+        _actualTestFileDataGetters.testGetter(assert, opts, "unknown");
+        _actualTestFileDataGetters.testGetter(assert, opts, null);
 
         var done = assert.async();
         opts.zip.generateAsync({type:"binarystring"})
@@ -152,17 +152,17 @@ QUnit.module("file", function () {
                 textData : opts.textData,
                 rawData : opts.rawData
             };
-            _actualTestFileDataGetters.testGetter(reloaded, "string");
-            _actualTestFileDataGetters.testGetter(reloaded, "text");
-            _actualTestFileDataGetters.testGetter(reloaded, "base64");
-            _actualTestFileDataGetters.testGetter(reloaded, "array");
-            _actualTestFileDataGetters.testGetter(reloaded, "binarystring");
-            _actualTestFileDataGetters.testGetter(reloaded, "arraybuffer");
-            _actualTestFileDataGetters.testGetter(reloaded, "uint8array");
-            _actualTestFileDataGetters.testGetter(reloaded, "nodebuffer");
-            _actualTestFileDataGetters.testGetter(reloaded, "blob");
-            _actualTestFileDataGetters.testGetter(reloaded, "unknown");
-            _actualTestFileDataGetters.testGetter(reloaded, null);
+            _actualTestFileDataGetters.testGetter(assert, reloaded, "string");
+            _actualTestFileDataGetters.testGetter(assert, reloaded, "text");
+            _actualTestFileDataGetters.testGetter(assert, reloaded, "base64");
+            _actualTestFileDataGetters.testGetter(assert, reloaded, "array");
+            _actualTestFileDataGetters.testGetter(assert, reloaded, "binarystring");
+            _actualTestFileDataGetters.testGetter(assert, reloaded, "arraybuffer");
+            _actualTestFileDataGetters.testGetter(assert, reloaded, "uint8array");
+            _actualTestFileDataGetters.testGetter(assert, reloaded, "nodebuffer");
+            _actualTestFileDataGetters.testGetter(assert, reloaded, "blob");
+            _actualTestFileDataGetters.testGetter(assert, reloaded, "unknown");
+            _actualTestFileDataGetters.testGetter(assert, reloaded, null);
 
             opts.zip.file("file.txt", "changing the content after the call won't change the result");
             done();
@@ -172,13 +172,13 @@ QUnit.module("file", function () {
     }
 
     var _actualTestFileDataGetters = {
-        testGetter : function (opts, askedType) {
+        testGetter : function (assert, opts, askedType) {
             var asyncTestName = "[test = " + opts.name + "] [method = async(" + askedType + ")] ";
 
             var err = null, content = null;
 
             var stream = opts.zip.file("file.txt").internalStream(askedType);
-            JSZipTestUtils.checkBasicStreamBehavior(stream, asyncTestName);
+            JSZipTestUtils.checkBasicStreamBehavior(assert, stream, asyncTestName);
 
             opts.zip.file("file.txt").async(askedType).then(function(result) {
                 _actualTestFileDataGetters["assert_" + askedType](opts, null, result, asyncTestName);
@@ -187,129 +187,129 @@ QUnit.module("file", function () {
             });
         },
         assert_string: function (opts, err, txt, testName) {
-            assert.equal(err, null, testName + "no error");
-            assert.equal(txt, opts.textData, testName + "content ok");
+            QUnit.assert.equal(err, null, testName + "no error");
+            QUnit.assert.equal(txt, opts.textData, testName + "content ok");
         },
         assert_text: function () {
             this.assert_string.apply(this, arguments);
         },
         assert_base64: function (opts, err, bin, testName) {
-            assert.equal(err, null, testName + "no error");
-            assert.equal(bin, JSZipTestUtils.base64encode(opts.rawData), testName + "content ok");
+            QUnit.assert.equal(err, null, testName + "no error");
+            QUnit.assert.equal(bin, JSZipTestUtils.base64encode(opts.rawData), testName + "content ok");
         },
         assert_binarystring : function (opts, err, bin, testName) {
-            assert.equal(err, null, testName + "no error");
-            assert.equal(bin, opts.rawData, testName + "content ok");
+            QUnit.assert.equal(err, null, testName + "no error");
+            QUnit.assert.equal(bin, opts.rawData, testName + "content ok");
         },
         assert_array : function (opts, err, array, testName) {
-            assert.equal(err, null, testName + "no error");
-            assert.ok(array instanceof Array, testName + "the result is a instance of Array");
+            QUnit.assert.equal(err, null, testName + "no error");
+            QUnit.assert.ok(array instanceof Array, testName + "the result is a instance of Array");
             var actual = JSZipTestUtils.toString(array);
-            assert.equal(actual, opts.rawData, testName + "content ok");
+            QUnit.assert.equal(actual, opts.rawData, testName + "content ok");
         },
         assert_arraybuffer : function (opts, err, buffer, testName) {
             if (JSZip.support.arraybuffer) {
-                assert.equal(err, null, testName + "no error");
-                assert.ok(buffer instanceof ArrayBuffer, testName + "the result is a instance of ArrayBuffer");
+                QUnit.assert.equal(err, null, testName + "no error");
+                QUnit.assert.ok(buffer instanceof ArrayBuffer, testName + "the result is a instance of ArrayBuffer");
                 var actual = JSZipTestUtils.toString(buffer);
-                assert.equal(actual, opts.rawData, testName + "content ok");
+                QUnit.assert.equal(actual, opts.rawData, testName + "content ok");
             } else {
-                assert.equal(buffer, null, testName + "no data");
-                assert.ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
+                QUnit.assert.equal(buffer, null, testName + "no data");
+                QUnit.assert.ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
             }
         },
         assert_uint8array : function (opts, err, bufferView, testName) {
             if (JSZip.support.uint8array) {
-                assert.equal(err, null, testName + "no error");
-                assert.ok(bufferView instanceof Uint8Array, testName+ "the result is a instance of Uint8Array");
+                QUnit.assert.equal(err, null, testName + "no error");
+                QUnit.assert.ok(bufferView instanceof Uint8Array, testName+ "the result is a instance of Uint8Array");
                 var actual = JSZipTestUtils.toString(bufferView);
-                assert.equal(actual, opts.rawData, testName + "content ok");
+                QUnit.assert.equal(actual, opts.rawData, testName + "content ok");
             } else {
-                assert.equal(bufferView, null, testName + "no data");
-                assert.ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
+                QUnit.assert.equal(bufferView, null, testName + "no data");
+                QUnit.assert.ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
             }
         },
         assert_nodebuffer : function (opts, err, buffer, testName) {
             if (JSZip.support.nodebuffer) {
-                assert.equal(err, null, testName + "no error");
-                assert.ok(buffer instanceof Buffer, testName + "the result is a instance of Buffer");
+                QUnit.assert.equal(err, null, testName + "no error");
+                QUnit.assert.ok(buffer instanceof Buffer, testName + "the result is a instance of Buffer");
                 var actual = JSZipTestUtils.toString(buffer);
-                assert.equal(actual, opts.rawData, testName + "content ok");
+                QUnit.assert.equal(actual, opts.rawData, testName + "content ok");
             } else {
-                assert.equal(buffer, null, testName + "no data");
-                assert.ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
+                QUnit.assert.equal(buffer, null, testName + "no data");
+                QUnit.assert.ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
             }
         },
         assert_blob : function (opts, err, blob, testName) {
             if (JSZip.support.blob) {
-                assert.equal(err, null, testName + "no error");
-                assert.ok(blob instanceof Blob, testName + "the result is a instance of Blob");
-                assert.equal(blob.type,  "", testName + "the result has the rigth mime type");
-                assert.equal(blob.size, opts.rawData.length, testName + "the result has the right length");
+                QUnit.assert.equal(err, null, testName + "no error");
+                QUnit.assert.ok(blob instanceof Blob, testName + "the result is a instance of Blob");
+                QUnit.assert.equal(blob.type,  "", testName + "the result has the rigth mime type");
+                QUnit.assert.equal(blob.size, opts.rawData.length, testName + "the result has the right length");
             } else {
-                assert.equal(blob, null, testName + "no data");
-                assert.ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
+                QUnit.assert.equal(blob, null, testName + "no data");
+                QUnit.assert.ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
             }
         },
         assert_unknown : function (opts, err, buffer, testName) {
-            assert.equal(buffer, null, testName + "no data");
-            assert.ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
+            QUnit.assert.equal(buffer, null, testName + "no data");
+            QUnit.assert.ok(err.message.match("not supported by this platform"), testName + "the error message is useful");
         },
         assert_null : function (opts, err, buffer, testName) {
-            assert.equal(buffer, null, testName + "no data");
-            assert.ok(err.message.match("No output type specified"), testName + "the error message is useful");
+            QUnit.assert.equal(buffer, null, testName + "no data");
+            QUnit.assert.ok(err.message.match("No output type specified"), testName + "the error message is useful");
         }
     };
 
-    QUnit.test("add file: file(name, undefined)", function() {
+    QUnit.test("add file: file(name, undefined)", function (assert) {
         var zip = new JSZip(), undef;
         zip.file("file.txt", undef);
-        testFileDataGetters({name : "undefined", zip : zip, textData : ""});
+        testFileDataGetters(assert, {name : "undefined", zip : zip, textData : ""});
 
         zip = new JSZip();
         zip.file("file.txt", undef, {binary:true});
-        testFileDataGetters({name : "undefined as binary", zip : zip, textData : ""});
+        testFileDataGetters(assert, {name : "undefined as binary", zip : zip, textData : ""});
 
         zip = new JSZip();
         zip.file("file.txt", undef, {base64:true});
-        testFileDataGetters({name : "undefined as base64", zip : zip, textData : ""});
+        testFileDataGetters(assert, {name : "undefined as base64", zip : zip, textData : ""});
     });
 
-    QUnit.test("add file: file(name, null)", function() {
+    QUnit.test("add file: file(name, null)", function (assert) {
         var zip = new JSZip();
         zip.file("file.txt", null);
-        testFileDataGetters({name : "null", zip : zip, textData : ""});
+        testFileDataGetters(assert, {name : "null", zip : zip, textData : ""});
 
         zip = new JSZip();
         zip.file("file.txt", null, {binary:true});
-        testFileDataGetters({name : "null as binary", zip : zip, textData : ""});
+        testFileDataGetters(assert, {name : "null as binary", zip : zip, textData : ""});
 
         zip = new JSZip();
         zip.file("file.txt", null, {base64:true});
-        testFileDataGetters({name : "null as base64", zip : zip, textData : ""});
+        testFileDataGetters(assert, {name : "null as base64", zip : zip, textData : ""});
     });
 
-    QUnit.test("add file: file(name, stringAsText)", function() {
+    QUnit.test("add file: file(name, stringAsText)", function (assert) {
         var zip = new JSZip();
         zip.file("file.txt", "€15\n", {binary:false});
-        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+        testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
         zip = new JSZip();
         zip.file("file.txt", "test\r\ntest\r\n", {binary:false});
-        testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+        testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
     });
 
-    QUnit.test("add file: file(name, stringAsBinary)", function() {
+    QUnit.test("add file: file(name, stringAsBinary)", function (assert) {
         var zip = new JSZip();
         zip.file("file.txt", "\xE2\x82\xAC15\n", {binary:true});
-        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+        testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
         zip = new JSZip();
         zip.file("file.txt", "test\r\ntest\r\n", {binary:true});
-        testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+        testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
     });
 
-    QUnit.test("add file: file(name, array)", function() {
+    QUnit.test("add file: file(name, array)", function (assert) {
         var zip = new JSZip();
         function toArray(str) {
             var array = new Array(str.length);
@@ -319,24 +319,24 @@ QUnit.module("file", function () {
             return array;
         }
         zip.file("file.txt", toArray("\xE2\x82\xAC15\n"), {binary:true});
-        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+        testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
         zip = new JSZip();
         zip.file("file.txt", toArray("test\r\ntest\r\n"), {binary:true});
-        testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+        testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
     });
 
-    QUnit.test("add file: file(name, base64)", function() {
+    QUnit.test("add file: file(name, base64)", function (assert) {
         var zip = new JSZip();
         zip.file("file.txt", "4oKsMTUK", {base64:true});
-        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+        testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
         zip = new JSZip();
         zip.file("file.txt", "dGVzdA0KdGVzdA0K", {base64:true});
-        testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+        testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
     });
 
-    QUnit.test("add file: file(name, unsupported)", function() {
+    QUnit.test("add file: file(name, unsupported)", function (assert) {
         var done = assert.async();
         var zip = new JSZip();
         zip.file("test.txt", new Date());
@@ -355,7 +355,7 @@ QUnit.module("file", function () {
     });
 
     if (JSZip.support.uint8array) {
-        QUnit.test("add file: file(name, Uint8Array)", function() {
+        QUnit.test("add file: file(name, Uint8Array)", function (assert) {
             var str2array = function (str) {
                 var array = new Uint8Array(str.length);
                 for(var i = 0; i < str.length; i++) {
@@ -365,20 +365,20 @@ QUnit.module("file", function () {
             };
             var zip = new JSZip();
             zip.file("file.txt", str2array("\xE2\x82\xAC15\n"));
-            testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+            testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2array("test\r\ntest\r\n"));
-            testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+            testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2array(""));
-            testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+            testFileDataGetters(assert, {name : "empty content", zip : zip, textData : ""});
         });
     }
 
     if (JSZip.support.arraybuffer) {
-        QUnit.test("add file: file(name, ArrayBuffer)", function() {
+        QUnit.test("add file: file(name, ArrayBuffer)", function (assert) {
             var str2buffer = function (str) {
                 var array = new Uint8Array(str.length);
                 for(var i = 0; i < str.length; i++) {
@@ -388,36 +388,36 @@ QUnit.module("file", function () {
             };
             var zip = new JSZip();
             zip.file("file.txt", str2buffer("\xE2\x82\xAC15\n"));
-            testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+            testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2buffer("test\r\ntest\r\n"));
-            testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+            testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2buffer(""));
-            testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+            testFileDataGetters(assert, {name : "empty content", zip : zip, textData : ""});
         });
     }
 
     if (JSZip.support.blob) {
-        QUnit.test("add file: file(name, Blob)", function() {
+        QUnit.test("add file: file(name, Blob)", function (assert) {
             var zip = new JSZip();
             zip.file("file.txt", str2blob("\xE2\x82\xAC15\n"));
-            testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+            testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2blob("test\r\ntest\r\n"));
-            testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+            testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2blob(""));
-            testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+            testFileDataGetters(assert, {name : "empty content", zip : zip, textData : ""});
         });
     }
 
     if (typeof Promise !== "undefined") {
-        QUnit.test("add file: file(name, native Promise)", function() {
+        QUnit.test("add file: file(name, native Promise)", function (assert) {
             var str2promise = function (str) {
                 return new Promise(function(resolve, reject) {
                     setTimeout(function () {
@@ -427,19 +427,19 @@ QUnit.module("file", function () {
             };
             var zip = new JSZip();
             zip.file("file.txt", str2promise("\xE2\x82\xAC15\n"));
-            testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+            testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2promise("test\r\ntest\r\n"));
-            testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+            testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2promise(""));
-            testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+            testFileDataGetters(assert, {name : "empty content", zip : zip, textData : ""});
         });
     }
 
-    QUnit.test("add file: file(name, polyfill Promise[string] as binary)", function() {
+    QUnit.test("add file: file(name, polyfill Promise[string] as binary)", function (assert) {
         var str2promise = function (str) {
             return new JSZip.external.Promise(function(resolve, reject) {
                 setTimeout(function () {
@@ -449,10 +449,10 @@ QUnit.module("file", function () {
         };
         var zip = new JSZip();
         zip.file("file.txt", str2promise("\xE2\x82\xAC15\n"), {binary: true});
-        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+        testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
     });
 
-    QUnit.test("add file: file(name, polyfill Promise[string] force text)", function() {
+    QUnit.test("add file: file(name, polyfill Promise[string] force text)", function (assert) {
         var str2promise = function (str) {
             return new JSZip.external.Promise(function(resolve, reject) {
                 setTimeout(function () {
@@ -462,13 +462,13 @@ QUnit.module("file", function () {
         };
         var zip = new JSZip();
         zip.file("file.txt", str2promise("€15\n"), {binary: false});
-        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+        testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
     });
 
     /*
      * Fix #325 for this one
      *
-    QUnit.test("add file: file(name, polyfill Promise[string] as text)", function() {
+    QUnit.test("add file: file(name, polyfill Promise[string] as text)", function (assert) {
         var str2promise = function (str) {
             return new JSZip.external.Promise(function(resolve, reject) {
                 setTimeout(function () {
@@ -478,20 +478,20 @@ QUnit.module("file", function () {
         };
         var zip = new JSZip();
         zip.file("file.txt", str2promise("€15\n"));
-        testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+        testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
         zip = new JSZip();
         zip.file("file.txt", str2promise("test\r\ntest\r\n"));
-        testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+        testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 
         zip = new JSZip();
         zip.file("file.txt", str2promise(""));
-        testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+        testFileDataGetters(assert, {name : "empty content", zip : zip, textData : ""});
     });
    */
 
     if (JSZip.support.blob) {
-        QUnit.test("add file: file(name, polyfill Promise[Blob])", function() {
+        QUnit.test("add file: file(name, polyfill Promise[Blob])", function (assert) {
             var str2promiseOfBlob = function (str) {
                 return new JSZip.external.Promise(function(resolve, reject) {
                     setTimeout(function () {
@@ -501,20 +501,20 @@ QUnit.module("file", function () {
             };
             var zip = new JSZip();
             zip.file("file.txt", str2promiseOfBlob("\xE2\x82\xAC15\n"));
-            testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+            testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2promiseOfBlob("test\r\ntest\r\n"));
-            testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+            testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2promiseOfBlob(""));
-            testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+            testFileDataGetters(assert, {name : "empty content", zip : zip, textData : ""});
         });
     }
 
     if (JSZip.support.nodebuffer) {
-        QUnit.test("add file: file(name, Buffer)", function() {
+        QUnit.test("add file: file(name, Buffer)", function (assert) {
             var str2buffer = function (str) {
                 var array = new Buffer(str.length);
                 for(var i = 0; i < str.length; i++) {
@@ -524,22 +524,22 @@ QUnit.module("file", function () {
             };
             var zip = new JSZip();
             zip.file("file.txt", str2buffer("\xE2\x82\xAC15\n"));
-            testFileDataGetters({name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
+            testFileDataGetters(assert, {name : "utf8", zip : zip, textData : "€15\n", rawData : "\xE2\x82\xAC15\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2buffer("test\r\ntest\r\n"));
-            testFileDataGetters({name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
+            testFileDataGetters(assert, {name : "\\r\\n", zip : zip, textData : "test\r\ntest\r\n"});
 
             zip = new JSZip();
             zip.file("file.txt", str2buffer(""));
-            testFileDataGetters({name : "empty content", zip : zip, textData : ""});
+            testFileDataGetters(assert, {name : "empty content", zip : zip, textData : ""});
         });
     }
 
 
     QUnit.module("about folders");
 
-    QUnit.test("Zip folder() shouldn't throw an exception", function() {
+    QUnit.test("Zip folder() shouldn't throw an exception", function (assert) {
         var zip = new JSZip();
         try {
             zip.folder();
@@ -549,18 +549,18 @@ QUnit.module("file", function () {
         }
     });
 
-    JSZipTestUtils.testZipFile("Zip empty folder", "ref/folder.zip", function(expected) {
+    JSZipTestUtils.testZipFile("Zip empty folder", "ref/folder.zip", function(assert, expected) {
         var zip = new JSZip();
         zip.folder("folder");
         var done = assert.async();
         zip.generateAsync({type:"binarystring"}).then(function(actual) {
             assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-            JSZipTestUtils.checkGenerateStability(actual);
+            JSZipTestUtils.checkGenerateStability(assert, actual);
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    QUnit.test("file() creates a folder with dir:true", function () {
+    QUnit.test("file() creates a folder with dir:true", function (assert) {
         var zip = new JSZip();
         zip.file("folder", null, {
             dir : true
@@ -568,7 +568,7 @@ QUnit.module("file", function () {
         assert.ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
     });
 
-    QUnit.test("file() creates a folder with the right unix permissions", function () {
+    QUnit.test("file() creates a folder with the right unix permissions", function (assert) {
         var zip = new JSZip();
         zip.file("folder", null, {
             unixPermissions : parseInt("40500", 8)
@@ -576,7 +576,7 @@ QUnit.module("file", function () {
         assert.ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
     });
 
-    QUnit.test("file() creates a folder with the right dos permissions", function () {
+    QUnit.test("file() creates a folder with the right dos permissions", function (assert) {
         var zip = new JSZip();
         zip.file("folder", null, {
             dosPermissions : parseInt("010000", 2)
@@ -584,7 +584,7 @@ QUnit.module("file", function () {
         assert.ok(zip.files['folder/'].dir, "the folder with options is marked as a folder");
     });
 
-    QUnit.test("A folder stays a folder when created with file", function () {
+    QUnit.test("A folder stays a folder when created with file", function (assert) {
         var referenceDate = new Date("July 17, 2009 14:36:56");
         var referenceComment = "my comment";
         var zip = new JSZip();
@@ -615,7 +615,7 @@ QUnit.module("file", function () {
 
     });
 
-    QUnit.test("file() adds a slash for directories", function () {
+    QUnit.test("file() adds a slash for directories", function (assert) {
         var zip = new JSZip();
         zip.file("folder_without_slash", null, {
             dir : true
@@ -627,7 +627,7 @@ QUnit.module("file", function () {
         assert.ok(zip.files['folder_with_slash/'], "keep the existing slash");
     });
 
-    QUnit.test("folder() doesn't overwrite existing entries", function () {
+    QUnit.test("folder() doesn't overwrite existing entries", function (assert) {
         var referenceComment = "my comment";
         var zip = new JSZip();
         zip.file("folder", null, {
@@ -643,7 +643,7 @@ QUnit.module("file", function () {
         assert.equal(zip.files['folder/'].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
     });
 
-    QUnit.test("createFolders works on a file", function () {
+    QUnit.test("createFolders works on a file", function (assert) {
         var zip = new JSZip();
         zip.file("false/0/1/2/file", "content", {createFolders:false, unixPermissions:"644"});
         zip.file("true/0/1/2/file", "content", {createFolders:true, unixPermissions:"644"});
@@ -653,7 +653,7 @@ QUnit.module("file", function () {
         assert.equal(zip.files["true/"].unixPermissions, null, "the options are not propagated");
     });
 
-    QUnit.test("createFolders works on a folder", function () {
+    QUnit.test("createFolders works on a folder", function (assert) {
         var zip = new JSZip();
         zip.file("false/0/1/2/folder", null, {createFolders:false, unixPermissions:"777",dir:true});
         zip.file("true/0/1/2/folder", null, {createFolders:true, unixPermissions:"777",dir:true});
@@ -663,14 +663,14 @@ QUnit.module("file", function () {
         assert.equal(zip.files["true/"].unixPermissions, null, "the options are not propagated");
     });
 
-    QUnit.test("folder follows the default createFolders settings", function () {
+    QUnit.test("folder follows the default createFolders settings", function (assert) {
         var zip = new JSZip();
         zip.folder("true/0/1/2/folder");
         assert.ok(zip.files["true/"], "the true/ folder exists");
     });
 
 
-    QUnit.test("A folder stays a folder", function () {
+    QUnit.test("A folder stays a folder", function (assert) {
         var zip = new JSZip();
         zip.folder("folder/");
         assert.ok(zip.files['folder/'].dir, "the folder is marked as a folder");
@@ -686,14 +686,14 @@ QUnit.module("file", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    QUnit.test("Folders are created by default", function() {
+    QUnit.test("Folders are created by default", function (assert) {
         var zip = new JSZip();
         zip.file("test/Readme", "Hello World!\n");
         assert.ok(zip.files["test/Readme"], "the file exists");
         assert.ok(zip.files["test/"], "the folder exists");
     });
 
-    QUnit.test("Folders can be avoided with createFolders", function() {
+    QUnit.test("Folders can be avoided with createFolders", function (assert) {
         var zip = new JSZip();
         zip.file("test/Readme", "Hello World!\n", {createFolders: false});
         assert.ok(zip.files["test/Readme"], "the file exists");
@@ -719,7 +719,7 @@ QUnit.module("file", function () {
         assert.equal(zip.file(/pirate/i).length, 1, "Match regex 1 result");
     });
 
-    QUnit.test("Finding a file (text search) with a relative folder", function() {
+    QUnit.test("Finding a file (text search) with a relative folder", function (assert) {
         var zip = new JSZip();
         zip.folder("files/default").file("Readme", "Hello World!\n");
         zip.folder("files/translation").file("Readme.French", "Bonjour tout le monde!\n");
@@ -740,7 +740,7 @@ QUnit.module("file", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
-    QUnit.test("Finding files (regex) with a relative folder", function() {
+    QUnit.test("Finding files (regex) with a relative folder", function (assert) {
         var zip = new JSZip();
         zip.folder("files/default").file("Readme", "Hello World!\n");
         zip.folder("files/translation").file("Readme.French", "Bonjour tout le monde!\n");
@@ -754,7 +754,7 @@ QUnit.module("file", function () {
         assert.equal(zip.folder("files/default").file(/pirate/i).length, 0, "regex match only in subfolders");
     });
 
-    QUnit.test("Finding folders", function () {
+    QUnit.test("Finding folders", function (assert) {
         var zip = new JSZip();
         zip.folder("root/").folder("sub1/");
         zip.folder("root/sub2/subsub1");
@@ -764,7 +764,7 @@ QUnit.module("file", function () {
         assert.equal(zip.folder(/root/).length, 4, "match on whole path");
     });
 
-    QUnit.test("Finding folders with relative path", function () {
+    QUnit.test("Finding folders with relative path", function (assert) {
         var zip = new JSZip();
         zip.folder("root/").folder("sub1/");
         zip.folder("root/sub2/subsub1");
@@ -776,7 +776,7 @@ QUnit.module("file", function () {
         assert.equal(root.folder(/root/).length, 0, "parent folder is not matched");
     });
 
-    function zipObjectsAssertions(zipObject) {
+    function zipObjectsAssertions(assert, zipObject) {
         var date = new Date("July 17, 2009 14:36:57");
 
         assert.equal(zipObject.name, "Hello.txt", "ZipObject#name is here");
@@ -787,22 +787,22 @@ QUnit.module("file", function () {
         var delta = Math.abs(zipObject.date.getTime() - date.getTime());
         assert.ok(delta < 2000/* ms */, date, "ZipObject#date is here");
     }
-    QUnit.test("ZipObject attributes", function () {
+    QUnit.test("ZipObject attributes", function (assert) {
         var date = new Date("July 17, 2009 14:36:57");
         var zip = new JSZip();
         zip.file("Hello.txt", "Hello World\n", {comment:"my comment", date:date});
-        zipObjectsAssertions(zip.file("Hello.txt"));
-        zipObjectsAssertions(zip.files["Hello.txt"]);
+        zipObjectsAssertions(assert, zip.file("Hello.txt"));
+        zipObjectsAssertions(assert, zip.files["Hello.txt"]);
         var done = assert.async();
         zip.generateAsync({type:"binarystring"})
         .then(JSZip.loadAsync)
         .then(function(reloaded) {
-            zipObjectsAssertions(reloaded.file("Hello.txt"));
-            zipObjectsAssertions(reloaded.files["Hello.txt"]);
+            zipObjectsAssertions(assert, reloaded.file("Hello.txt"));
+            zipObjectsAssertions(assert, reloaded.files["Hello.txt"]);
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });
-    QUnit.test("generate uses updated ZipObject date attribute", function () {
+    QUnit.test("generate uses updated ZipObject date attribute", function (assert) {
         var date = new Date("July 17, 2009 14:36:57");
         var zip = new JSZip();
         zip.file("Hello.txt", "Hello World\n", {comment:"my comment"}); // date = now
@@ -811,8 +811,8 @@ QUnit.module("file", function () {
         zip.generateAsync({type:"binarystring"})
         .then(JSZip.loadAsync)
         .then(function(reloaded) {
-            zipObjectsAssertions(reloaded.file("Hello.txt"));
-            zipObjectsAssertions(reloaded.files["Hello.txt"]);
+            zipObjectsAssertions(assert, reloaded.file("Hello.txt"));
+            zipObjectsAssertions(assert, reloaded.files["Hello.txt"]);
             done();
         })['catch'](JSZipTestUtils.assertNoError);
     });

@@ -4,18 +4,18 @@
 QUnit.module("unicode");
 
 // zip -X -0 utf8.zip amount.txt
-JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters", "ref/utf8.zip", function(expected) {
+JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters", "ref/utf8.zip", function(assert, expected) {
     var zip = new JSZip();
     zip.file("amount.txt", "€15\n");
     var done = assert.async();
     zip.generateAsync({type:"binarystring"}).then(function (actual) {
         assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        JSZipTestUtils.checkGenerateStability(actual);
+        JSZipTestUtils.checkGenerateStability(assert, actual);
         done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-QUnit.test("Text file with long unicode string", function() {
+QUnit.test("Text file with long unicode string", function(assert) {
     var expected = "€";
     for(var i = 0; i < 13; i++) {
         expected = expected + expected;
@@ -35,7 +35,7 @@ QUnit.test("Text file with long unicode string", function() {
 });
 
 // zip -X -0 utf8_in_name.zip €15.txt
-JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(expected) {
+JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(assert, expected) {
     var zip = new JSZip();
     zip.file("€15.txt", "€15\n");
     var done = assert.async();
@@ -45,12 +45,12 @@ JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters in filename", "r
         // error count goes through the roof. The parsing is checked on a other test so I'll
         // comment this one for now.
         // assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
-        JSZipTestUtils.checkGenerateStability(actual);
+        JSZipTestUtils.checkGenerateStability(assert, actual);
         done();
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filename: loadAsync without decodeFileName", "ref/local_encoding_in_name.zip", function(content) {
+JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filename: loadAsync without decodeFileName", "ref/local_encoding_in_name.zip", function(assert, content) {
 
     var done = assert.async();
     JSZip.loadAsync(content).then(function (zipUnicode) {
@@ -61,7 +61,7 @@ JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filenam
 
 });
 
-JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filename: loadAsync with decodeFileName", "ref/local_encoding_in_name.zip", function(content) {
+JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filename: loadAsync with decodeFileName", "ref/local_encoding_in_name.zip", function(assert, content) {
     var conversions = {
         "bytes 8d ae a2 a0 ef 20 af a0 af aa a0 2f" : "Новая папка/",
         "bytes 8d ae a2 a0 ef 20 af a0 af aa a0 2f 8d ae a2 eb a9 20 e2 a5 aa e1 e2 ae a2 eb a9 20 a4 ae aa e3 ac a5 ad e2 2e 74 78 74" : "Новая папка/Новый текстовый документ.txt"
@@ -85,7 +85,7 @@ JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filenam
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
-JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filename: generateAsync with encodeFileName", "ref/local_encoding_in_name.zip", function(content) {
+JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filename: generateAsync with encodeassert, fileName", "ref/local_encoding_in_name.zip", function(assert, content) {
     var conversions = {
         "": [],
         "Новая папка/": [0x8d, 0xae, 0xa2, 0xa0, 0xef, 0x20, 0xaf, 0xa0, 0xaf, 0xaa, 0xa0, 0x2f],
@@ -126,7 +126,7 @@ JSZipTestUtils.testZipFile("Zip text file with non unicode characters in filenam
 });
 
 // zip --entry-comments --archive-comment -X -0 pile_of_poo.zip Iñtërnâtiônàlizætiøn☃$'\360\237\222\251'.txt
-JSZipTestUtils.testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pile_of_poo.zip", function(expected) {
+JSZipTestUtils.testZipFile("Zip text assert, file and UTF-8, Pile Of Poo test", "ref/pile_of_poo.zip", function(assert, expected) {
     var zip = new JSZip();
     // this is the string "Iñtërnâtiônàlizætiøn☃💩",
     // see http://mathiasbynens.be/notes/javascript-unicode
@@ -137,9 +137,9 @@ JSZipTestUtils.testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pil
     var done = assert.async();
     zip.generateAsync({type:"binarystring", comment : text}).then(function(actual) {
 
-        JSZipTestUtils.checkGenerateStability(actual);
+        JSZipTestUtils.checkGenerateStability(assert, actual);
 
-        var done = assert.async(2);
+        var done = assert.async(3);
         JSZip.loadAsync(expected)
         .then(function (zip) {
             var file = zip.file(text + ".txt");

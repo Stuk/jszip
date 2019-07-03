@@ -13,7 +13,7 @@ QUnit.module("permissions", function () {
     // zip -r linux_zip.zip .
     // 7z a -r linux_7z.zip .
     // ...
-    function assertUnixPermissions(file){
+    function assertUnixPermissions(assert, file){
         function doAsserts(zip, fileName, dir, octal) {
             var mode = parseInt(octal, 8);
             assert.equal(zip.files[fileName].dosPermissions, null, fileName + ", no DOS permissions");
@@ -35,7 +35,7 @@ QUnit.module("permissions", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     }
 
-    function assertDosPermissions(file){
+    function assertDosPermissions(assert, file){
         function doAsserts(zip, fileName, dir, binary) {
             var mode = parseInt(binary, 2);
             assert.equal(zip.files[fileName].unixPermissions, null, fileName + ", no UNIX permissions");
@@ -60,7 +60,7 @@ QUnit.module("permissions", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     }
 
-    function reloadAndAssertUnixPermissions(file){
+    function reloadAndAssertUnixPermissions(assert, file){
         var done = assert.async();
         JSZip.loadAsync(file, {createFolders:false})
         .then(function (zip) {
@@ -68,10 +68,10 @@ QUnit.module("permissions", function () {
         })
         .then(function (content) {
             done();
-            assertUnixPermissions(content);
+            assertUnixPermissions(assert, content);
         })['catch'](JSZipTestUtils.assertNoError);
     }
-    function reloadAndAssertDosPermissions(file){
+    function reloadAndAssertDosPermissions(assert, file){
         var done = assert.async();
         JSZip.loadAsync(file, {createFolders:false})
         .then(function (zip) {
@@ -79,7 +79,7 @@ QUnit.module("permissions", function () {
         })
         .then(function (content) {
             done();
-            assertDosPermissions(content);
+            assertDosPermissions(assert, content);
         })['catch'](JSZipTestUtils.assertNoError);
     }
     JSZipTestUtils.testZipFile("permissions on linux : file created by zip", "ref/permissions/linux_zip.zip", assertUnixPermissions);

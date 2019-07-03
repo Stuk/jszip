@@ -54,7 +54,7 @@ QUnit.module("stream", function () {
     }
 
     function generateStreamTest(name, ref, createFunction, generateOptions, updateStream) {
-        JSZipTestUtils.testZipFile(name,ref, function(expected) {
+        JSZipTestUtils.testZipFile(name,ref, function(assert, expected) {
             var done = assert.async();
 
             var tempFile = require('tmp').tmpNameSync({postfix:".zip"});
