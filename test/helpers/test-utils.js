@@ -1,5 +1,4 @@
-/* jshint qunit: true */
-/* global JSZip,JSZipTestUtils */
+/* global QUnit,JSZip,JSZipTestUtils */
 'use strict';
 
 (function (global) {
@@ -54,20 +53,20 @@
     JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY = 18;
 
     JSZipTestUtils.checkGenerateStability = function checkGenerateStability(bytesStream, options) {
-        stop();
+        QUnit.stop();
 
         options = options || {type:"binarystring"};
         // TODO checkcrc32
         return new JSZip().loadAsync(bytesStream).then(function (zip) {
             return zip.generateAsync(options);
         }).then(function (content) {
-            ok(JSZipTestUtils.similar(bytesStream, content, 0), "generate stability : stable");
-            start();
+            QUnit.ok(JSZipTestUtils.similar(bytesStream, content, 0), "generate stability : stable");
+            QUnit.start();
         })['catch'](JSZipTestUtils.assertNoError);
     };
 
     JSZipTestUtils.checkBasicStreamBehavior = function checkBasicStreamBehavior(stream, testName) {
-        stop();
+        QUnit.stop();
         if (!testName) {
             testName = "";
         }
@@ -76,25 +75,25 @@
         .on("data", function (data, metadata) {
             // triggering a lot of passing checks makes the result unreadable
             if (!data) {
-                ok(data, testName + "basic check stream, data event handler, data is defined");
+                QUnit.ok(data, testName + "basic check stream, data event handler, data is defined");
             }
             if(!metadata) {
-                ok(metadata, testName + "basic check stream, data event handler, metadata is defined");
+                QUnit.ok(metadata, testName + "basic check stream, data event handler, metadata is defined");
             }
             triggeredStream = true;
         })
         .on("error", function (e) {
-            ok(e, testName + "basic check stream, error event handler, error is defined");
+            QUnit.ok(e, testName + "basic check stream, error event handler, error is defined");
             triggeredStream = true;
-            start();
+            QUnit.start();
         })
         .on("end", function () {
             triggeredStream = true;
-            start();
+            QUnit.start();
         })
         .resume()
         ;
-        ok(!triggeredStream, testName + "basic check stream, the stream callback is async");
+        QUnit.ok(!triggeredStream, testName + "basic check stream, the stream callback is async");
     };
 
     JSZipTestUtils.toString = function toString(obj) {
@@ -134,9 +133,9 @@
         if (typeof console !== "undefined" && console.error) {
             console.error(err.stack);
         }
-        ok(false, "unexpected error : " + err + ",  " + err.stack);
+        QUnit.ok(false, "unexpected error : " + err + ",  " + err.stack);
         while(QUnit.config.semaphore) {
-            start();
+            QUnit.start();
         }
     };
 
@@ -149,8 +148,8 @@
             filesToFetch = zipName;
         }
 
-        test(testName, function () {
-            stop();
+        QUnit.test(testName, function () {
+            QUnit.stop();
 
             var results = new Array(filesToFetch.length);
             var count = 0;
@@ -163,9 +162,9 @@
 
                 if (count === filesToFetch.length) {
 
-                    start();
+                    QUnit.start();
                     if(fetchError) {
-                        ok(false, fetchError);
+                        QUnit.ok(false, fetchError);
                         return;
                     }
                     if(simpleForm) {
