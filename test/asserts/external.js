@@ -1,5 +1,4 @@
-/* jshint qunit: true */
-/* global JSZip,JSZipTestUtils,Promise */
+/* global QUnit,JSZip,JSZipTestUtils,Promise */
 'use strict';
 
 QUnit.module("external");

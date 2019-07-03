@@ -1,5 +1,4 @@
-/* jshint qunit: true */
-/* global JSZip,JSZipTestUtils,BlobBuilder */
+/* global QUnit,JSZip,JSZipTestUtils */
 'use strict';
 
 QUnit.module("load", function () {
@@ -82,7 +81,7 @@ QUnit.module("load", function () {
 
             // when reading an arraybuffer, the CompressedObject mechanism will keep it and subarray() a Uint8Array.
             // if we request a file in the same format, we might get the same Uint8Array or its ArrayBuffer (the original zip file).
-            var done = assert.async();
+            var done = assert.async(3);
             JSZip.loadAsync(file)
             .then(function (zip) {
                 return zip.file("Hello.txt").async("arraybuffer");
@@ -91,7 +90,6 @@ QUnit.module("load", function () {
                 done();
             })['catch'](JSZipTestUtils.assertNoError);
 
-            var done = assert.async();
             JSZip.loadAsync(file)
             .then(function (zip) {
                 return zip.file("Hello.txt").async("uint8array");
@@ -100,7 +98,6 @@ QUnit.module("load", function () {
                 done();
             });
 
-            var done = assert.async();
             JSZip.loadAsync(file)
             .then(function (zip) {
                 return zip.file("Hello.txt").async("string");
@@ -140,7 +137,7 @@ QUnit.module("load", function () {
 
             // when reading an arraybuffer, the CompressedObject mechanism will keep it and subarray() a Uint8Array.
             // if we request a file in the same format, we might get the same Uint8Array or its ArrayBuffer (the original zip file).
-            var done = assert.async();
+            var done = assert.async(3);
             JSZip.loadAsync(file)
             .then(function (zip) {
                 return zip.file("Hello.txt").async("arraybuffer");
@@ -149,7 +146,6 @@ QUnit.module("load", function () {
                 done();
             })['catch'](JSZipTestUtils.assertNoError);
 
-            var done = assert.async();
             JSZip.loadAsync(file)
             .then(function (zip) {
                 return zip.file("Hello.txt").async("uint8array");
@@ -158,7 +154,6 @@ QUnit.module("load", function () {
                 done();
             })['catch'](JSZipTestUtils.assertNoError);
 
-            var done = assert.async();
             JSZip.loadAsync(file)
             .then(function (zip) {
                 return zip.file("Hello.txt").async("string");
@@ -250,7 +245,7 @@ QUnit.module("load", function () {
 
     // zip -0 -X zip_within_zip.zip Hello.txt && zip -0 -X nested.zip Hello.txt zip_within_zip.zip
     JSZipTestUtils.testZipFile("nested zip", "ref/nested.zip", function(file) {
-        var done = assert.async();
+        var done = assert.async(2);
         JSZip.loadAsync(file)
         .then(function (zip) {
             return zip.file("zip_within_zip.zip").async("binarystring");
@@ -263,7 +258,6 @@ QUnit.module("load", function () {
             done();
         })['catch'](JSZipTestUtils.assertNoError);
 
-        var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip) {
             return zip.file("Hello.txt").async("string");
@@ -312,7 +306,7 @@ QUnit.module("load", function () {
 
     // zip -X -0 utf8_in_name.zip €15.txt
     JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters in filename", "ref/utf8_in_name.zip", function(file) {
-        var done = assert.async();
+        var done = assert.async(2);
         JSZip.loadAsync(file)
         .then(function (zip){
             assert.ok(zip.file("€15.txt") !== null, "the utf8 file is here.");
@@ -323,7 +317,6 @@ QUnit.module("load", function () {
             done();
         })['catch'](JSZipTestUtils.assertNoError);
 
-        var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip){
             return zip.files["€15.txt"].async("string");
@@ -337,7 +330,7 @@ QUnit.module("load", function () {
     // Created with winrar
     // winrar will replace the euro symbol with a '_' but set the correct unicode path in an extra field.
     JSZipTestUtils.testZipFile("Zip text file with UTF-8 characters in filename and windows compatibility", "ref/winrar_utf8_in_name.zip", function(file) {
-        var done = assert.async();
+        var done = assert.async(2);
         JSZip.loadAsync(file)
         .then(function (zip){
             assert.ok(zip.file("€15.txt") !== null, "the utf8 file is here.");
@@ -348,7 +341,6 @@ QUnit.module("load", function () {
             done();
         })['catch'](JSZipTestUtils.assertNoError);
 
-        var done = assert.async();
         JSZip.loadAsync(file)
         .then(function (zip){
             return zip.files["€15.txt"].async("string");
@@ -681,7 +673,7 @@ QUnit.module("load", function () {
 
         // http://www.feedbooks.com/book/8/the-metamorphosis
         JSZipTestUtils.testZipFile("Franz Kafka - The Metamorphosis.epub", "ref/complex_files/Franz Kafka - The Metamorphosis.epub", function(file) {
-            var done = assert.async();
+            var done = assert.async(2);
             JSZip.loadAsync(file)
             .then(function(zip) {
                 assert.equal(zip.filter(function(){return true;}).length, 26, "the zip contains the good number of elements.");
@@ -692,7 +684,6 @@ QUnit.module("load", function () {
                 done();
             })['catch'](JSZipTestUtils.assertNoError);
 
-            var done = assert.async();
             JSZip.loadAsync(file)
             .then(function(zip) {
                 return zip.file("OPS/main0.xml").async("string");

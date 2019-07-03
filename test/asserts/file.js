@@ -1,5 +1,4 @@
-/* jshint qunit: true */
-/* global JSZip,JSZipTestUtils,Promise,BlobBuilder */
+/* global QUnit,JSZip,JSZipTestUtils,Promise */
 'use strict';
 
 QUnit.module("file", function () {
@@ -726,17 +725,15 @@ QUnit.module("file", function () {
         zip.folder("files/translation").file("Readme.French", "Bonjour tout le monde!\n");
         zip.folder("files").folder("translation").file("Readme.Pirate", "Ahoy m'hearty!\n");
 
-        var done = assert.async();
+        var done = assert.async(3);
         zip.file("files/translation/Readme.French").async("string").then(function (content) {
             assert.equal(content, "Bonjour tout le monde!\n", "finding file with the full path");
             done();
         })['catch'](JSZipTestUtils.assertNoError);
-        var done = assert.async();
         zip.folder("files").file("translation/Readme.French").async("string").then(function (content) {
             assert.equal(content, "Bonjour tout le monde!\n", "finding file with a relative path");
             done();
         })['catch'](JSZipTestUtils.assertNoError);
-        var done = assert.async();
         zip.folder("files/translation").file("Readme.French").async("string").then(function (content) {
             assert.equal(content, "Bonjour tout le monde!\n", "finding file with a relative path");
             done();

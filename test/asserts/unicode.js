@@ -139,7 +139,7 @@ JSZipTestUtils.testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pil
 
         JSZipTestUtils.checkGenerateStability(actual);
 
-        var done = assert.async();
+        var done = assert.async(2);
         JSZip.loadAsync(expected)
         .then(function (zip) {
             var file = zip.file(text + ".txt");
@@ -152,8 +152,6 @@ JSZipTestUtils.testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pil
             done();
         })['catch'](JSZipTestUtils.assertNoError);
 
-
-        var done = assert.async();
         JSZip.loadAsync(actual)
         .then(function (zip) {
             var file = zip.file(text + ".txt");
