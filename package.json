@@ -48,7 +48,6 @@
     "jshint": "~2.9.1",
     "jszip-utils": "~0.0.2",
     "package-json-versionify": "1.0.2",
-    "phantomjs-prebuilt": "2.1.15",
     "qunit": "~2.9.2",
     "tmp": "0.0.28"
   },
