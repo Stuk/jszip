@@ -52,10 +52,10 @@
     "tmp": "0.0.28"
   },
   "dependencies": {
+    "core-js-pure": "^3.0.0",
     "lie": "~3.3.0",
     "pako": "~1.0.2",
-    "readable-stream": "~2.3.6",
-    "set-immediate-shim": "~1.0.1"
+    "readable-stream": "~2.3.6"
   },
   "license": "(MIT OR GPL-3.0)"
 }

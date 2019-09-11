@@ -1,6 +1,6 @@
 /*!
 
-JSZip v3.2.1 - A JavaScript class for generating and reading zip files
+JSZip v3.2.2 - A JavaScript class for generating and reading zip files
 <http://stuartk.com/jszip>
 
 (c) 2009-2016 Stuart Knightley <stuart [at] stuartk.com>
@@ -324,7 +324,7 @@ module.exports = {
     Promise: ES6Promise
 };
 
-},{"lie":37}],7:[function(require,module,exports){
+},{"lie":66}],7:[function(require,module,exports){
 'use strict';
 var USE_TYPEDARRAY = (typeof Uint8Array !== 'undefined') && (typeof Uint16Array !== 'undefined') && (typeof Uint32Array !== 'undefined');
 
@@ -411,7 +411,7 @@ exports.uncompressWorker = function () {
     return new FlateWorker("Inflate", {});
 };
 
-},{"./stream/GenericWorker":28,"./utils":32,"pako":38}],8:[function(require,module,exports){
+},{"./stream/GenericWorker":28,"./utils":32,"pako":67}],8:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -3037,7 +3037,7 @@ exports.Utf8EncodeWorker = Utf8EncodeWorker;
 var support = require('./support');
 var base64 = require('./base64');
 var nodejsUtils = require('./nodejsUtils');
-var setImmediate = require('set-immediate-shim');
+var setImmediate = require('core-js-pure/features/set-immediate');
 var external = require("./external");
 
 
@@ -3509,7 +3509,7 @@ exports.prepareContent = function(name, inputData, isBinary, isOptimizedBinarySt
     });
 };
 
-},{"./base64":1,"./external":6,"./nodejsUtils":14,"./support":30,"set-immediate-shim":54}],33:[function(require,module,exports){
+},{"./base64":1,"./external":6,"./nodejsUtils":14,"./support":30,"core-js-pure/features/set-immediate":36}],33:[function(require,module,exports){
 'use strict';
 var readerFor = require('./reader/readerFor');
 var utils = require('./utils');
@@ -4203,6 +4203,520 @@ for(var i = 0; i < removedMethods.length; i++) {
 module.exports = ZipObject;
 
 },{"./compressedObject":2,"./stream/DataWorker":27,"./stream/GenericWorker":28,"./stream/StreamHelper":29,"./utf8":31}],36:[function(require,module,exports){
+module.exports = require('../stable/set-immediate');
+
+},{"../stable/set-immediate":64}],37:[function(require,module,exports){
+module.exports = function (it) {
+  if (typeof it != 'function') {
+    throw TypeError(String(it) + ' is not a function');
+  } return it;
+};
+
+},{}],38:[function(require,module,exports){
+var isObject = require('../internals/is-object');
+
+module.exports = function (it) {
+  if (!isObject(it)) {
+    throw TypeError(String(it) + ' is not an object');
+  } return it;
+};
+
+},{"../internals/is-object":54}],39:[function(require,module,exports){
+var aFunction = require('../internals/a-function');
+
+// optional / simple context binding
+module.exports = function (fn, that, length) {
+  aFunction(fn);
+  if (that === undefined) return fn;
+  switch (length) {
+    case 0: return function () {
+      return fn.call(that);
+    };
+    case 1: return function (a) {
+      return fn.call(that, a);
+    };
+    case 2: return function (a, b) {
+      return fn.call(that, a, b);
+    };
+    case 3: return function (a, b, c) {
+      return fn.call(that, a, b, c);
+    };
+  }
+  return function (/* ...args */) {
+    return fn.apply(that, arguments);
+  };
+};
+
+},{"../internals/a-function":37}],40:[function(require,module,exports){
+var toString = {}.toString;
+
+module.exports = function (it) {
+  return toString.call(it).slice(8, -1);
+};
+
+},{}],41:[function(require,module,exports){
+module.exports = function (bitmap, value) {
+  return {
+    enumerable: !(bitmap & 1),
+    configurable: !(bitmap & 2),
+    writable: !(bitmap & 4),
+    value: value
+  };
+};
+
+},{}],42:[function(require,module,exports){
+var fails = require('../internals/fails');
+
+// Thank's IE8 for his funny defineProperty
+module.exports = !fails(function () {
+  return Object.defineProperty({}, 'a', { get: function () { return 7; } }).a != 7;
+});
+
+},{"../internals/fails":45}],43:[function(require,module,exports){
+var global = require('../internals/global');
+var isObject = require('../internals/is-object');
+
+var document = global.document;
+// typeof document.createElement is 'object' in old IE
+var EXISTS = isObject(document) && isObject(document.createElement);
+
+module.exports = function (it) {
+  return EXISTS ? document.createElement(it) : {};
+};
+
+},{"../internals/global":47,"../internals/is-object":54}],44:[function(require,module,exports){
+'use strict';
+var global = require('../internals/global');
+var getOwnPropertyDescriptor = require('../internals/object-get-own-property-descriptor').f;
+var isForced = require('../internals/is-forced');
+var path = require('../internals/path');
+var bind = require('../internals/bind-context');
+var hide = require('../internals/hide');
+var has = require('../internals/has');
+
+var wrapConstructor = function (NativeConstructor) {
+  var Wrapper = function (a, b, c) {
+    if (this instanceof NativeConstructor) {
+      switch (arguments.length) {
+        case 0: return new NativeConstructor();
+        case 1: return new NativeConstructor(a);
+        case 2: return new NativeConstructor(a, b);
+      } return new NativeConstructor(a, b, c);
+    } return NativeConstructor.apply(this, arguments);
+  };
+  Wrapper.prototype = NativeConstructor.prototype;
+  return Wrapper;
+};
+
+/*
+  options.target      - name of the target object
+  options.global      - target is the global object
+  options.stat        - export as static methods of target
+  options.proto       - export as prototype methods of target
+  options.real        - real prototype method for the `pure` version
+  options.forced      - export even if the native feature is available
+  options.bind        - bind methods to the target, required for the `pure` version
+  options.wrap        - wrap constructors to preventing global pollution, required for the `pure` version
+  options.unsafe      - use the simple assignment of property instead of delete + defineProperty
+  options.sham        - add a flag to not completely full polyfills
+  options.enumerable  - export as enumerable property
+  options.noTargetGet - prevent calling a getter on target
+*/
+module.exports = function (options, source) {
+  var TARGET = options.target;
+  var GLOBAL = options.global;
+  var STATIC = options.stat;
+  var PROTO = options.proto;
+
+  var nativeSource = GLOBAL ? global : STATIC ? global[TARGET] : (global[TARGET] || {}).prototype;
+
+  var target = GLOBAL ? path : path[TARGET] || (path[TARGET] = {});
+  var targetPrototype = target.prototype;
+
+  var FORCED, USE_NATIVE, VIRTUAL_PROTOTYPE;
+  var key, sourceProperty, targetProperty, nativeProperty, resultProperty, descriptor;
+
+  for (key in source) {
+    FORCED = isForced(GLOBAL ? key : TARGET + (STATIC ? '.' : '#') + key, options.forced);
+    // contains in native
+    USE_NATIVE = !FORCED && nativeSource && has(nativeSource, key);
+
+    targetProperty = target[key];
+
+    if (USE_NATIVE) if (options.noTargetGet) {
+      descriptor = getOwnPropertyDescriptor(nativeSource, key);
+      nativeProperty = descriptor && descriptor.value;
+    } else nativeProperty = nativeSource[key];
+
+    // export native or implementation
+    sourceProperty = (USE_NATIVE && nativeProperty) ? nativeProperty : source[key];
+
+    if (USE_NATIVE && typeof targetProperty === typeof sourceProperty) continue;
+
+    // bind timers to global for call from export context
+    if (options.bind && USE_NATIVE) resultProperty = bind(sourceProperty, global);
+    // wrap global constructors for prevent changs in this version
+    else if (options.wrap && USE_NATIVE) resultProperty = wrapConstructor(sourceProperty);
+    // make static versions for prototype methods
+    else if (PROTO && typeof sourceProperty == 'function') resultProperty = bind(Function.call, sourceProperty);
+    // default case
+    else resultProperty = sourceProperty;
+
+    // add a flag to not completely full polyfills
+    if (options.sham || (sourceProperty && sourceProperty.sham) || (targetProperty && targetProperty.sham)) {
+      hide(resultProperty, 'sham', true);
+    }
+
+    target[key] = resultProperty;
+
+    if (PROTO) {
+      VIRTUAL_PROTOTYPE = TARGET + 'Prototype';
+      if (!has(path, VIRTUAL_PROTOTYPE)) hide(path, VIRTUAL_PROTOTYPE, {});
+      // export virtual prototype methods
+      path[VIRTUAL_PROTOTYPE][key] = sourceProperty;
+      // export real prototype methods
+      if (options.real && targetPrototype && !targetPrototype[key]) hide(targetPrototype, key, sourceProperty);
+    }
+  }
+};
+
+},{"../internals/bind-context":39,"../internals/global":47,"../internals/has":48,"../internals/hide":49,"../internals/is-forced":53,"../internals/object-get-own-property-descriptor":56,"../internals/path":58}],45:[function(require,module,exports){
+module.exports = function (exec) {
+  try {
+    return !!exec();
+  } catch (error) {
+    return true;
+  }
+};
+
+},{}],46:[function(require,module,exports){
+var path = require('../internals/path');
+var global = require('../internals/global');
+
+var aFunction = function (variable) {
+  return typeof variable == 'function' ? variable : undefined;
+};
+
+module.exports = function (namespace, method) {
+  return arguments.length < 2 ? aFunction(path[namespace]) || aFunction(global[namespace])
+    : path[namespace] && path[namespace][method] || global[namespace] && global[namespace][method];
+};
+
+},{"../internals/global":47,"../internals/path":58}],47:[function(require,module,exports){
+(function (global){
+var O = 'object';
+var check = function (it) {
+  return it && it.Math == Math && it;
+};
+
+// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
+module.exports =
+  // eslint-disable-next-line no-undef
+  check(typeof globalThis == O && globalThis) ||
+  check(typeof window == O && window) ||
+  check(typeof self == O && self) ||
+  check(typeof global == O && global) ||
+  // eslint-disable-next-line no-new-func
+  Function('return this')();
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],48:[function(require,module,exports){
+var hasOwnProperty = {}.hasOwnProperty;
+
+module.exports = function (it, key) {
+  return hasOwnProperty.call(it, key);
+};
+
+},{}],49:[function(require,module,exports){
+var DESCRIPTORS = require('../internals/descriptors');
+var definePropertyModule = require('../internals/object-define-property');
+var createPropertyDescriptor = require('../internals/create-property-descriptor');
+
+module.exports = DESCRIPTORS ? function (object, key, value) {
+  return definePropertyModule.f(object, key, createPropertyDescriptor(1, value));
+} : function (object, key, value) {
+  object[key] = value;
+  return object;
+};
+
+},{"../internals/create-property-descriptor":41,"../internals/descriptors":42,"../internals/object-define-property":55}],50:[function(require,module,exports){
+var getBuiltIn = require('../internals/get-built-in');
+
+module.exports = getBuiltIn('document', 'documentElement');
+
+},{"../internals/get-built-in":46}],51:[function(require,module,exports){
+var DESCRIPTORS = require('../internals/descriptors');
+var fails = require('../internals/fails');
+var createElement = require('../internals/document-create-element');
+
+// Thank's IE8 for his funny defineProperty
+module.exports = !DESCRIPTORS && !fails(function () {
+  return Object.defineProperty(createElement('div'), 'a', {
+    get: function () { return 7; }
+  }).a != 7;
+});
+
+},{"../internals/descriptors":42,"../internals/document-create-element":43,"../internals/fails":45}],52:[function(require,module,exports){
+var fails = require('../internals/fails');
+var classof = require('../internals/classof-raw');
+
+var split = ''.split;
+
+// fallback for non-array-like ES3 and non-enumerable old V8 strings
+module.exports = fails(function () {
+  // throws an error in rhino, see https://github.com/mozilla/rhino/issues/346
+  // eslint-disable-next-line no-prototype-builtins
+  return !Object('z').propertyIsEnumerable(0);
+}) ? function (it) {
+  return classof(it) == 'String' ? split.call(it, '') : Object(it);
+} : Object;
+
+},{"../internals/classof-raw":40,"../internals/fails":45}],53:[function(require,module,exports){
+var fails = require('../internals/fails');
+
+var replacement = /#|\.prototype\./;
+
+var isForced = function (feature, detection) {
+  var value = data[normalize(feature)];
+  return value == POLYFILL ? true
+    : value == NATIVE ? false
+    : typeof detection == 'function' ? fails(detection)
+    : !!detection;
+};
+
+var normalize = isForced.normalize = function (string) {
+  return String(string).replace(replacement, '.').toLowerCase();
+};
+
+var data = isForced.data = {};
+var NATIVE = isForced.NATIVE = 'N';
+var POLYFILL = isForced.POLYFILL = 'P';
+
+module.exports = isForced;
+
+},{"../internals/fails":45}],54:[function(require,module,exports){
+module.exports = function (it) {
+  return typeof it === 'object' ? it !== null : typeof it === 'function';
+};
+
+},{}],55:[function(require,module,exports){
+var DESCRIPTORS = require('../internals/descriptors');
+var IE8_DOM_DEFINE = require('../internals/ie8-dom-define');
+var anObject = require('../internals/an-object');
+var toPrimitive = require('../internals/to-primitive');
+
+var nativeDefineProperty = Object.defineProperty;
+
+// `Object.defineProperty` method
+// https://tc39.github.io/ecma262/#sec-object.defineproperty
+exports.f = DESCRIPTORS ? nativeDefineProperty : function defineProperty(O, P, Attributes) {
+  anObject(O);
+  P = toPrimitive(P, true);
+  anObject(Attributes);
+  if (IE8_DOM_DEFINE) try {
+    return nativeDefineProperty(O, P, Attributes);
+  } catch (error) { /* empty */ }
+  if ('get' in Attributes || 'set' in Attributes) throw TypeError('Accessors not supported');
+  if ('value' in Attributes) O[P] = Attributes.value;
+  return O;
+};
+
+},{"../internals/an-object":38,"../internals/descriptors":42,"../internals/ie8-dom-define":51,"../internals/to-primitive":62}],56:[function(require,module,exports){
+var DESCRIPTORS = require('../internals/descriptors');
+var propertyIsEnumerableModule = require('../internals/object-property-is-enumerable');
+var createPropertyDescriptor = require('../internals/create-property-descriptor');
+var toIndexedObject = require('../internals/to-indexed-object');
+var toPrimitive = require('../internals/to-primitive');
+var has = require('../internals/has');
+var IE8_DOM_DEFINE = require('../internals/ie8-dom-define');
+
+var nativeGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+
+// `Object.getOwnPropertyDescriptor` method
+// https://tc39.github.io/ecma262/#sec-object.getownpropertydescriptor
+exports.f = DESCRIPTORS ? nativeGetOwnPropertyDescriptor : function getOwnPropertyDescriptor(O, P) {
+  O = toIndexedObject(O);
+  P = toPrimitive(P, true);
+  if (IE8_DOM_DEFINE) try {
+    return nativeGetOwnPropertyDescriptor(O, P);
+  } catch (error) { /* empty */ }
+  if (has(O, P)) return createPropertyDescriptor(!propertyIsEnumerableModule.f.call(O, P), O[P]);
+};
+
+},{"../internals/create-property-descriptor":41,"../internals/descriptors":42,"../internals/has":48,"../internals/ie8-dom-define":51,"../internals/object-property-is-enumerable":57,"../internals/to-indexed-object":61,"../internals/to-primitive":62}],57:[function(require,module,exports){
+'use strict';
+var nativePropertyIsEnumerable = {}.propertyIsEnumerable;
+var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+
+// Nashorn ~ JDK8 bug
+var NASHORN_BUG = getOwnPropertyDescriptor && !nativePropertyIsEnumerable.call({ 1: 2 }, 1);
+
+// `Object.prototype.propertyIsEnumerable` method implementation
+// https://tc39.github.io/ecma262/#sec-object.prototype.propertyisenumerable
+exports.f = NASHORN_BUG ? function propertyIsEnumerable(V) {
+  var descriptor = getOwnPropertyDescriptor(this, V);
+  return !!descriptor && descriptor.enumerable;
+} : nativePropertyIsEnumerable;
+
+},{}],58:[function(require,module,exports){
+module.exports = {};
+
+},{}],59:[function(require,module,exports){
+// `RequireObjectCoercible` abstract operation
+// https://tc39.github.io/ecma262/#sec-requireobjectcoercible
+module.exports = function (it) {
+  if (it == undefined) throw TypeError("Can't call method on " + it);
+  return it;
+};
+
+},{}],60:[function(require,module,exports){
+var global = require('../internals/global');
+var fails = require('../internals/fails');
+var classof = require('../internals/classof-raw');
+var bind = require('../internals/bind-context');
+var html = require('../internals/html');
+var createElement = require('../internals/document-create-element');
+
+var location = global.location;
+var set = global.setImmediate;
+var clear = global.clearImmediate;
+var process = global.process;
+var MessageChannel = global.MessageChannel;
+var Dispatch = global.Dispatch;
+var counter = 0;
+var queue = {};
+var ONREADYSTATECHANGE = 'onreadystatechange';
+var defer, channel, port;
+
+var run = function (id) {
+  // eslint-disable-next-line no-prototype-builtins
+  if (queue.hasOwnProperty(id)) {
+    var fn = queue[id];
+    delete queue[id];
+    fn();
+  }
+};
+
+var runner = function (id) {
+  return function () {
+    run(id);
+  };
+};
+
+var listener = function (event) {
+  run(event.data);
+};
+
+var post = function (id) {
+  // old engines have not location.origin
+  global.postMessage(id + '', location.protocol + '//' + location.host);
+};
+
+// Node.js 0.9+ & IE10+ has setImmediate, otherwise:
+if (!set || !clear) {
+  set = function setImmediate(fn) {
+    var args = [];
+    var i = 1;
+    while (arguments.length > i) args.push(arguments[i++]);
+    queue[++counter] = function () {
+      // eslint-disable-next-line no-new-func
+      (typeof fn == 'function' ? fn : Function(fn)).apply(undefined, args);
+    };
+    defer(counter);
+    return counter;
+  };
+  clear = function clearImmediate(id) {
+    delete queue[id];
+  };
+  // Node.js 0.8-
+  if (classof(process) == 'process') {
+    defer = function (id) {
+      process.nextTick(runner(id));
+    };
+  // Sphere (JS game engine) Dispatch API
+  } else if (Dispatch && Dispatch.now) {
+    defer = function (id) {
+      Dispatch.now(runner(id));
+    };
+  // Browsers with MessageChannel, includes WebWorkers
+  } else if (MessageChannel) {
+    channel = new MessageChannel();
+    port = channel.port2;
+    channel.port1.onmessage = listener;
+    defer = bind(port.postMessage, port, 1);
+  // Browsers with postMessage, skip WebWorkers
+  // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
+  } else if (global.addEventListener && typeof postMessage == 'function' && !global.importScripts && !fails(post)) {
+    defer = post;
+    global.addEventListener('message', listener, false);
+  // IE8-
+  } else if (ONREADYSTATECHANGE in createElement('script')) {
+    defer = function (id) {
+      html.appendChild(createElement('script'))[ONREADYSTATECHANGE] = function () {
+        html.removeChild(this);
+        run(id);
+      };
+    };
+  // Rest old browsers
+  } else {
+    defer = function (id) {
+      setTimeout(runner(id), 0);
+    };
+  }
+}
+
+module.exports = {
+  set: set,
+  clear: clear
+};
+
+},{"../internals/bind-context":39,"../internals/classof-raw":40,"../internals/document-create-element":43,"../internals/fails":45,"../internals/global":47,"../internals/html":50}],61:[function(require,module,exports){
+// toObject with fallback for non-array-like ES3 strings
+var IndexedObject = require('../internals/indexed-object');
+var requireObjectCoercible = require('../internals/require-object-coercible');
+
+module.exports = function (it) {
+  return IndexedObject(requireObjectCoercible(it));
+};
+
+},{"../internals/indexed-object":52,"../internals/require-object-coercible":59}],62:[function(require,module,exports){
+var isObject = require('../internals/is-object');
+
+// `ToPrimitive` abstract operation
+// https://tc39.github.io/ecma262/#sec-toprimitive
+// instead of the ES6 spec version, we didn't implement @@toPrimitive case
+// and the second argument - flag - preferred type is a string
+module.exports = function (input, PREFERRED_STRING) {
+  if (!isObject(input)) return input;
+  var fn, val;
+  if (PREFERRED_STRING && typeof (fn = input.toString) == 'function' && !isObject(val = fn.call(input))) return val;
+  if (typeof (fn = input.valueOf) == 'function' && !isObject(val = fn.call(input))) return val;
+  if (!PREFERRED_STRING && typeof (fn = input.toString) == 'function' && !isObject(val = fn.call(input))) return val;
+  throw TypeError("Can't convert object to primitive value");
+};
+
+},{"../internals/is-object":54}],63:[function(require,module,exports){
+var global = require('../internals/global');
+var task = require('../internals/task');
+
+var FORCED = !global.setImmediate || !global.clearImmediate;
+
+// http://w3c.github.io/setImmediate/
+require('../internals/export')({ global: true, bind: true, enumerable: true, forced: FORCED }, {
+  // `setImmediate` method
+  // http://w3c.github.io/setImmediate/#si-setImmediate
+  setImmediate: task.set,
+  // `clearImmediate` method
+  // http://w3c.github.io/setImmediate/#si-clearImmediate
+  clearImmediate: task.clear
+});
+
+},{"../internals/export":44,"../internals/global":47,"../internals/task":60}],64:[function(require,module,exports){
+require('../modules/web.immediate');
+
+module.exports = require('../internals/path').setImmediate;
+
+},{"../internals/path":58,"../modules/web.immediate":63}],65:[function(require,module,exports){
 (function (global){
 'use strict';
 var Mutation = global.MutationObserver || global.WebKitMutationObserver;
@@ -4275,7 +4789,7 @@ function immediate(task) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],37:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 'use strict';
 var immediate = require('immediate');
 
@@ -4550,7 +5064,7 @@ function race(iterable) {
   }
 }
 
-},{"immediate":36}],38:[function(require,module,exports){
+},{"immediate":65}],67:[function(require,module,exports){
 // Top level file is just a mixin of submodules & constants
 'use strict';
 
@@ -4566,7 +5080,7 @@ assign(pako, deflate, inflate, constants);
 
 module.exports = pako;
 
-},{"./lib/deflate":39,"./lib/inflate":40,"./lib/utils/common":41,"./lib/zlib/constants":44}],39:[function(require,module,exports){
+},{"./lib/deflate":68,"./lib/inflate":69,"./lib/utils/common":70,"./lib/zlib/constants":73}],68:[function(require,module,exports){
 'use strict';
 
 
@@ -4608,7 +5122,7 @@ var Z_DEFLATED  = 8;
 /* internal
  * Deflate.chunks -> Array
  *
- * Chunks of output data, if [[Deflate#onData]] not overridden.
+ * Chunks of output data, if [[Deflate#onData]] not overriden.
  **/
 
 /**
@@ -4850,7 +5364,7 @@ Deflate.prototype.push = function (data, mode) {
 
 /**
  * Deflate#onData(chunk) -> Void
- * - chunk (Uint8Array|Array|String): output data. Type of array depends
+ * - chunk (Uint8Array|Array|String): ouput data. Type of array depends
  *   on js engine support. When string output requested, each chunk
  *   will be string.
  *
@@ -4968,7 +5482,7 @@ exports.deflate = deflate;
 exports.deflateRaw = deflateRaw;
 exports.gzip = gzip;
 
-},{"./utils/common":41,"./utils/strings":42,"./zlib/deflate":46,"./zlib/messages":51,"./zlib/zstream":53}],40:[function(require,module,exports){
+},{"./utils/common":70,"./utils/strings":71,"./zlib/deflate":75,"./zlib/messages":80,"./zlib/zstream":82}],69:[function(require,module,exports){
 'use strict';
 
 
@@ -4993,7 +5507,7 @@ var toString = Object.prototype.toString;
 /* internal
  * inflate.chunks -> Array
  *
- * Chunks of output data, if [[Inflate#onData]] not overridden.
+ * Chunks of output data, if [[Inflate#onData]] not overriden.
  **/
 
 /**
@@ -5268,7 +5782,7 @@ Inflate.prototype.push = function (data, mode) {
 
 /**
  * Inflate#onData(chunk) -> Void
- * - chunk (Uint8Array|Array|String): output data. Type of array depends
+ * - chunk (Uint8Array|Array|String): ouput data. Type of array depends
  *   on js engine support. When string output requested, each chunk
  *   will be string.
  *
@@ -5295,7 +5809,7 @@ Inflate.prototype.onEnd = function (status) {
   if (status === c.Z_OK) {
     if (this.options.to === 'string') {
       // Glue & convert here, until we teach pako to send
-      // utf8 aligned strings to onData
+      // utf8 alligned strings to onData
       this.result = this.chunks.join('');
     } else {
       this.result = utils.flattenChunks(this.chunks);
@@ -5388,7 +5902,7 @@ exports.inflate = inflate;
 exports.inflateRaw = inflateRaw;
 exports.ungzip  = inflate;
 
-},{"./utils/common":41,"./utils/strings":42,"./zlib/constants":44,"./zlib/gzheader":47,"./zlib/inflate":49,"./zlib/messages":51,"./zlib/zstream":53}],41:[function(require,module,exports){
+},{"./utils/common":70,"./utils/strings":71,"./zlib/constants":73,"./zlib/gzheader":76,"./zlib/inflate":78,"./zlib/messages":80,"./zlib/zstream":82}],70:[function(require,module,exports){
 'use strict';
 
 
@@ -5492,7 +6006,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],42:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 // String encode/decode helpers
 'use strict';
 
@@ -5679,7 +6193,7 @@ exports.utf8border = function (buf, max) {
   return (pos + _utf8len[buf[pos]] > max) ? pos : max;
 };
 
-},{"./common":41}],43:[function(require,module,exports){
+},{"./common":70}],72:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -5732,7 +6246,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],44:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -5802,7 +6316,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],45:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -5863,7 +6377,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],46:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -7739,7 +8253,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":41,"./adler32":43,"./crc32":45,"./messages":51,"./trees":52}],47:[function(require,module,exports){
+},{"../utils/common":70,"./adler32":72,"./crc32":74,"./messages":80,"./trees":81}],76:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -7799,7 +8313,7 @@ function GZheader() {
 
 module.exports = GZheader;
 
-},{}],48:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -8146,7 +8660,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],49:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -9704,7 +10218,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":41,"./adler32":43,"./crc32":45,"./inffast":48,"./inftrees":50}],50:[function(require,module,exports){
+},{"../utils/common":70,"./adler32":72,"./crc32":74,"./inffast":77,"./inftrees":79}],79:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -10049,7 +10563,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":41}],51:[function(require,module,exports){
+},{"../utils/common":70}],80:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -10083,7 +10597,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],52:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -11305,7 +11819,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":41}],53:[function(require,module,exports){
+},{"../utils/common":70}],82:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -11353,15 +11867,6 @@ function ZStream() {
 }
 
 module.exports = ZStream;
-
-},{}],54:[function(require,module,exports){
-'use strict';
-module.exports = typeof setImmediate === 'function' ? setImmediate :
-	function setImmediate() {
-		var args = [].slice.apply(arguments);
-		args.splice(1, 0, 0);
-		setTimeout.apply(null, args);
-	};
 
 },{}]},{},[10])(10)
 });
