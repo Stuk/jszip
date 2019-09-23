@@ -86,6 +86,20 @@ zip.remove("photos");
 zip.remove("photos"); // by removing the folder, you also remove its content.
 ```
 
+You can also rename files or folders with `.rename(from, to)` :
+
+```js
+zip.rename("photos/README", "photos/README.md");
+zip.rename("photos/README", "README");
+```
+
+You can also copy files or folders with `.copy(from, to)` :
+
+```js
+zip.copy("photos/photo1.jpg", "photos/photo1_copy.jpg");
+zip.copy("photos/README", "README.md");
+```
+
 ### Generate a zip file
 
 With `.generateAsync(options)` or `.generateNodeStream(options)` you can generate
