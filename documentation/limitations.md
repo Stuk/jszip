@@ -83,8 +83,8 @@ encoding used, you need to know it before doing anything.
 If the name of a file inside the zip is encoded with UTF-8 then JSZip can
 detect it (Language encoding flag, Unicode Path Extra Field). If not, JSZip
 can't detect the encoding used and will generate [Mojibake](https://en.wikipedia.org/wiki/Mojibake).
-You can use the [encodeFileName]({{site.baseurl}}/documentation/api_jszip/generate.html)
-option and the [decodeFileName]({{site.baseurl}}/documentation/api_jszip/load.html)
+You can use the [encodeFileName]({{site.baseurl}}/documentation/api_jszip/generate_async.html#encodefilename-option)
+option and the [decodeFileName]({{site.baseurl}}/documentation/api_jszip/load_async.html#decodefilename-option)
 option to encode/decode using a custom encoding.
 
 #### File content
