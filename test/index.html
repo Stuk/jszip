@@ -3,8 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>JSZip Testing</title>
-<link media="screen" href="//code.jquery.com/qunit/qunit-1.23.0.css" type="text/css" rel="stylesheet">
-<script type="text/javascript" src="//code.jquery.com/qunit/qunit-1.23.0.js"></script>
+<link media="screen" href="http://code.jquery.com/qunit/qunit-1.23.0.css" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="http://code.jquery.com/qunit/qunit-1.23.0.js"></script>
 <script>
 // no CDN, fallback on the npm version
 if(!window.QUnit) {
@@ -55,7 +55,11 @@ if(!window.QUnit) {
    });
 </script>
 
+<!--
 <script type="text/javascript" src="//stuk.github.io/jszip-utils/dist/jszip-utils.js"></script>
+-->
+<script type="text/javascript" src="../dist/jszip-utils.js"></script>
+
 <!--
 Mandatory in IE 6, 7, 8 and 9.
 -->
@@ -89,6 +93,7 @@ if(!window.JSZipUtils) {
 
 </head>
 <body>
+   <div>This script not working locally, from folder, because XHR-queries not supporting "file://" protocol). Try to host this on http-server and run tests from there in this case.</div>
    <div id="qunit"></div>
    <div id="qunit-fixture"></div>
 </body>
