@@ -1,0 +1,101 @@
+<html>
+	Upload the file binary file - here (progress in console - F12 button): <input type="file" /><br>
+	<a id="download_txt" href="" download="array_with_bytes.txt" style="display:none;">Click to download "array_with_bytes.txt"</a>
+</html>
+
+<script>
+//add event listeren for input [type=file], to run this function when file is loaded.
+document.querySelector("input").addEventListener("change", function() {
+  var reader = new FileReader();
+  reader.onload = function(){									//when file is loaded
+    var arrayBuffer = this.result;										//arraybuffer
+    var source_Uint8Array = new Uint8Array(arrayBuffer);				//Uint8Array
+	var source_array = [].slice.call(source_Uint8Array);				//Uint8Array to source_array.
+	console.log("source_array file accepted. Generate txt_bytearray...");
+	generate_zip_with_souce_bytearray(source_array);
+  }
+  reader.readAsArrayBuffer(this.files[0]);						//read file from input as arraybuffer
+}, false);
+
+function decimalToHex(d, padding, Up) {
+	Up = (typeof Up === "undefined" || Up) ? true : false;
+    var hex = Number(d).toString(16);
+    padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
+    while (hex.length < padding) {
+        hex = "0" + hex;
+    }
+    return (Up) ? hex.toUpperCase() : hex;
+}
+
+function string2bytes(str) {
+  var result = [];
+  for (var b = 0; b < str.length; b++) {
+    result.push(str.charCodeAt(b));
+  }
+  return result;
+}
+
+function generate_zip_with_souce_bytearray(source_bytearray){
+	var txt_bytearray = [];
+	var quotes = true;	//add double quotes to hexadecimal byte-values?
+	var quote = ((quotes)?'"':"");
+
+	var start = "var array_with_bytes = [\r\n\/\/Byte:";
+	for(i = 0; i<16; i++){
+		start += "\t"+decimalToHex(i,1);
+	}
+	start += "\t\tOffsets:\r\n\t";
+		
+	var begin = "\t"+quote+"0x", comma = quote+",", end = "";
+	
+	var block_size = 1024;	//use blocks to accellerate concat
+	var bytes_block = [];	//define empty block
+	
+	var total_progress = (Math.floor(source_bytearray.length/block_size));
+	for(var i = 0; i<source_bytearray.length; i++){
+		if(i%block_size==0){
+			console.log(
+				"Progress: ("+(Math.floor(i/block_size))+"\/"+total_progress+")"+
+				", i = "+i+
+				", source_bytearray.length = "+source_bytearray.length+
+				", txt_bytearray.length = "+txt_bytearray.length
+			);
+			txt_bytearray = txt_bytearray.concat(bytes_block);
+			bytes_block = [];
+		}
+		if(i==0){
+			end = "";			
+		}else if(i == (source_bytearray.length-1)){
+			comma =
+				quote + //no comma in the end
+				("\t\t\/\/ 0x"+(decimalToHex(((i+1)-(i+1)%16), 8))+" - 0x"+(decimalToHex(i, 8)) )	//add offsets
+			;
+			end = "\r\n";
+		}
+		else if((i+1)%16==0){
+			end = "\t\t\/\/ 0x"+(decimalToHex(((i+1)-16), 8))+" - 0x"+(decimalToHex(i, 8))+"\r\n\t";
+		}else if((i+1)%8==0){
+			end 	= "\t";	//one more tab
+		}else{
+			end 	= "";
+		}
+		bytes_block = bytes_block.concat((string2bytes( ( ( i == 0 ) ? start+begin : begin ) + (decimalToHex(parseInt(source_bytearray[i]), 2))+comma+end)));
+	}
+	
+	txt_bytearray = txt_bytearray.concat(bytes_block.concat(string2bytes("];")));	//add to end
+
+	//	Generate the link:
+	//create blob
+	var blob = new Blob([new Uint8Array(txt_bytearray).buffer], { type: "application/octet-binary" });
+	//create blob-url object
+	var url = window.URL.createObjectURL(blob);
+	//insert blob-url in href of the link
+	download_txt.href = url;
+	//generate filename
+	download_txt.download = "array_with_bytes.txt";
+	//display the link to download uTox.exe
+	download_txt.style.display = "inline-block";
+	
+	console.log("array_with_bytes.txt was been generated, link to download it - added... Finished!"); //Finish
+}
+</script>
