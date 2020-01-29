@@ -28,6 +28,25 @@ images/
     smile.gif
 */
 ```
+
+If you want to enable compression, you need to pass additional options to the `generateAsync` function:
+
+```javascript
+zip.generateAsync({
+
+   type:"blob",
+   compression: "DEFLATE",
+   compressionOptions: {
+    /* compression level ranges from 1 (best speed) to 9 (best compression) */
+    level: 9
+   }
+        
+}).then(function(content) {
+    saveAs(content, "example.zip");
+});
+
+```
+
 License
 -------
 
