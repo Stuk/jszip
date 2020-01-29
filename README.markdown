@@ -29,7 +29,7 @@ images/
 */
 ```
 
-If you want to enable compression, you need to pass additional options to the `generateAsync` function:
+**If you want to enable compression**, you need to pass additional options to the `generateAsync` function:
 
 ```javascript
 zip.generateAsync({
