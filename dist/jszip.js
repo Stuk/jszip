@@ -1,6 +1,6 @@
 /*!
 
-JSZip v3.3.0 - A JavaScript class for generating and reading zip files
+JSZip v3.4.0 - A JavaScript class for generating and reading zip files
 <http://stuartk.com/jszip>
 
 (c) 2009-2016 Stuart Knightley <stuart [at] stuartk.com>
@@ -1855,6 +1855,22 @@ DataReader.prototype = {
         this.checkOffset(size);
         for (i = this.index + size - 1; i >= this.index; i--) {
             result = (result << 8) + this.byteAt(i);
+        }
+        this.index += size;
+        return result;
+    },
+    /**
+     * Get the next number with a given byte size.
+     * Same as readInt but using * 256 so there is no conversion to int32.
+     * @param {number} size the number of bytes to read.
+     * @return {number} the corresponding number.
+     */
+    readLong: function(size) {
+        var result = 0,
+            i;
+        this.checkOffset(size);
+        for (i = this.index + size - 1; i >= this.index; i--) {
+            result = (result * 256) + this.byteAt(i);
         }
         this.index += size;
         return result;
@@ -3950,13 +3966,13 @@ ZipEntry.prototype = {
         // I really hope that these 64bits integer can fit in 32 bits integer, because js
         // won't let us have more.
         if (this.uncompressedSize === utils.MAX_VALUE_32BITS) {
-            this.uncompressedSize = extraReader.readInt(8);
+            this.uncompressedSize = extraReader.readLong(8);
         }
         if (this.compressedSize === utils.MAX_VALUE_32BITS) {
-            this.compressedSize = extraReader.readInt(8);
+            this.compressedSize = extraReader.readLong(8);
         }
         if (this.localHeaderOffset === utils.MAX_VALUE_32BITS) {
-            this.localHeaderOffset = extraReader.readInt(8);
+            this.localHeaderOffset = extraReader.readLong(8);
         }
         if (this.diskNumberStart === utils.MAX_VALUE_32BITS) {
             this.diskNumberStart = extraReader.readInt(4);
