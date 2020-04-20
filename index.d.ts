@@ -36,6 +36,7 @@ interface InputByType {
 
 interface OutputByType {
     base64: string;
+    string: string;
     text: string;
     binarystring: string;
     array: number[];
