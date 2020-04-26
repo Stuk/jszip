@@ -245,6 +245,22 @@ JSZipTestUtils.testZipFile("STORE is the default method", "ref/text.zip", functi
     })['catch'](JSZipTestUtils.assertNoError);
 });
 
+JSZipTestUtils.testZipFile("AES-256 encrypted", "ref/aes.zip", function(assert, expected) {
+    var zip = new JSZip();
+    zip.file("aes.txt", "aes encrypted");
+    var done = assert.async();
+    zip.generateAsync({type:"arraybuffer", password:"12345678", encryptStrength: 3})
+    .then(function(content) {
+        JSZip.loadAsync(content, {password:"12345678"})
+        .then(function success(zip) {
+            return zip.file("aes.txt").async("string");
+        }).then(function (content) {
+            assert.equal(content, "aes encrypted", "Generated ZIP matches reference ZIP");
+            done();
+        });
+    })['catch'](JSZipTestUtils.assertNoError);
+});
+
 
 function testLazyDecompression(assert, from, to) {
     var done = assert.async();
