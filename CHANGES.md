@@ -4,6 +4,14 @@ layout: default
 section: main
 ---
 
+### v3.4.0 2020 2020-04-19
+
+- Add Typescript type definitions (see [#601](https://github.com/Stuk/jszip/pull/601)).
+
+### v3.3.0 2020 2020-04-1
+
+- Change browser module resolution to support Angular packager (see [#614](https://github.com/Stuk/jszip/pull/614)).
+
 ### v3.2.2 2019-07-04
 - No public changes, but a number of testing dependencies have been updated.
 - Tested browsers are now: Internet Explorer 11, Chrome (most recent) and Firefox (most recent). Other browsers (specifically Safari) are still supported however testing them on Saucelabs is broken and so they were removed from the test matrix.
