@@ -85,6 +85,9 @@ module.exports = function(grunt) {
             },
             builtins: false
           },
+          transform: [
+            'browserify-shim'
+          ],
           banner: grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
         }
       }
