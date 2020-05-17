@@ -26,6 +26,7 @@
   "main": "./lib/index",
   "browser": {
     "readable-stream": "./lib/readable-stream-browser.js",
+    "sjcl": "./node_modules/sjcl/core/sjcl.js",
     ".": "./dist/jszip.min.js"
   },
   "types": "./index.d.ts",
@@ -40,6 +41,7 @@
   ],
   "devDependencies": {
     "browserify": "~13.0.0",
+    "browserify-shim": "^3.8.14",
     "grunt": "~0.4.1",
     "grunt-browserify": "~5.0.0",
     "grunt-cli": "~1.1.0",
@@ -57,7 +59,16 @@
     "lie": "~3.3.0",
     "pako": "~1.0.2",
     "readable-stream": "~2.3.6",
-    "set-immediate-shim": "~1.0.1"
+    "set-immediate-shim": "~1.0.1",
+    "sjcl": "^1.0.8"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "browserify-shim": {
+    "sjcl": "sjcl"
   },
   "license": "(MIT OR GPL-3.0)"
 }
