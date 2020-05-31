@@ -1,10 +1,9 @@
-/* jshint qunit: true */
-/* global JSZip,JSZipTestUtils */
+/* global QUnit,JSZip,JSZipTestUtils */
 'use strict';
 
 QUnit.module("deprecated");
 
-test("Removed load method throws an exception", function(assert) {
+QUnit.test("Removed load method throws an exception", function(assert) {
     var file = JSZipTestUtils.createZipAll().file("Hello.txt");
     assert.throws(
         function() {
@@ -14,7 +13,7 @@ test("Removed load method throws an exception", function(assert) {
         "load() throws an exception"
     );
 });
-test("Removed constructor with data throws an exception", function(assert) {
+QUnit.test("Removed constructor with data throws an exception", function(assert) {
     var file = JSZipTestUtils.createZipAll().file("Hello.txt");
     assert.throws(
         function() {
@@ -24,7 +23,7 @@ test("Removed constructor with data throws an exception", function(assert) {
         "new JSZip(data) throws an exception"
     );
 });
-test("Removed asText method throws an exception", function(assert) {
+QUnit.test("Removed asText method throws an exception", function(assert) {
     var file = JSZipTestUtils.createZipAll().file("Hello.txt");
     assert.throws(
         function() {
@@ -34,7 +33,7 @@ test("Removed asText method throws an exception", function(assert) {
         "file.asText() throws an exception"
     );
 });
-test("Removed generate method throws an exception", function(assert) {
+QUnit.test("Removed generate method throws an exception", function(assert) {
     var file = JSZipTestUtils.createZipAll().file("Hello.txt");
     assert.throws(
         function() {
