@@ -570,15 +570,15 @@ QUnit.module("load", function () {
         });
     });
 
-    JSZipTestUtils.testZipFile("zip file with extra field is Non-standard", "ref/extra_filed_non_standard.zip", function(file) {
-        stop();
+    JSZipTestUtils.testZipFile("zip file with extra field is Non-standard", "ref/extra_filed_non_standard.zip", function(assert, file) {
+        var done = assert.async();
         JSZip.loadAsync(file)
         .then(function success() {
-            start();
-            ok(true, "no exception were thrown");
+            assert.ok(true, "no exception were thrown");
+            done();
         }, function failure(e) {
-            start();
-            ok(false, "An exception were thrown: " + e.message);
+            assert.ok(false, "An exception were thrown: " + e.message);
+            done();
         });
     });
 
