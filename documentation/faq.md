@@ -15,7 +15,7 @@ decode the binary content as a text and corrupt it. See
 
 That happens if you try to handle to much data with the synchronous API. If
 possible, try the asynchronous API, see
-[this page]({{site.baseurl}}/documentation/limitations.html) for more informations.
+[this page]({{site.baseurl}}/documentation/limitations.html) for more information.
 
 ### Can't read the data of [...]. Is it in a supported JavaScript type ?
 

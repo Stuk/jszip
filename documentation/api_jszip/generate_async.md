@@ -186,7 +186,7 @@ zip.generateAsync({
 If specified, this function will be called each time a chunk is pushed to the
 output stream (or internally accumulated).
 
-The function takes a `metadata` object which contains informations about the
+The function takes a `metadata` object which contains information about the
 ongoing process.
 
 __Metadata__ : the metadata are:
