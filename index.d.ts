@@ -154,7 +154,7 @@ interface JSZip {
      * @param Path relative path to file
      * @return File matching path, null if no file found
      */
-    file(path: string): JSZip.JSZipObject;
+    file(path: string): JSZip.JSZipObject | null;
 
     /**
      * Get files matching a RegExp from archive
@@ -181,7 +181,7 @@ interface JSZip {
      * @param name Name of the folder
      * @return New JSZip object with the given folder as root or null
      */
-    folder(name: string): JSZip;
+    folder(name: string): JSZip | null;
 
     /**
      * Returns new JSZip instances with the matching folders as root
