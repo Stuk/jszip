@@ -578,6 +578,18 @@ QUnit.module("load", function () {
         });
     });
 
+    JSZipTestUtils.testZipFile("zip file with extra field is Non-standard", "ref/extra_filed_non_standard.zip", function(file) {
+        stop();
+        JSZip.loadAsync(file)
+        .then(function success() {
+            start();
+            ok(true, "no exception were thrown");
+        }, function failure(e) {
+            start();
+            ok(false, "An exception were thrown: " + e.message);
+        });
+    });
+
     test("not a zip file", function() {
         stop();
         JSZip.loadAsync("this is not a zip file")
