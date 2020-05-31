@@ -1,6 +1,6 @@
 /*!
 
-JSZip v3.3.0 - A JavaScript class for generating and reading zip files
+JSZip v3.4.0 - A JavaScript class for generating and reading zip files
 <http://stuartk.com/jszip>
 
 (c) 2009-2016 Stuart Knightley <stuart [at] stuartk.com>
