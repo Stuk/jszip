@@ -80,7 +80,7 @@ declare namespace JSZip {
          * @return Promise the promise of the result.
          */
         async<T extends OutputType>(type: T, onUpdate?: OnUpdateCallback): Promise<OutputByType[T]>;
-        nodeStream(type?: 'nodestream', onUpdate?: OnUpdateCallback): NodeJS.ReadableStream;
+        nodeStream(type?: 'nodebuffer', onUpdate?: OnUpdateCallback): NodeJS.ReadableStream;
     }
 
     interface JSZipFileOptions {
