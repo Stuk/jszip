@@ -4,6 +4,13 @@ layout: default
 section: main
 ---
 
+### v3.5.0 2020 2020-05-31
+
+- Fix 'End of data reached' error when file extra field is invalid (see [#544](https://github.com/Stuk/jszip/pull/544)).
+- Typescript definitions: Add null to return types of functions that may return null (see [#669](https://github.com/Stuk/jszip/pull/669)).
+- Typescript definitions: Correct nodeStream's type (see [#682](https://github.com/Stuk/jszip/pull/682))
+- Typescript definitions: Add string output type (see [#666](https://github.com/Stuk/jszip/pull/666))
+
 ### v3.4.0 2020 2020-04-19
 
 - Add Typescript type definitions (see [#601](https://github.com/Stuk/jszip/pull/601)).
