@@ -243,6 +243,24 @@ interface JSZip {
     loadAsync(data: InputFileFormat, options?: JSZip.JSZipLoadOptions): Promise<JSZip>;
 
     /**
+     * Rename an entry inside the zip
+     *
+     * @param {string} from
+     * @param {string} to
+     * @returns {JSZip}
+     */
+    rename(from: string, to: string): this;
+
+    /**
+     * Copy an entry inside the zip
+     *
+     * @param {string} from
+     * @param {string} to
+     * @returns {JSZip}
+     */
+    copy(from: string, to: string): this;
+
+    /**
      * Create JSZip instance
      */
 
