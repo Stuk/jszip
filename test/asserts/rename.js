@@ -3,12 +3,14 @@
 
 QUnit.module("rename");
 
+var date = new Date("2020-07-05T15:03:26.000Z");
+
 JSZipTestUtils.testZipFile("rename file", "ref/rename_file.zip", function (assert, expected) {
     var zip = new JSZip();
-    zip.file("file1.txt", "This file should not be renamed\n");
-    zip.file("file2.txt", "This file should not be renamed\n");
-    zip.file("file3.txt", "This file should not be renamed\n");
-    zip.file("rename.txt", "This file should be renamed\n");
+    zip.file("file1.txt", "This file should not be renamed\n", {date: date});
+    zip.file("file2.txt", "This file should not be renamed\n", {date: date});
+    zip.file("file3.txt", "This file should not be renamed\n", {date: date});
+    zip.file("rename.txt", "This file should be renamed\n", {date: date});
     zip.rename("rename.txt", "renamed.txt");
     var done = assert.async();
     zip.generateAsync({type: "binarystring"}).then(function (actual) {
@@ -19,9 +21,9 @@ JSZipTestUtils.testZipFile("rename file", "ref/rename_file.zip", function (asser
 
 JSZipTestUtils.testZipFile("rename folder", "ref/rename_folder.zip", function (assert, expected) {
     var zip = new JSZip();
-    zip.file("file1.txt", "This file should not be renamed\n");
-    zip.file("rename/file2.txt", "This file should not be renamed\n");
-    zip.file("rename/file3.txt", "This file should not be renamed\n");
+    zip.file("file1.txt", "This file should not be renamed\n", {date: date});
+    zip.file("rename/file2.txt", "This file should not be renamed\n", {date: date});
+    zip.file("rename/file3.txt", "This file should not be renamed\n", {date: date});
     zip.rename("rename/", "renamed/");
     var done = assert.async();
     zip.generateAsync({type: "binarystring"}).then(function (actual) {
@@ -32,10 +34,10 @@ JSZipTestUtils.testZipFile("rename folder", "ref/rename_folder.zip", function (a
 
 JSZipTestUtils.testZipFile("rename file to folder", "ref/rename_file_to_folder.zip", function (assert, expected) {
     var zip = new JSZip();
-    zip.file("file1.txt", "This file should not be renamed\n");
-    zip.file("file2.txt", "This file should not be renamed\n");
-    zip.file("folder/file3.txt", "This file should not be renamed\n");
-    zip.file("rename.txt", "This file should be renamed\n");
+    zip.file("file1.txt", "This file should not be renamed\n", {date: date});
+    zip.file("file2.txt", "This file should not be renamed\n", {date: date});
+    zip.file("folder/file3.txt", "This file should not be renamed\n", {date: date});
+    zip.file("rename.txt", "This file should be renamed\n", {date: date});
     zip.rename("rename.txt", "folder/renamed.txt");
     var done = assert.async();
     zip.generateAsync({type: "binarystring"}).then(function (actual) {
@@ -46,9 +48,9 @@ JSZipTestUtils.testZipFile("rename file to folder", "ref/rename_file_to_folder.z
 
 JSZipTestUtils.testZipFile("rename folder to sub folder", "ref/rename_folder_to_sub_folder.zip", function (assert, expected) {
     var zip = new JSZip();
-    zip.file("folder/file1.txt", "This file should be renamed\n");
-    zip.file("folder/file2.txt", "This file should be renamed\n");
-    zip.file("folder/file3.txt", "This file should be renamed\n");
+    zip.file("folder/file1.txt", "This file should be renamed\n", {date: date});
+    zip.file("folder/file2.txt", "This file should be renamed\n", {date: date});
+    zip.file("folder/file3.txt", "This file should be renamed\n", {date: date});
     zip.rename("folder/", "newfolder/folder/");
     var done = assert.async();
     zip.generateAsync({type: "binarystring"}).then(function (actual) {
