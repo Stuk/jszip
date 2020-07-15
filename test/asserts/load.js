@@ -425,7 +425,28 @@ QUnit.module("load", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
+    JSZipTestUtils.testZipFile("aes encrypted zip file", "ref/aes.zip", function(assert, file) {
+        var done = assert.async();
+        JSZip.loadAsync(file, {password: "12345678"})
+        .then(function success(zip) {
+            return zip.file("aes.txt").async("string");
+        }).then(function (content) {
+            assert.equal(content, "aes encrypted", "the zip was correctly read.");
+            done();
+        })['catch'](JSZipTestUtils.assertNoError);
+    });
 
+    JSZipTestUtils.testZipFile("aes encrypted only one zip file", "ref/aes_only_one.zip", function(assert, file) {
+        var done = assert.async();
+        JSZip.loadAsync(file)
+        .then(function success(zip) {
+            return zip.file("aes.txt").password("12345678").async("string");
+        }).then(function (content) {
+            assert.equal(content, "aes encrypted", "the zip was correctly read.");
+            done();
+        })['catch'](JSZipTestUtils.assertNoError);
+    });
+    
     JSZipTestUtils.testZipFile("load(promise) works", "ref/all.zip", function(assert, fileAsString) {
         var done = assert.async();
         JSZip.loadAsync(JSZip.external.Promise.resolve(fileAsString))
@@ -525,7 +546,7 @@ QUnit.module("load", function () {
             assert.ok(false, "Encryption is not supported, but no exception were thrown");
             done();
         }, function failure(e) {
-            assert.equal(e.message, "Encrypted zip are not supported", "the error message is useful");
+            assert.equal(e.message, "Encrypted zip: unsupported encrypt method", "the error message is useful");
             done();
         });
     });
