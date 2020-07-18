@@ -40,7 +40,7 @@
   ],
   "devDependencies": {
     "browserify": "~13.0.0",
-    "grunt": "~0.4.1",
+    "grunt": "^1.2.1",
     "grunt-browserify": "^5.3.0",
     "grunt-cli": "~1.1.0",
     "grunt-contrib-connect": "~2.0.0",
