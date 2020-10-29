@@ -96,7 +96,13 @@ declare namespace JSZip {
          * The last modification date, defaults to the current date.
          */
         date?: Date;
+        /**
+         * Sets per file compression. The `compressionOptions` parameter depends on the compression type.
+         */
         compression?: Compression;
+        /**
+         * Sets per file compression level. With `STORE` (no compression), this parameter is ignored. With `DEFLATE`, you can give the compression level with `compressionOptions : {level:6}` (or any level between 1 (best speed) and 9 (best compression)).
+         */
         compressionOptions?: null | {
             level: number;
         };
@@ -123,6 +129,9 @@ declare namespace JSZip {
 
     interface JSZipGeneratorOptions<T extends OutputType = OutputType> {
         compression?: Compression;
+        /**
+         * The `compressionOptions` parameter depends on the compression type. With `STORE` (no compression), this parameter is ignored. With `DEFLATE`, you can give the compression level with `compressionOptions : {level:6}` (or any level between 1 (best speed) and 9 (best compression)).
+         */
         compressionOptions?: null | {
             level: number;
         };
