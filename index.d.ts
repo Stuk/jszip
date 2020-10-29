@@ -96,7 +96,10 @@ declare namespace JSZip {
          * The last modification date, defaults to the current date.
          */
         date?: Date;
-        compression?: string;
+        compression?: Compression;
+        compressionOptions?: null | {
+            level: number;
+        };
         comment?: string;
         /** Set to `true` if (and only if) the input is a "binary string" and has already been prepared with a `0xFF` mask. */
         optimizedBinaryString?: boolean;
