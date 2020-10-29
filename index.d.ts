@@ -128,6 +128,9 @@ declare namespace JSZip {
     }
 
     interface JSZipGeneratorOptions<T extends OutputType = OutputType> {
+        /**
+         * Sets compression option for all entries that have not specified their own `compression` option
+         */
         compression?: Compression;
         /**
          * The `compressionOptions` parameter depends on the compression type. With `STORE` (no compression), this parameter is ignored. With `DEFLATE`, you can give the compression level with `compressionOptions : {level:6}` (or any level between 1 (best speed) and 9 (best compression)).
