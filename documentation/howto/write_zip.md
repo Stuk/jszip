@@ -63,7 +63,7 @@ with the following changes:
 
 ```js
 zip = new JSZip();
-zip.file("Hello.", "hello.txt");
+zip.file("hello.txt", "Hello.");
 
 zip.generateAsync({type:"base64"}).then(function (base64) {
     Downloadify.create('downloadify',{
