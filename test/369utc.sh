@@ -1,6 +1,5 @@
 
 #!/bin/sh -xe
-
 # test case for https://github.com/Stuk/jszip/issues/369
 
 rm -f example.zip Hello.txt
@@ -17,9 +16,11 @@ modseconds=`date --date="${moddatestring}" +"%s"`
 echo mod seconds $modseconds
 nowseconds=` date +"%s"`
 echo now  $nowseconds
-
 if [ $modseconds -gt $nowseconds ]; then
   echo error - time travel is not possible - file is from the future
+  exit -4
 fi
+echo pass
+exit 0;
 
 
