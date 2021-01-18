@@ -3,7 +3,7 @@
 # test case for https://github.com/Stuk/jszip/issues/369
 
 rm -f example.zip Hello.txt
-export  TZ=PST5PDT
+export  TZ=EST5EDT
 node  369utc.js #creates exmaple.zip 
 unzip example.zip
 echo mod time 
