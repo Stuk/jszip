@@ -39,25 +39,25 @@
     "inflate"
   ],
   "devDependencies": {
-    "browserify": "~13.0.0",
-    "grunt": "~0.4.1",
-    "grunt-browserify": "~5.0.0",
-    "grunt-cli": "~1.1.0",
-    "grunt-contrib-connect": "~2.0.0",
-    "grunt-contrib-jshint": "~1.0.0",
-    "grunt-contrib-uglify": "~4.0.1",
+    "browserify": "^13.0.0",
+    "grunt": "^0.4.1",
+    "grunt-browserify": "^5.0.0",
+    "grunt-cli": "^1.1.0",
+    "grunt-contrib-connect": "^2.0.0",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-uglify": "^4.0.1",
     "grunt-saucelabs": "Stuk/grunt-saucelabs#v10.0.0",
-    "jshint": "~2.9.1",
-    "jszip-utils": "~0.0.2",
+    "jshint": "^2.9.1",
+    "jszip-utils": "^0.0.2",
     "package-json-versionify": "1.0.2",
-    "qunit": "~2.9.2",
+    "qunit": "^2.9.2",
     "tmp": "0.0.28"
   },
   "dependencies": {
-    "lie": "~3.3.0",
-    "pako": "~1.0.2",
-    "readable-stream": "~2.3.6",
-    "set-immediate-shim": "~1.0.1"
+    "lie": "^3.3.0",
+    "pako": "^1.0.2",
+    "readable-stream": "^2.3.6",
+    "set-immediate-shim": "^1.0.1"
   },
   "license": "(MIT OR GPL-3.0)"
 }
