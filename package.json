@@ -46,6 +46,7 @@
     "grunt-contrib-connect": "^2.0.0",
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-uglify": "^4.0.1",
+    "grunt-extract-sourcemap": "^0.1.19",
     "grunt-saucelabs": "Stuk/grunt-saucelabs#v10.0.0",
     "jshint": "^2.9.1",
     "jszip-utils": "^0.0.2",

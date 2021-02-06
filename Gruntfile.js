@@ -83,9 +83,17 @@ module.exports = function(grunt) {
               __filename: undefined,
               __dirname: undefined
             },
-            builtins: false
+            builtins: false,
+            debug: true
           },
           banner: grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
+        }
+      }
+    },
+    extract_sourcemap: {
+      all: {
+        files: {
+          'dist': ['dist/jszip.js'],
         }
       }
     },
@@ -93,7 +101,8 @@ module.exports = function(grunt) {
       options: {
         mangle: true,
         preserveComments: false,
-        banner: grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version)
+        banner: grunt.file.read('lib/license_header.js').replace(/__VERSION__/, version),
+        sourceMap: true
       },
       all: {
         src: 'dist/jszip.js',
@@ -107,6 +116,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-extract-sourcemap');
 
   // A task to cause Grunt to sit and wait, keeping the test server running
   grunt.registerTask("wait", function() {
@@ -121,6 +131,6 @@ module.exports = function(grunt) {
   } else {
     grunt.registerTask("test", ["jshint", "test-local"]);
   }
-  grunt.registerTask("build", ["browserify", "uglify"]);
+  grunt.registerTask("build", ["browserify", "extract_sourcemap", "uglify"]);
   grunt.registerTask("default", ["jshint", "build"]);
 };
