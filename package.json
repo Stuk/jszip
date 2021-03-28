@@ -1,6 +1,6 @@
 {
   "name": "jszip",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "author": "Stuart Knightley <stuart@stuartk.com>",
   "description": "Create, read and edit .zip files with JavaScript http://stuartk.com/jszip",
   "scripts": {
@@ -26,7 +26,7 @@
   "main": "./lib/index",
   "browser": {
     "readable-stream": "./lib/readable-stream-browser.js",
-    ".": "./dist/jszip.min.js"
+    "./lib/index": "./dist/jszip.min.js"
   },
   "types": "./index.d.ts",
   "repository": {

@@ -4,6 +4,12 @@ layout: default
 section: main
 ---
 
+### v3.6.0 2020 2021-02-09
+
+- Fix: redirect main to dist on browsers (see [#742](https://github.com/Stuk/jszip/pull/742))
+- Fix duplicate require DataLengthProbe, utils (see [#734](https://github.com/Stuk/jszip/pull/734))
+- Fix small error in read_zip.md (see [#703](https://github.com/Stuk/jszip/pull/703))
+
 ### v3.5.0 2020 2020-05-31
 
 - Fix 'End of data reached' error when file extra field is invalid (see [#544](https://github.com/Stuk/jszip/pull/544)).

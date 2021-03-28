@@ -196,7 +196,7 @@ request({
   }
   JSZip.loadAsync(body).then(function (zip) {
     return zip.file("content.txt").async("string");
-  }).then(function () {
+  }).then(function (text) {
     console.log(text);
   });
 });
