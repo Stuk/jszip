@@ -1,11 +1,11 @@
 {
   "name": "jszip",
-  "version": "3.1.5",
+  "version": "3.6.0",
   "author": "Stuart Knightley <stuart@stuartk.com>",
   "description": "Create, read and edit .zip files with JavaScript http://stuartk.com/jszip",
   "scripts": {
     "test": "npm run test-node && npm run test-browser",
-    "test-node": "qunit-cli -c test/helpers/test-utils.js test/helpers/node-test-utils.js test/asserts/*.js",
+    "test-node": "qunit --require ./test/helpers/test-utils.js --require ./test/helpers/node-test-utils.js test/asserts/",
     "test-browser": "grunt build && grunt test",
     "lint": "grunt jshint"
   },
@@ -25,8 +25,10 @@
   ],
   "main": "./lib/index",
   "browser": {
-    "readable-stream": "./lib/readable-stream-browser.js"
+    "readable-stream": "./lib/readable-stream-browser.js",
+    "./lib/index": "./dist/jszip.min.js"
   },
+  "types": "./index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/Stuk/jszip.git"
@@ -37,29 +39,25 @@
     "inflate"
   ],
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-cli": "~1.1.0",
-    "grunt-saucelabs": "8.6.2",
-    "grunt-contrib-connect": "1.0.0",
-    "jshint": "~2.9.1",
     "browserify": "~13.0.0",
+    "grunt": "~0.4.1",
     "grunt-browserify": "~5.0.0",
+    "grunt-cli": "~1.1.0",
+    "grunt-contrib-connect": "~2.0.0",
     "grunt-contrib-jshint": "~1.0.0",
-    "grunt-contrib-qunit": "~1.2.0",
-    "grunt-contrib-uglify": "~1.0.0",
-    "phantomjs-prebuilt": "2.1.15",
+    "grunt-contrib-uglify": "~4.0.1",
+    "grunt-saucelabs": "Stuk/grunt-saucelabs#v10.0.0",
+    "jshint": "~2.9.1",
     "jszip-utils": "~0.0.2",
     "package-json-versionify": "1.0.2",
-    "qunit-cli": "~0.2.0",
-    "qunitjs": "~1.23.0",
+    "qunit": "~2.9.2",
     "tmp": "0.0.28"
   },
   "dependencies": {
-    "core-js": "~2.3.0",
-    "es6-promise": "~3.0.2",
-    "lie": "~3.1.0",
+    "lie": "~3.3.0",
     "pako": "~1.0.2",
-    "readable-stream": "~2.0.6"
+    "readable-stream": "~2.3.6",
+    "set-immediate-shim": "~1.0.1"
   },
-  "license": "(MIT OR GPL-3.0)"
+  "license": "(MIT OR GPL-3.0-or-later)"
 }

@@ -60,3 +60,15 @@ before running the `npm run test-browser` command.
 
 If you have tested bug fixes or new features, you can open a
 [pull request](https://help.github.com/articles/using-pull-requests) on Github.
+
+## Releasing a new version
+
+1. Run `npm test`
+    * Locally open http://localhost:8080/test/
+    * Or use the SauceLabs configuration above
+2. Update `JSZip.version` in `index.js` and in `package.json`
+3. Run `grunt` to generate the new dist files
+    * undo the package.json change, it was just needed to replace the `__VERSION__` in the header
+4. Update CHANGES.md
+5. Run `npm version ...` where `...` is `major`, `minor`, or `patch`
+6. Run npm publish
