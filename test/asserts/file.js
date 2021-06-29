@@ -442,6 +442,27 @@ QUnit.module("file", function () {
         });
     }
 
+    QUnit.test('add UTF-8 text without a Promise', async function (assert) {
+        var zip = new JSZip();
+        zip.file("file.html", "Hèllo");
+        const output = await zip.file("file.html").async("text");
+        assert.equal(output, "Hèllo");
+    });
+
+    QUnit.test('add UTF-8 text as a Promise with binary: false', async function (assert) {
+        var zip = new JSZip();
+        zip.file("file.html", Promise.resolve("Hèllo"), { binary: false });
+        const output = await zip.file("file.html").async("text");
+        assert.equal(output, "Hèllo");
+    });
+
+    QUnit.test('add UTF-8 text as a Promise without binary: false', async function (assert) {
+        var zip = new JSZip();
+        zip.file("file.html", Promise.resolve("Hèllo"));
+        const output = await zip.file("file.html").async("text");
+        assert.equal(output, "Hèllo");
+    });
+
     QUnit.test("add file: file(name, polyfill Promise[string] as binary)", function (assert) {
         var str2promise = function (str) {
             return new JSZip.external.Promise(function(resolve, reject) {
