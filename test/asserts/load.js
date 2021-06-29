@@ -17,6 +17,19 @@ QUnit.module("load", function () {
         })['catch'](JSZipTestUtils.assertNoError);
     });
 
+    JSZipTestUtils.testZipFile("Load files which shadow Object prototype methods", "ref/pollution.zip", function(assert, file) {
+        var done = assert.async();
+        assert.ok(typeof file === "string");
+        JSZip.loadAsync(file)
+        .then(function (zip) {
+            assert.notEqual(Object.getPrototypeOf(zip.files), zip.files.__proto__);
+            return zip.file("__proto__").async("string");        })
+        .then(function(result) {
+            assert.equal(result, "hello\n", "the zip was correctly read.");
+            done();
+        })['catch'](JSZipTestUtils.assertNoError);
+    });
+
     JSZipTestUtils.testZipFile("load(string) handles bytes > 255", "ref/all.zip", function(assert, file) {
         var done = assert.async();
         // the method used to load zip with ajax will remove the extra bits.
