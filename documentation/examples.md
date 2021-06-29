@@ -106,7 +106,7 @@ if (JSZip.support.uint8array) {
 
 With `.loadAsync(data)` you can load a zip file. Check
 [this page]({{site.baseurl}}/documentation/howto/read_zip.html) to see how to
-do properly (it's more tricky that it seems).
+do properly (it's more tricky than it seems).
 
 ```js
 var new_zip = new JSZip();
