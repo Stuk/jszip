@@ -146,6 +146,46 @@ declare namespace JSZip {
     }
 }
 
+declare namespace StreamHelper {
+    type DataEventCallback = (dataChunk: any, metadata: any) => any
+    type EndEventCallback = () => any
+    type ErrorEventCallback = (error: Error) => any
+
+    interface StreamHelper {
+        /**
+         * Register a listener on an event
+         *
+         * @param event The name of the event. Only 3 events are supported : data, end and error
+         * @param callback The function called when the event occurs
+         * @return The current StreamHelper object, for chaining
+         */
+        on(event: 'data' | 'end' | 'error', callback: DataEventCallback | EndEventCallback | ErrorEventCallback);
+
+        /**
+         * Read the whole stream and call a callback with the complete content
+         *
+         * @param updateCallback The function called every time the stream updates
+         * @param metadata Metadata contains for example currentFile and percent
+         * @return A Promise of the full content
+         */
+        accumulate(updateCallback?): Promise<any>;
+
+        /**
+         * Resume the stream if the stream is paused. Once resumed, the stream starts sending data events again
+         *
+         * @return The current StreamHelper object, for chaining
+         */
+        resume(): StreamHelper;
+
+        /**
+         * Pause the stream if the stream is running. Once paused, the stream stops sending data events
+         *
+         * @return The current StreamHelper object, for chaining
+         */
+        pause(): StreamHelper;
+    }
+}
+
 interface JSZip {
     files: {[key: string]: JSZip.JSZipObject};
 
@@ -233,6 +273,14 @@ interface JSZip {
      */
     generateNodeStream(options?: JSZip.JSZipGeneratorOptions<'nodebuffer'>, onUpdate?: OnUpdateCallback): NodeJS.ReadableStream;
 
+    /**
+     * Generates the complete zip file with the internal stream implementation
+     *
+     * @param options Optional options for the generator
+     * @return a StreamHelper
+     */
+    generateInternalStream(options?: JSZip.JSZipGeneratorOptions): StreamHelper.StreamHelper
+    
     /**
      * Deserialize zip file asynchronously
      *
