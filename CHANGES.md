@@ -4,6 +4,11 @@ layout: default
 section: main
 ---
 
+### v3.7.1 2021-08-05
+
+- Fix build of `dist` files.
+    + Note: this version ensures the changes from 3.7.0 are actually included in the `dist` files. Thanks to Evan W for reporting. 
+
 ### v3.7.0 2021-07-23
 
 - Fix: Use a null prototype object for this.files  (see [#766](https://github.com/Stuk/jszip/pull/766))
