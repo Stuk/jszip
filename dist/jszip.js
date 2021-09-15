@@ -1112,27 +1112,72 @@ module.exports = function (data, options) {
     if (nodejsUtils.isNode && nodejsUtils.isStream(data)) {
         return external.Promise.reject(new Error("JSZip can't accept a stream when loading a zip file."));
     }
-
-    return utils.prepareContent("the loaded zip file", data, true, options.optimizedBinaryString, options.base64)
-        .then(function (data) {
-            var zipEntries = new ZipEntries(options);
-            zipEntries.load(data);
-            return zipEntries;
-        }).then(function checkCRC32(zipEntries) {
-            var promises = [external.Promise.resolve(zipEntries)];
-            var files = zipEntries.files;
-            if (options.checkCRC32) {
-                for (var i = 0; i < files.length; i++) {
-                    promises.push(checkEntryCRC32(files[i]));
-                }
+    let getGBK = function (obj) {
+        let fileName = obj.fileName,
+          //Utf8Code = '',
+          otherCode = '',
+          chaeset = 'utf-8',
+          len = 0;
+        for (let i = 0; i < fileName.length; i++) {
+          let code = fileName[i];
+          let Code16 = code.toString(16).toUpperCase(),
+            cnt = code.toString(2),
+            size = code >> 4;
+          //Utf8Code += '%' + Code16;
+          if (len) {
+            otherCode += Code16;
+            len--;
+          } else if (code < 128) {
+            otherCode = '';
+          } else {
+            if (size = 15) {
+              //4 char is not be a utf8
+              chaeset = 'gbk';
+              len = 3;
+              break;
+            } else if (size == 14) {
+              len = 2;
+            } else if (size == 12 || size == 13) {
+              len = 1;
             }
-            return external.Promise.all(promises);
+            otherCode = Code16;
+          }
+        }
+        console.log(chaeset);
+        return new Promise((resolve, reject) => {
+          if(chaeset=='utf-8'){
+            //return null;//using the Original decoding?
+            return resolve(String.fromCharCode.apply(null,fileName));
+          }
+          let reader = new FileReader();
+          reader.onload = e => resolve(reader.result);
+          reader.readAsText(new Blob([fileName]), chaeset);
+        });
+      };
+  return utils.prepareContent("the loaded zip file", data, true, options.optimizedBinaryString, options.base64)
+      .then(function (data) {
+          var zipEntries = new ZipEntries(options);
+          zipEntries.load(data);
+          return zipEntries;
+      }).then(async function checkCRC32(zipEntries) {
+          //var promises = [external.Promise.resolve(zipEntries)];
+          var files = zipEntries.files;
+          for (var i = 0; i < files.length; i++) {
+            files[i].CN = await getGBK(files[i]);
+            //promises.push(
+            if (options.checkCRC32) {
+              await checkEntryCRC32(files[i])
+              //);
+            }
+          }
+         return zipEntries;
         }).then(function addFiles(results) {
-            var zipEntries = results.shift();
-            var files = zipEntries.files;
-            for (var i = 0; i < files.length; i++) {
-                var input = files[i];
-                zip.file(input.fileNameStr, input.decompressed, {
+          var zipEntries = results;
+          var files = zipEntries.files;
+          for (var i = 0; i < files.length; i++) {
+              var input = files[i];
+              zip.file(input.CN ||input.fileNameStr, input.decompressed, {
+                    name:input.CN||input.fileNameStr,
                     binary: true,
                     optimizedBinaryString: true,
                     date: input.date,
