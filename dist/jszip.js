@@ -1855,7 +1855,7 @@ DataReader.prototype = {
             i;
         this.checkOffset(size);
         for (i = this.index + size - 1; i >= this.index; i--) {
-            result = (result << 8) + this.byteAt(i);
+            result = (result * 256) + this.byteAt(i);
         }
         this.index += size;
         return result;
