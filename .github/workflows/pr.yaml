@@ -1,0 +1,20 @@
+name: pull-request
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+      - run: npm install
+
+      - run: npm run lint
+      - run: npm run test-node
+      - run: npm run test-browser
