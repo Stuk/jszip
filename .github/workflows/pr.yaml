@@ -15,6 +15,9 @@ jobs:
           cache: 'npm'
       - run: npm install
 
-      - run: npm run lint
-      - run: npm run test-node
-      - run: npm run test-browser
+      - name: Lint
+        run: npm run lint
+      - name: Test Node
+        run: npm run test-node
+      - name: Test browsers
+        run: npm run test-browser
