@@ -17,8 +17,7 @@ $(form).on('submit', e => {
 
 To convert from the FormData to zip all of the files, you can parse it easily and add all of the files to the zip:
 
-```
-
+```js
 $('form#myform').on('submit', e => {
   e.preventDefault();
   const form = new FormData(e.target);
