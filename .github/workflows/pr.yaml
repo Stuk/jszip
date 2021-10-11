@@ -20,4 +20,6 @@ jobs:
       - name: Test Node
         run: npm run test-node
       - name: Test browsers
-        run: npm run test-browser
+        run: |
+          sudo npx playwright install-deps
+          npm run test-browser
