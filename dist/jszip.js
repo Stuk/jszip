@@ -1,6 +1,6 @@
 /*!
 
-JSZip v3.5.0 - A JavaScript class for generating and reading zip files
+JSZip v3.7.1 - A JavaScript class for generating and reading zip files
 <http://stuartk.com/jszip>
 
 (c) 2009-2016 Stuart Knightley <stuart [at] stuartk.com>
@@ -123,7 +123,6 @@ exports.decode = function(input) {
 
 var external = require("./external");
 var DataWorker = require('./stream/DataWorker');
-var DataLengthProbe = require('./stream/DataLengthProbe');
 var Crc32Probe = require('./stream/Crc32Probe');
 var DataLengthProbe = require('./stream/DataLengthProbe');
 
@@ -149,14 +148,14 @@ CompressedObject.prototype = {
      * Create a worker to get the uncompressed content.
      * @return {GenericWorker} the worker.
      */
-    getContentWorker : function () {
+    getContentWorker: function () {
         var worker = new DataWorker(external.Promise.resolve(this.compressedContent))
-        .pipe(this.compression.uncompressWorker())
-        .pipe(new DataLengthProbe("data_length"));
+            .pipe(this.compression.uncompressWorker())
+            .pipe(new DataLengthProbe("data_length"));
 
         var that = this;
         worker.on("end", function () {
-            if(this.streamInfo['data_length'] !== that.uncompressedSize) {
+            if (this.streamInfo['data_length'] !== that.uncompressedSize) {
                 throw new Error("Bug : uncompressed data size mismatch");
             }
         });
@@ -166,13 +165,13 @@ CompressedObject.prototype = {
      * Create a worker to get the compressed content.
      * @return {GenericWorker} the worker.
      */
-    getCompressedWorker : function () {
+    getCompressedWorker: function () {
         return new DataWorker(external.Promise.resolve(this.compressedContent))
-        .withStreamInfo("compressedSize", this.compressedSize)
-        .withStreamInfo("uncompressedSize", this.uncompressedSize)
-        .withStreamInfo("crc32", this.crc32)
-        .withStreamInfo("compression", this.compression)
-        ;
+            .withStreamInfo("compressedSize", this.compressedSize)
+            .withStreamInfo("uncompressedSize", this.uncompressedSize)
+            .withStreamInfo("crc32", this.crc32)
+            .withStreamInfo("compression", this.compression)
+            ;
     }
 };
 
@@ -186,11 +185,11 @@ CompressedObject.prototype = {
  */
 CompressedObject.createWorkerFrom = function (uncompressedWorker, compression, compressionOptions) {
     return uncompressedWorker
-    .pipe(new Crc32Probe())
-    .pipe(new DataLengthProbe("uncompressedSize"))
-    .pipe(compression.compressWorker(compressionOptions))
-    .pipe(new DataLengthProbe("compressedSize"))
-    .withStreamInfo("compression", compression);
+        .pipe(new Crc32Probe())
+        .pipe(new DataLengthProbe("uncompressedSize"))
+        .pipe(compression.compressWorker(compressionOptions))
+        .pipe(new DataLengthProbe("compressedSize"))
+        .withStreamInfo("compression", compression);
 };
 
 module.exports = CompressedObject;
@@ -1034,7 +1033,10 @@ function JSZip() {
     //   "folder/" : {...},
     //   "folder/data.txt" : {...}
     // }
-    this.files = {};
+    // NOTE: we use a null prototype because we do not
+    // want filenames like "toString" coming from a zip file
+    // to overwrite methods and attributes in a normal Object.
+    this.files = Object.create(null);
 
     this.comment = null;
 
@@ -1057,7 +1059,7 @@ JSZip.defaults = require('./defaults');
 
 // TODO find a better way to handle this version,
 // a require('package.json').version doesn't work with webpack, see #327
-JSZip.version = "3.5.0";
+JSZip.version = "3.7.1";
 
 JSZip.loadAsync = function (content, options) {
     return new JSZip().loadAsync(content, options);
@@ -1071,7 +1073,6 @@ module.exports = JSZip;
 var utils = require('./utils');
 var external = require("./external");
 var utf8 = require('./utf8');
-var utils = require('./utils');
 var ZipEntries = require('./zipEntries');
 var Crc32Probe = require('./stream/Crc32Probe');
 var nodejsUtils = require("./nodejsUtils");
@@ -1087,18 +1088,18 @@ function checkEntryCRC32(zipEntry) {
         worker.on("error", function (e) {
             reject(e);
         })
-        .on("end", function () {
-            if (worker.streamInfo.crc32 !== zipEntry.decompressed.crc32) {
-                reject(new Error("Corrupted zip : CRC32 mismatch"));
-            } else {
-                resolve();
-            }
-        })
-        .resume();
+            .on("end", function () {
+                if (worker.streamInfo.crc32 !== zipEntry.decompressed.crc32) {
+                    reject(new Error("Corrupted zip : CRC32 mismatch"));
+                } else {
+                    resolve();
+                }
+            })
+            .resume();
     });
 }
 
-module.exports = function(data, options) {
+module.exports = function (data, options) {
     var zip = this;
     options = utils.extend(options || {}, {
         base64: false,
@@ -1113,41 +1114,41 @@ module.exports = function(data, options) {
     }
 
     return utils.prepareContent("the loaded zip file", data, true, options.optimizedBinaryString, options.base64)
-    .then(function(data) {
-        var zipEntries = new ZipEntries(options);
-        zipEntries.load(data);
-        return zipEntries;
-    }).then(function checkCRC32(zipEntries) {
-        var promises = [external.Promise.resolve(zipEntries)];
-        var files = zipEntries.files;
-        if (options.checkCRC32) {
-            for (var i = 0; i < files.length; i++) {
-                promises.push(checkEntryCRC32(files[i]));
+        .then(function (data) {
+            var zipEntries = new ZipEntries(options);
+            zipEntries.load(data);
+            return zipEntries;
+        }).then(function checkCRC32(zipEntries) {
+            var promises = [external.Promise.resolve(zipEntries)];
+            var files = zipEntries.files;
+            if (options.checkCRC32) {
+                for (var i = 0; i < files.length; i++) {
+                    promises.push(checkEntryCRC32(files[i]));
+                }
             }
-        }
-        return external.Promise.all(promises);
-    }).then(function addFiles(results) {
-        var zipEntries = results.shift();
-        var files = zipEntries.files;
-        for (var i = 0; i < files.length; i++) {
-            var input = files[i];
-            zip.file(input.fileNameStr, input.decompressed, {
-                binary: true,
-                optimizedBinaryString: true,
-                date: input.date,
-                dir: input.dir,
-                comment : input.fileCommentStr.length ? input.fileCommentStr : null,
-                unixPermissions : input.unixPermissions,
-                dosPermissions : input.dosPermissions,
-                createFolders: options.createFolders
-            });
-        }
-        if (zipEntries.zipComment.length) {
-            zip.comment = zipEntries.zipComment;
-        }
+            return external.Promise.all(promises);
+        }).then(function addFiles(results) {
+            var zipEntries = results.shift();
+            var files = zipEntries.files;
+            for (var i = 0; i < files.length; i++) {
+                var input = files[i];
+                zip.file(input.fileNameStr, input.decompressed, {
+                    binary: true,
+                    optimizedBinaryString: true,
+                    date: input.date,
+                    dir: input.dir,
+                    comment: input.fileCommentStr.length ? input.fileCommentStr : null,
+                    unixPermissions: input.unixPermissions,
+                    dosPermissions: input.dosPermissions,
+                    createFolders: options.createFolders
+                });
+            }
+            if (zipEntries.zipComment.length) {
+                zip.comment = zipEntries.zipComment;
+            }
 
-        return zip;
-    });
+            return zip;
+        });
 };
 
 },{"./external":6,"./nodejsUtils":14,"./stream/Crc32Probe":25,"./utf8":31,"./utils":32,"./zipEntries":33}],12:[function(require,module,exports){
@@ -1511,16 +1512,16 @@ var out = {
      */
     forEach: function(cb) {
         var filename, relativePath, file;
+        /* jshint ignore:start */
+        // ignore warning about unwanted properties because this.files is a null prototype object
         for (filename in this.files) {
-            if (!this.files.hasOwnProperty(filename)) {
-                continue;
-            }
             file = this.files[filename];
             relativePath = filename.slice(this.root.length, filename.length);
             if (relativePath && filename.slice(0, this.root.length) === this.root) { // the file is in the current root
                 cb(relativePath, file); // TODO reverse the parameters ? need to be clean AND consistent with the filter search fn...
             }
         }
+        /* jshint ignore:end */
     },
 
     /**

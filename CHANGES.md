@@ -4,18 +4,34 @@ layout: default
 section: main
 ---
 
-### v3.5.0 2020 2020-05-31
+### v3.7.1 2021-08-05
+
+- Fix build of `dist` files.
+    + Note: this version ensures the changes from 3.7.0 are actually included in the `dist` files. Thanks to Evan W for reporting. 
+
+### v3.7.0 2021-07-23
+
+- Fix: Use a null prototype object for this.files  (see [#766](https://github.com/Stuk/jszip/pull/766))
+    + This change might break existing code if it uses prototype methods on the `.files` property of a zip object, for example `zip.files.toString()`. This approach is taken to prevent files in the zip overriding object methods that would exist on a normal object.
+
+### v3.6.0 2021-02-09
+
+- Fix: redirect main to dist on browsers (see [#742](https://github.com/Stuk/jszip/pull/742))
+- Fix duplicate require DataLengthProbe, utils (see [#734](https://github.com/Stuk/jszip/pull/734))
+- Fix small error in read_zip.md (see [#703](https://github.com/Stuk/jszip/pull/703))
+
+### v3.5.0 2020-05-31
 
 - Fix 'End of data reached' error when file extra field is invalid (see [#544](https://github.com/Stuk/jszip/pull/544)).
 - Typescript definitions: Add null to return types of functions that may return null (see [#669](https://github.com/Stuk/jszip/pull/669)).
 - Typescript definitions: Correct nodeStream's type (see [#682](https://github.com/Stuk/jszip/pull/682))
 - Typescript definitions: Add string output type (see [#666](https://github.com/Stuk/jszip/pull/666))
 
-### v3.4.0 2020 2020-04-19
+### v3.4.0 2020-04-19
 
 - Add Typescript type definitions (see [#601](https://github.com/Stuk/jszip/pull/601)).
 
-### v3.3.0 2020 2020-04-1
+### v3.3.0 2020-04-1
 
 - Change browser module resolution to support Angular packager (see [#614](https://github.com/Stuk/jszip/pull/614)).
 
