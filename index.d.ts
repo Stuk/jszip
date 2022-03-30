@@ -65,6 +65,11 @@ declare namespace JSZip {
 
     interface JSZipObject {
         name: string;
+        /**
+         * Present for files loadded with `loadAsync`. May contain ".." path components that could
+         * result in a zip-slip attack. See https://snyk.io/research/zip-slip-vulnerability
+         */
+        unsafeOriginalName?: string;
         dir: boolean;
         date: Date;
         comment: string;

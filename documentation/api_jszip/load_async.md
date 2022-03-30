@@ -10,6 +10,8 @@ object at the current folder level. This technique has some limitations, see
 If the JSZip object already contains entries, new entries will be merged. If
 two have the same name, the loaded one will replace the other.
 
+Since v3.8.0 this method will santize relative path components (i.e. `..`) in loaded filenames to avoid ["zip slip" attacks](https://snyk.io/research/zip-slip-vulnerability). For example: `../../../example.txt` → `example.txt`, `src/images/../example.txt` → `src/example.txt`. The original filename is available on each zip entry as `unsafeOriginalName`.
+
 __Returns__ : A [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) with the updated zip object.
 The promise can fail if the loaded data is not valid zip data or if it
 uses unsupported features (multi volume, password protected, etc).
@@ -193,4 +195,25 @@ zip.loadAsync(bin1)
     // file2.txt, from bin2
     // file3.txt, from bin2
 });
+```
+
+Reading a zip file with relative filenames:
+
+```js
+// here, "unsafe.zip" is zip file containing:
+// src/images/../file.txt
+// ../../example.txt
+
+require("fs").readFile("unsafe.zip", function (err, data) {
+    if (err) throw err;
+    var zip = new JSZip();
+    zip.loadAsync(data)
+    .then(function (zip) {
+        console.log(zip.files);
+        // src/file.txt
+        // example.txt
+        console.log(zip.files["example.txt"].unsafeOriginalName);
+        // "../../example.txt"
+    });
+}
 ```

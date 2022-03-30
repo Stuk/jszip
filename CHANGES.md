@@ -4,10 +4,14 @@ layout: default
 section: main
 ---
 
+### v3.8.0 2022-03-30
+
+- Santize filenames when files are loaded with `loadAsync`, to avoid ["zip slip" attacks](https://snyk.io/research/zip-slip-vulnerability). The original filename is available on each zip entry as `unsafeOriginalName`. See the [documentation](https://stuk.github.io/jszip/documentation/api_jszip/load_async.html). Many thanks to McCaulay Hudson for reporting.
+
 ### v3.7.1 2021-08-05
 
 - Fix build of `dist` files.
-    + Note: this version ensures the changes from 3.7.0 are actually included in the `dist` files. Thanks to Evan W for reporting. 
+    + Note: this version ensures the changes from 3.7.0 are actually included in the `dist` files. Thanks to Evan W for reporting.
 
 ### v3.7.0 2021-07-23
 
