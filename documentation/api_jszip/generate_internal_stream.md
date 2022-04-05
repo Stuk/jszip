@@ -21,13 +21,10 @@ __Metadata__ : see [the metadata of `generateAsync()`]({{site.baseurl}}/document
 ## Examples
 
 ```js
-zip.generateInternalStream({type:"blob"}).accumulate(function callback(err, content) {
-  if (err) {
-    // handle error
-  }
-  // see FileSaver.js
-  saveAs(content, "hello.zip");
-}, function updateCallback(metadata) {
-  // print progression with metadata.percent and metadata.currentFile
+zip
+.generateInternalStream({type:"uint8array"})
+.accumulate()
+.then(function (data) {
+    // data contains here the complete zip file as a uint8array (the type asked in generateInternalStream)
 });
 ```

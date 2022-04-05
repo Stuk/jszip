@@ -169,22 +169,23 @@ declare namespace JSZip {
         createFolders?: boolean;
         decodeFileName?: (bytes: string[] | Uint8Array | Buffer) => string;
     }
-}
 
-declare namespace StreamHelper {
-    type DataEventCallback = (dataChunk: any, metadata: any) => any
-    type EndEventCallback = () => any
-    type ErrorEventCallback = (error: Error) => any
+    interface JSZipMetadata {
+        percent: number;
+        currentFile: string;
+    }
 
-    interface StreamHelper {
+    type DataEventCallback<T> = (dataChunk: T, metadata: JSZipMetadata) => void
+    type EndEventCallback = () => void
+    type ErrorEventCallback = (error: Error) => void
+
+    interface JSZipStreamHelper<T> {
         /**
          * Register a listener on an event
-         *
-         * @param event The name of the event. Only 3 events are supported : data, end and error
-         * @param callback The function called when the event occurs
-         * @return The current StreamHelper object, for chaining
          */
-        on(event: 'data' | 'end' | 'error', callback: DataEventCallback | EndEventCallback | ErrorEventCallback);
+        on(event: 'data', callback: DataEventCallback<T>): this;
+        on(event: 'end', callback: EndEventCallback): this;
+        on(event: 'error', callback: ErrorEventCallback): this;
 
         /**
          * Read the whole stream and call a callback with the complete content
@@ -192,21 +193,21 @@ declare namespace StreamHelper {
          * @param updateCallback The function called every time the stream updates
          * @return A Promise of the full content
          */
-        accumulate(updateCallback?: (metadata: any) => any): Promise<any>;
+        accumulate(updateCallback?: (metadata: JSZipMetadata) => void): Promise<T>;
 
         /**
          * Resume the stream if the stream is paused. Once resumed, the stream starts sending data events again
          *
          * @return The current StreamHelper object, for chaining
          */
-        resume(): StreamHelper;
+        resume(): this;
 
         /**
          * Pause the stream if the stream is running. Once paused, the stream stops sending data events
          *
          * @return The current StreamHelper object, for chaining
          */
-        pause(): StreamHelper;
+        pause(): this;
     }
 }
 
@@ -303,7 +304,7 @@ interface JSZip {
      * @param options Optional options for the generator
      * @return a StreamHelper
      */
-    generateInternalStream(options?: JSZip.JSZipGeneratorOptions): StreamHelper.StreamHelper
+    generateInternalStream<T extends JSZip.OutputType>(options?: JSZip.JSZipGeneratorOptions<T>): JSZip.JSZipStreamHelper<OutputByType[T]>;
 
     /**
      * Deserialize zip file asynchronously
