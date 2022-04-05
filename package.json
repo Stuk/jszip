@@ -4,7 +4,7 @@
   "author": "Stuart Knightley <stuart@stuartk.com>",
   "description": "Create, read and edit .zip files with JavaScript http://stuartk.com/jszip",
   "scripts": {
-    "test": "npm run test-node && npm run test-browser",
+    "test": "npm run test-node && npm run test-browser && tsc",
     "test-node": "qunit --require ./test/helpers/test-utils.js --require ./test/helpers/node-test-utils.js test/asserts/",
     "test-browser": "grunt build && node test/run.js",
     "lint": "grunt jshint"
@@ -51,7 +51,8 @@
     "package-json-versionify": "1.0.2",
     "playwright": "^1.15.2",
     "qunit": "~2.9.2",
-    "tmp": "0.0.28"
+    "tmp": "0.0.28",
+    "typescript": "^4.6.3"
   },
   "dependencies": {
     "lie": "~3.3.0",
