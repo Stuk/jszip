@@ -15,6 +15,14 @@ interface JSZipSupport {
 
 type Compression = 'STORE' | 'DEFLATE';
 
+/**
+ * Depends on the compression type. With `STORE` (no compression), these options are ignored. With
+ * `DEFLATE`, you can give the compression level between 1 (best speed) and 9 (best compression).
+ */
+interface CompressionOptions {
+    level: number;
+}
+
 interface Metadata  {
     percent: number;
     currentFile: string;
@@ -106,11 +114,9 @@ declare namespace JSZip {
          */
         compression?: Compression;
         /**
-         * Sets per file compression level. With `STORE` (no compression), this parameter is ignored. With `DEFLATE`, you can give the compression level with `compressionOptions : {level:6}` (or any level between 1 (best speed) and 9 (best compression)).
+         * Sets per file compression level for `DEFLATE` compression.
          */
-        compressionOptions?: null | {
-            level: number;
-        };
+        compressionOptions?: null | CompressionOptions;
         comment?: string;
         /** Set to `true` if (and only if) the input is a "binary string" and has already been prepared with a `0xFF` mask. */
         optimizedBinaryString?: boolean;
@@ -138,11 +144,9 @@ declare namespace JSZip {
          */
         compression?: Compression;
         /**
-         * The `compressionOptions` parameter depends on the compression type. With `STORE` (no compression), this parameter is ignored. With `DEFLATE`, you can give the compression level with `compressionOptions : {level:6}` (or any level between 1 (best speed) and 9 (best compression)).
+         * Sets compression level for `DEFLATE` compression.
          */
-        compressionOptions?: null | {
-            level: number;
-        };
+        compressionOptions?: null | CompressionOptions;
         type?: T;
         comment?: string;
         /**
