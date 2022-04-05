@@ -20,6 +20,7 @@ attribute name              | type        | description
 `dosPermissions`            | 6 bits number  | The DOS permissions of the file, if any.
 `options`                   | object      | the options of the file. The available options are :
 `options.compression`       | compression | see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
+`options.compressionOptions`| object      | see [file(name, data [,options])]({{site.baseurl}}/documentation/api_jszip/file_data.html)
 
 Example:
 
