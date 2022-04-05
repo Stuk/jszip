@@ -26,8 +26,7 @@ zip.generateInternalStream({type:"blob"}).accumulate(function callback(err, cont
     // handle error
   }
   // see FileSaver.js
-  saveAs(content, "hello.zip");
-}, function updateCallback(metadata) {
-  // print progression with metadata.percent and metadata.currentFile
+}.then(function (data){
+    saveAs(data, "hello.zip");
 });
 ```
