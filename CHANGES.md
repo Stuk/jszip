@@ -4,6 +4,12 @@ layout: default
 section: main
 ---
 
+### v3.9.0 2022-04-04
+
+- Update types JSZip#loadAsync to accept a promise for data, and remove arguments from `new JSZip()` (see [#752](https://github.com/Stuk/jszip/pull/752))
+- Update types for `compressionOptions` to JSZipFileOptions and JSZipGeneratorOptions (see [#722](https://github.com/Stuk/jszip/pull/722))
+- Add types for `generateInternalStream` (see [#774](https://github.com/Stuk/jszip/pull/774))
+
 ### v3.8.0 2022-03-30
 
 - Santize filenames when files are loaded with `loadAsync`, to avoid ["zip slip" attacks](https://snyk.io/research/zip-slip-vulnerability). The original filename is available on each zip entry as `unsafeOriginalName`. See the [documentation](https://stuk.github.io/jszip/documentation/api_jszip/load_async.html). Many thanks to McCaulay Hudson for reporting.
