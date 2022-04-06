@@ -4,6 +4,10 @@ layout: default
 section: main
 ---
 
+### v3.9.1 2022-04-06
+
+- Fix recursive definition of `InputFileFormat` introduced in 3.9.0.
+
 ### v3.9.0 2022-04-04
 
 - Update types JSZip#loadAsync to accept a promise for data, and remove arguments from `new JSZip()` (see [#752](https://github.com/Stuk/jszip/pull/752))
