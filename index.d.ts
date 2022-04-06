@@ -64,7 +64,7 @@ interface OutputByType {
 //     compressedContent: string|ArrayBuffer|Uint8Array|Buffer;
 // }
 
-type InputFileFormat = InputByType[keyof InputByType] | Promise<InputFileFormat>;
+type InputFileFormat = InputByType[keyof InputByType] | Promise<InputByType[keyof InputByType]>;
 
 declare namespace JSZip {
     type InputType = keyof InputByType;
