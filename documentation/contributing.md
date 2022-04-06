@@ -13,7 +13,7 @@ need one to create the pull request).
 
 If you just want the get the source code, you can use git and do
 `git clone https://github.com/Stuk/jszip.git` to get the sources. You can also
-download the latest sources [here](https://github.com/Stuk/jszip/archive/master.zip).
+download the latest sources [here](https://github.com/Stuk/jszip/archive/main.zip).
 
 ### Building the project
 
