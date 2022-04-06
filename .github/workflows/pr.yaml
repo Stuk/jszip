@@ -35,8 +35,5 @@ jobs:
 
       - name: Lint
         run: npm run lint
-      - name: Test Node
-        run: npm run test-node
-      - name: Test browsers
-        run: |
-          npm run test-browser
+      - name: Test
+        run: npm test
