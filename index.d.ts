@@ -324,6 +324,7 @@ interface JSZip {
 
     prototype: JSZip;
     support: JSZipSupport;
+    root: string;
     external: {
         Promise: PromiseConstructorLike;
     };
