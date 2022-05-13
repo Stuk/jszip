@@ -13,7 +13,7 @@ interface JSZipSupport {
     nodebuffer: boolean;
 }
 
-type Compression = "STORE" | "DEFLATE";
+type Compression = 'STORE' | 'DEFLATE';
 
 /**
  * Depends on the compression type. With `STORE` (no compression), these options are ignored. With
@@ -23,7 +23,7 @@ interface CompressionOptions {
     level: number;
 }
 
-interface Metadata {
+interface Metadata  {
     percent: number;
     currentFile: string | null;
 }
@@ -64,9 +64,7 @@ interface OutputByType {
 //     compressedContent: string|ArrayBuffer|Uint8Array|Buffer;
 // }
 
-type InputFileFormat =
-    | InputByType[keyof InputByType]
-    | Promise<InputByType[keyof InputByType]>;
+type InputFileFormat = InputByType[keyof InputByType] | Promise<InputByType[keyof InputByType]>;
 
 declare namespace JSZip {
     type InputType = keyof InputByType;
@@ -95,14 +93,8 @@ declare namespace JSZip {
          * @param onUpdate a function to call on each internal update.
          * @return Promise the promise of the result.
          */
-        async<T extends OutputType>(
-            type: T,
-            onUpdate?: OnUpdateCallback
-        ): Promise<OutputByType[T]>;
-        nodeStream(
-            type?: "nodebuffer",
-            onUpdate?: OnUpdateCallback
-        ): NodeJS.ReadableStream;
+        async<T extends OutputType>(type: T, onUpdate?: OnUpdateCallback): Promise<OutputByType[T]>;
+        nodeStream(type?: 'nodebuffer', onUpdate?: OnUpdateCallback): NodeJS.ReadableStream;
     }
 
     interface JSZipFileOptions {
@@ -167,7 +159,7 @@ declare namespace JSZip {
         /** Stream the files and create file descriptors */
         streamFiles?: boolean;
         /** DOS (default) or UNIX */
-        platform?: "DOS" | "UNIX";
+        platform?: 'DOS' | 'UNIX';
     }
 
     interface JSZipLoadOptions {
@@ -183,17 +175,17 @@ declare namespace JSZip {
         currentFile: string;
     }
 
-    type DataEventCallback<T> = (dataChunk: T, metadata: JSZipMetadata) => void;
-    type EndEventCallback = () => void;
-    type ErrorEventCallback = (error: Error) => void;
+    type DataEventCallback<T> = (dataChunk: T, metadata: JSZipMetadata) => void
+    type EndEventCallback = () => void
+    type ErrorEventCallback = (error: Error) => void
 
     interface JSZipStreamHelper<T> {
         /**
          * Register a listener on an event
          */
-        on(event: "data", callback: DataEventCallback<T>): this;
-        on(event: "end", callback: EndEventCallback): this;
-        on(event: "error", callback: ErrorEventCallback): this;
+        on(event: 'data', callback: DataEventCallback<T>): this;
+        on(event: 'end', callback: EndEventCallback): this;
+        on(event: 'error', callback: ErrorEventCallback): this;
 
         /**
          * Read the whole stream and call a callback with the complete content
@@ -201,9 +193,7 @@ declare namespace JSZip {
          * @param updateCallback The function called every time the stream updates
          * @return A Promise of the full content
          */
-        accumulate(
-            updateCallback?: (metadata: JSZipMetadata) => void
-        ): Promise<T>;
+        accumulate(updateCallback?: (metadata: JSZipMetadata) => void): Promise<T>;
 
         /**
          * Resume the stream if the stream is paused. Once resumed, the stream starts sending data events again
@@ -222,7 +212,7 @@ declare namespace JSZip {
 }
 
 interface JSZip {
-    files: { [key: string]: JSZip.JSZipObject };
+    files: {[key: string]: JSZip.JSZipObject};
 
     /**
      * Get a file from the archive
@@ -248,16 +238,8 @@ interface JSZip {
      * @param options Optional information about the file
      * @return JSZip object
      */
-    file<T extends JSZip.InputType>(
-        path: string,
-        data: InputByType[T] | Promise<InputByType[T]>,
-        options?: JSZip.JSZipFileOptions
-    ): this;
-    file<T extends JSZip.InputType>(
-        path: string,
-        data: null,
-        options?: JSZip.JSZipFileOptions & { dir: true }
-    ): this;
+    file<T extends JSZip.InputType>(path: string, data: InputByType[T] | Promise<InputByType[T]>, options?: JSZip.JSZipFileOptions): this;
+    file<T extends JSZip.InputType>(path: string, data: null, options?: JSZip.JSZipFileOptions & { dir: true }): this;
 
     /**
      * Returns an new JSZip instance with the given folder as root
@@ -280,9 +262,7 @@ interface JSZip {
      *
      * @param callback function
      */
-    forEach(
-        callback: (relativePath: string, file: JSZip.JSZipObject) => void
-    ): void;
+    forEach(callback: (relativePath: string, file: JSZip.JSZipObject) => void): void;
 
     /**
      * Get all files which match the given filter function
@@ -290,9 +270,7 @@ interface JSZip {
      * @param predicate Filter function
      * @return Array of matched elements
      */
-    filter(
-        predicate: (relativePath: string, file: JSZip.JSZipObject) => boolean
-    ): JSZip.JSZipObject[];
+    filter(predicate: (relativePath: string, file: JSZip.JSZipObject) => boolean): JSZip.JSZipObject[];
 
     /**
      * Removes the file or folder from the archive
@@ -309,10 +287,7 @@ interface JSZip {
      * @param onUpdate The optional function called on each internal update with the metadata.
      * @return The serialized archive
      */
-    generateAsync<T extends JSZip.OutputType>(
-        options?: JSZip.JSZipGeneratorOptions<T>,
-        onUpdate?: OnUpdateCallback
-    ): Promise<OutputByType[T]>;
+    generateAsync<T extends JSZip.OutputType>(options?: JSZip.JSZipGeneratorOptions<T>, onUpdate?: OnUpdateCallback): Promise<OutputByType[T]>;
 
     /**
      * Generates a new archive asynchronously
@@ -321,10 +296,7 @@ interface JSZip {
      * @param onUpdate The optional function called on each internal update with the metadata.
      * @return A Node.js `ReadableStream`
      */
-    generateNodeStream(
-        options?: JSZip.JSZipGeneratorOptions<"nodebuffer">,
-        onUpdate?: OnUpdateCallback
-    ): NodeJS.ReadableStream;
+    generateNodeStream(options?: JSZip.JSZipGeneratorOptions<'nodebuffer'>, onUpdate?: OnUpdateCallback): NodeJS.ReadableStream;
 
     /**
      * Generates the complete zip file with the internal stream implementation
@@ -332,9 +304,7 @@ interface JSZip {
      * @param options Optional options for the generator
      * @return a StreamHelper
      */
-    generateInternalStream<T extends JSZip.OutputType>(
-        options?: JSZip.JSZipGeneratorOptions<T>
-    ): JSZip.JSZipStreamHelper<OutputByType[T]>;
+    generateInternalStream<T extends JSZip.OutputType>(options?: JSZip.JSZipGeneratorOptions<T>): JSZip.JSZipStreamHelper<OutputByType[T]>;
 
     /**
      * Deserialize zip file asynchronously
@@ -343,15 +313,12 @@ interface JSZip {
      * @param options Options for deserializing
      * @return Returns promise
      */
-    loadAsync(
-        data: InputFileFormat,
-        options?: JSZip.JSZipLoadOptions
-    ): Promise<JSZip>;
+    loadAsync(data: InputFileFormat, options?: JSZip.JSZipLoadOptions): Promise<JSZip>;
 
     /**
      * Create JSZip instance
      */
-    new (): this;
+    new(): this;
 
     (): JSZip;
 
