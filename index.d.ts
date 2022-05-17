@@ -25,7 +25,7 @@ interface CompressionOptions {
 
 interface Metadata  {
     percent: number;
-    currentFile: string;
+    currentFile: string | null;
 }
 
 type OnUpdateCallback = (metadata: Metadata) => void;
