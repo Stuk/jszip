@@ -6,8 +6,8 @@ section: main
 
 ### v3.10.0 2022-05-20
 
-- Change setimmediate dependency to more efficient one. Fixes https://github.com/Stuk/jszip/issues/617 (see [#829](https://github.com/Stuk/jszip/pull/829)
-- Update types of `currentFile` metadata to include `null` (see [#826](https://github.com/Stuk/jszip/pull/826)
+- Change setimmediate dependency to more efficient one. Fixes https://github.com/Stuk/jszip/issues/617 (see [#829](https://github.com/Stuk/jszip/pull/829))
+- Update types of `currentFile` metadata to include `null` (see [#826](https://github.com/Stuk/jszip/pull/826))
 
 ### v3.9.1 2022-04-06
 
