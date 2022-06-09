@@ -4030,11 +4030,12 @@ ZipEntry.prototype = {
     
     decode:function(u8,i){
         i = i||0;
-        if(this.loadOptions.charset&&this.loadOptions.charset!='utf8'){
+        var charset = this.loadOptions.charset;
+        if(charset&&charset!='utf8'){
           for(;i<u8.byteLength;i++){
             if(u8[i]>127){
               //not a ascii
-              let utf8 = false;
+              var utf8 = false;
                 var k=0;
                 for(var j=1;j<u8[i].toString(2).split('0')[0].length;j++){
                   if(u8[i+j]>>6==2){
@@ -4043,15 +4044,15 @@ ZipEntry.prototype = {
                   }
                 }
                 if(k>0&&k==j-1&&u8[i+j]>>6!=2){
-                    if(k==1){
+                    if(k==1&&charset=='gbk'){
                       //double byte
                       //some gbk will erro
-                      return this.decode(u8,j);
+                      //return this.decode(u8,j);
                     }else{
                       utf8 = true;
                     }
                 }
-              if(utf8===false)return new TextDecoder(this.loadOptions.charset).decode(u8);
+              if(utf8===false)return new TextDecoder(charset).decode(u8);
               break;
             }
           }
@@ -4059,37 +4060,34 @@ ZipEntry.prototype = {
         return new TextDecoder().decode(u8);
     },
     handleUTF8: function() {
-        if(this.loadOptions.decodeFileName == utf8.utf8decode){
-            this.fileNameStr = this.decode(this.fileName);
-            this.fileCommentStr = this.decode(this.fileComment);
-        }else{
-            this.fileNameStr = utf8.utf8decode(this.fileName);
-            this.fileCommentStr = utf8.utf8decode(this.fileComment);
-        }
-        return;
+      var charset = this.loadOptions.charset,
+          utf8decode = utf8.utf8decode,
+          decode = this.loadOptions.decodeFileName||utf8decode;
+      if(charset&&'TextDecoder' in window&&'Uint8Array' in window){
+        this.fileNameStr = this.decode(this.fileName);
+        this.fileCommentStr = this.decode(this.fileComment);
+      }else if(this.useUTF8()){
+        this.fileNameStr = utf8decode(this.fileName);
+        this.fileCommentStr = utf8decode(this.fileComment);
+      }else{
         var decodeParamType = support.uint8array ? "uint8array" : "array";
-        if (this.useUTF8()) {
-            this.fileNameStr = utf8.utf8decode(this.fileName);
-            this.fileCommentStr = utf8.utf8decode(this.fileComment);
+        var upath = this.findExtraFieldUnicodePath();
+        if (upath !== null) {
+            this.fileNameStr = upath;
         } else {
-            var upath = this.findExtraFieldUnicodePath();
-            if (upath !== null) {
-                this.fileNameStr = upath;
-            } else {
-                // ASCII text or unsupported code page
-                var fileNameByteArray =  utils.transformTo(decodeParamType, this.fileName);
-                this.fileNameStr = this.loadOptions.decodeFileName(fileNameByteArray);
-            }
-
-            var ucomment = this.findExtraFieldUnicodeComment();
-            if (ucomment !== null) {
-                this.fileCommentStr = ucomment;
-            } else {
-                // ASCII text or unsupported code page
-                var commentByteArray =  utils.transformTo(decodeParamType, this.fileComment);
-                this.fileCommentStr = this.loadOptions.decodeFileName(commentByteArray);
-            }
+            // ASCII text or unsupported code page
+            var fileNameByteArray =  utils.transformTo(decodeParamType, this.fileName);
+            this.fileNameStr = decode(fileNameByteArray);
         }
+        var ucomment = this.findExtraFieldUnicodeComment();
+        if (ucomment !== null) {
+            this.fileCommentStr = ucomment;
+        } else {
+            // ASCII text or unsupported code page
+            var commentByteArray =  utils.transformTo(decodeParamType, this.fileComment);
+            this.fileCommentStr = decode(commentByteArray);
+        }
+      }
     },
 
     /**
