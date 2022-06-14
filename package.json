@@ -7,6 +7,7 @@
     "test": "npm run test-node && npm run test-browser && tsc",
     "test-node": "qunit --require ./test/helpers/test-utils.js --require ./test/helpers/node-test-utils.js test/asserts/",
     "test-browser": "grunt build && node test/run.js",
+    "perf-node": "node test/perf/node.js",
     "lint": "eslint ."
   },
   "contributors": [
@@ -39,6 +40,7 @@
     "inflate"
   ],
   "devDependencies": {
+    "benchmark": "^2.1.4",
     "browserify": "~13.0.0",
     "eslint": "^8.18.0",
     "grunt": "~0.4.1",
