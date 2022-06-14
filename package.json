@@ -6,8 +6,10 @@
   "scripts": {
     "test": "npm run test-node && npm run test-browser && tsc",
     "test-node": "qunit --require ./test/helpers/test-utils.js --require ./test/helpers/node-test-utils.js test/asserts/",
-    "test-browser": "grunt build && node test/run.js",
+    "test-browser": "grunt build && node test/run.js --test",
+    "perf": "npm run perf-node && npm run perf-browser",
     "perf-node": "node test/perf/node.js",
+    "perf-browser": "node test/run.js --benchmark",
     "lint": "eslint ."
   },
   "contributors": [

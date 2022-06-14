@@ -80,4 +80,37 @@ async function runTests() {
     }
 }
 
-runTests();
+async function waitForBenchmark(page) {
+    return new Promise(resolve => {
+        const logs = [];
+
+        page.on("console", async message => {
+            if (message.text() === "Benchmark complete") {
+                resolve(logs);
+            } else {
+                logs.push(message.text());
+            }
+        });
+    });
+}
+
+async function runBenchmark() {
+    const results = await runBrowsers(waitForBenchmark, "perf/index.html");
+
+    for (const [browser, logs] of results) {
+        for (const log of logs) {
+            console.log(browser, log);
+        }
+    }
+}
+
+switch (process.argv[2]) {
+case "--test":
+    runTests();
+    break;
+case "--benchmark":
+    runBenchmark();
+    break;
+default:
+    throw new Error(`Unknown argument: ${process.argv[2]}`);
+}
