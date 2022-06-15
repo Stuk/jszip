@@ -95,7 +95,7 @@ async function waitForBenchmark(page) {
 }
 
 async function runBenchmark() {
-    const results = await runBrowsers(waitForBenchmark, "perf/index.html");
+    const results = await runBrowsers(waitForBenchmark, "benchmark/index.html");
 
     for (const [browser, logs] of results) {
         for (const log of logs) {
