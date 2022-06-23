@@ -1,5 +1,4 @@
-/* global QUnit,JSZip,JSZipTestUtils */
-'use strict';
+"use strict";
 
 QUnit.module("stream", function () {
 
@@ -19,54 +18,64 @@ QUnit.module("stream", function () {
 
         var helper = zip.generateInternalStream({streamFiles:true, type:"binarystring"});
         helper
-        .on("data", function () {
-            chunkCount++;
-            assert.equal(allowChunks, true, "be sure to get chunks only when allowed");
+            .on("data", function () {
+                chunkCount++;
+                assert.equal(allowChunks, true, "be sure to get chunks only when allowed");
 
-            /*
+                /*
              * We stop at ~ half of chunks.
              * A setTimeout aside this stream is not reliable and can be
              * triggered *after* the completion of the stream.
              */
-            if (chunkCount === 20) {
+                if (chunkCount === 20) {
 
-                allowChunks = false;
-                helper.pause();
-                setTimeout(function () {
-                    allowChunks = true;
-                    helper.resume();
-                }, 50);
-            }
-        })
-        .on("error", function (e) {
-            done();
-            assert.ok(false, e.message);
-        })
-        .on("end", function () {
-            done();
-        });
+                    allowChunks = false;
+                    helper.pause();
+                    setTimeout(function () {
+                        allowChunks = true;
+                        helper.resume();
+                    }, 50);
+                }
+            })
+            .on("error", function (e) {
+                done();
+                assert.ok(false, e.message);
+            })
+            .on("end", function () {
+                done();
+            });
         helper.resume();
     });
 
     QUnit.module("nodejs");
     if (JSZip.support.nodestream) {
-        var fs = require('fs');
+        var fs = require("fs");
     }
 
-    function generateStreamTest(name, ref, createFunction, generateOptions, updateStream) {
+    function generateStreamTest(name, ref, createFunction, generateOptions) {
         JSZipTestUtils.testZipFile(name,ref, function(assert, expected) {
             var done = assert.async();
 
-            var tempFile = require('tmp').tmpNameSync({postfix:".zip"});
+            var tempFile = require("tmp").tmpNameSync({postfix:".zip"});
 
             var zip = createFunction();
 
             zip.generateNodeStream(generateOptions)
-            .pipe(fs.createWriteStream(tempFile))
-            .on("close", function () {
-                fs.readFile(tempFile, function (e, data) {
-                    var actual = JSZipTestUtils.toString(data);
-                    assert.ok(JSZipTestUtils.similar(actual, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+                .pipe(fs.createWriteStream(tempFile))
+                .on("close", function () {
+                    fs.readFile(tempFile, function (e, data) {
+                        var actual = JSZipTestUtils.toString(data);
+                        assert.ok(JSZipTestUtils.similar(actual, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+                        fs.unlink(tempFile, function (err) {
+                            if (err) {
+                                assert.ok(false, err);
+                            }
+                            done();
+                        });
+                    });
+                })
+                .on("error", function (e) {
+                    assert.ok(false, e.message);
                     fs.unlink(tempFile, function (err) {
                         if (err) {
                             assert.ok(false, err);
@@ -74,27 +83,27 @@ QUnit.module("stream", function () {
                         done();
                     });
                 });
-            })
-            .on("error", function (e) {
-                assert.ok(false, e.message);
-                fs.unlink(tempFile, function (err) {
-                    if (err) {
-                        assert.ok(false, err);
-                    }
-                    done();
-                });
-            });
         });
     }
     function zipObjectStreamTest(name, createFunction) {
         QUnit.test(name, function(assert) {
-            var tempFile = require('tmp').tmpNameSync({postfix:".txt"});
+            var tempFile = require("tmp").tmpNameSync({postfix:".txt"});
             var done = assert.async();
             createFunction().pipe(fs.createWriteStream(tempFile))
-            .on("close", function () {
-                fs.readFile(tempFile, function (e, data) {
-                    var actual = JSZipTestUtils.toString(data);
-                    assert.equal(actual, "Hello World\n", "the generated content is ok");
+                .on("close", function () {
+                    fs.readFile(tempFile, function (e, data) {
+                        var actual = JSZipTestUtils.toString(data);
+                        assert.equal(actual, "Hello World\n", "the generated content is ok");
+                        fs.unlink(tempFile, function (err) {
+                            if (err) {
+                                assert.ok(false, err);
+                            }
+                            done();
+                        });
+                    });
+                })
+                .on("error", function (e) {
+                    assert.ok(false, e.message);
                     fs.unlink(tempFile, function (err) {
                         if (err) {
                             assert.ok(false, err);
@@ -102,16 +111,6 @@ QUnit.module("stream", function () {
                         done();
                     });
                 });
-            })
-            .on("error", function (e) {
-                assert.ok(false, e.message);
-                fs.unlink(tempFile, function (err) {
-                    if (err) {
-                        assert.ok(false, err);
-                    }
-                    done();
-                });
-            });
         });
     }
 
@@ -120,7 +119,7 @@ QUnit.module("stream", function () {
         generateStreamTest(
             "generateNodeStream(type:nodebuffer / !streamFiles) generates a working stream", "ref/all.zip",
             JSZipTestUtils.createZipAll,
-            {type:'nodebuffer',streamFiles:false}
+            {type:"nodebuffer",streamFiles:false}
         );
         generateStreamTest(
             "generateNodeStream(type:<default> / !streamFiles) generates a working stream", "ref/all.zip",
@@ -134,7 +133,7 @@ QUnit.module("stream", function () {
         generateStreamTest(
             "generateNodeStream(type:nodebuffer / streamFiles) generates a working stream", "ref/all-stream.zip",
             JSZipTestUtils.createZipAll,
-            {type:'nodebuffer',streamFiles:true}
+            {type:"nodebuffer",streamFiles:true}
         );
         generateStreamTest(
             "generateNodeStream(type:<default> / streamFiles) generates a working stream", "ref/all-stream.zip",
@@ -153,7 +152,7 @@ QUnit.module("stream", function () {
 
                 return zip;
             },
-            {type:'nodebuffer',streamFiles:false}
+            {type:"nodebuffer",streamFiles:false}
         );
         generateStreamTest(
             "generateNodeStream(type:nodebuffer / streamFiles) generates a working stream from other streams", "ref/all-stream.zip",
@@ -166,13 +165,13 @@ QUnit.module("stream", function () {
 
                 return zip;
             },
-            {type:'nodebuffer',streamFiles:true}
+            {type:"nodebuffer",streamFiles:true}
         );
 
 
         zipObjectStreamTest("ZipObject#nodeStream generates a working stream[nodebuffer]", function() {
             var zip = JSZipTestUtils.createZipAll();
-            return zip.file("Hello.txt").nodeStream('nodebuffer');
+            return zip.file("Hello.txt").nodeStream("nodebuffer");
         });
         zipObjectStreamTest("ZipObject#nodeStream generates a working stream[default]", function() {
             var zip = JSZipTestUtils.createZipAll();
@@ -187,7 +186,7 @@ QUnit.module("stream", function () {
             zip.file("Hello.txt").async("text").then(function(actual) {
                 assert.equal(actual, "Hello World\n", "the stream has been read correctly");
                 done();
-            })['catch'](JSZipTestUtils.assertNoError);
+            })["catch"](JSZipTestUtils.assertNoError);
         });
 
         QUnit.test("a ZipObject containing a stream can't be read with async 2 times", function(assert) {
@@ -201,13 +200,13 @@ QUnit.module("stream", function () {
             zip.file("Hello.txt").async("text");
             // second time, it shouldn't work
             zip.file("Hello.txt").async("text")
-            .then(function (data) {
-                assert.ok(false, "calling 2 times a stream should generate an error");
-                done();
-            }, function ko(e) {
-                assert.ok(e.message.match("has already been used"), "the error message is useful");
-                done();
-            });
+                .then(function () {
+                    assert.ok(false, "calling 2 times a stream should generate an error");
+                    done();
+                }, function ko(e) {
+                    assert.ok(e.message.match("has already been used"), "the error message is useful");
+                    done();
+                });
         });
 
         QUnit.test("a ZipObject containing a stream can't be read with nodeStream 2 times", function(assert) {
@@ -221,15 +220,15 @@ QUnit.module("stream", function () {
             zip.file("Hello.txt").nodeStream().resume();
             // second time, it shouldn't work
             zip.file("Hello.txt").nodeStream()
-            .on("error", function (e) {
-                assert.ok(e.message.match("has already been used"), "the error message is useful");
-                done();
-            })
-            .on ("end", function () {
-                assert.ok(false, "calling 2 times a stream should generate an error");
-                done();
-            })
-            .resume();
+                .on("error", function (e) {
+                    assert.ok(e.message.match("has already been used"), "the error message is useful");
+                    done();
+                })
+                .on ("end", function () {
+                    assert.ok(false, "calling 2 times a stream should generate an error");
+                    done();
+                })
+                .resume();
         });
 
         QUnit.test("generateAsync with a stream can't be read 2 times", function(assert) {
@@ -243,13 +242,13 @@ QUnit.module("stream", function () {
             zip.generateAsync({type:"string"});
             // second time, it shouldn't work
             zip.generateAsync({type:"string"})
-            .then(function (data) {
-                assert.ok(false, "calling 2 times a stream should generate an error");
-                done();
-            }, function ko(e) {
-                assert.ok(e.message.match("has already been used"), "the error message is useful");
-                done();
-            });
+                .then(function () {
+                    assert.ok(false, "calling 2 times a stream should generate an error");
+                    done();
+                }, function ko(e) {
+                    assert.ok(e.message.match("has already been used"), "the error message is useful");
+                    done();
+                });
         });
 
         QUnit.test("generateNodeStream with a stream can't be read 2 times", function(assert) {
@@ -263,15 +262,15 @@ QUnit.module("stream", function () {
             zip.generateNodeStream().resume();
             // second time, it shouldn't work
             zip.generateNodeStream()
-            .on("error", function (e) {
-                assert.ok(e.message.match("has already been used"), "the error message is useful");
-                done();
-            })
-            .on ("end", function () {
-                assert.ok(false, "calling 2 times a stream should generate an error");
-                done();
-            })
-            .resume();
+                .on("error", function (e) {
+                    assert.ok(e.message.match("has already been used"), "the error message is useful");
+                    done();
+                })
+                .on ("end", function () {
+                    assert.ok(false, "calling 2 times a stream should generate an error");
+                    done();
+                })
+                .resume();
         });
 
         QUnit.test("loadAsync ends with an error when called with a stream", function(assert) {
@@ -291,7 +290,7 @@ QUnit.module("stream", function () {
         QUnit.test("generateNodeStream generates an error", function(assert) {
             try {
                 var zip = new JSZip();
-                zip.generateNodeStream({type:'nodebuffer',streamFiles:true});
+                zip.generateNodeStream({type:"nodebuffer",streamFiles:true});
                 assert.ok(false, "generateNodeStream should generate an error");
             } catch(err) {
                 assert.ok(err.message.match("not supported by this platform"), "the error message is useful");
@@ -301,7 +300,7 @@ QUnit.module("stream", function () {
         QUnit.test("ZipObject#nodeStream generates an error", function(assert) {
             try {
                 var zip = JSZipTestUtils.createZipAll();
-                zip.file("Hello.txt").nodeStream('nodebuffer');
+                zip.file("Hello.txt").nodeStream("nodebuffer");
                 assert.ok(false, "nodeStream should generate an error");
             } catch(err) {
                 assert.ok(err.message.match("not supported by this platform"), "the error message is useful");

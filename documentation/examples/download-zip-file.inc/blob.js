@@ -1,3 +1,5 @@
+"use strict";
+
 var zip = new JSZip();
 zip.file("Hello.txt", "Hello world\n");
 

@@ -1,3 +1,5 @@
+"use strict";
+
 const path = require("path");
 const playwright = require("playwright");
 const createServer = require("http-server").createServer;
@@ -27,14 +29,14 @@ async function run(browserType) {
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    await page.goto(`http://127.0.0.1:8080/test/index.html?hidepassed`);
+    await page.goto("http://127.0.0.1:8080/test/index.html?hidepassed");
 
     let result;
     do {
         result = await page.evaluate(() => {
             return window.global_test_results;
         });
-    } while (!result)
+    } while (!result);
 
     console.log("Closing", browserType);
     await browser.close();

@@ -30,7 +30,7 @@ Here are the interesting build commands :
 * `npm run test-browser` will the tests in some browsers using SauceLabs, see
   below.
 * `npm run test` will run the tests in nodejs and in the browser.
-* `npm run lint` will use jshint the check the source code.
+* `npm run lint` will use eslint the check the source code.
 
 #### Documentation
 

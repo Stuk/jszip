@@ -7,7 +7,7 @@
     "test": "npm run test-node && npm run test-browser && tsc",
     "test-node": "qunit --require ./test/helpers/test-utils.js --require ./test/helpers/node-test-utils.js test/asserts/",
     "test-browser": "grunt build && node test/run.js",
-    "lint": "grunt jshint"
+    "lint": "eslint ."
   },
   "contributors": [
     {
@@ -40,13 +40,12 @@
   ],
   "devDependencies": {
     "browserify": "~13.0.0",
+    "eslint": "^8.18.0",
     "grunt": "~0.4.1",
     "grunt-browserify": "~5.0.0",
     "grunt-cli": "~1.1.0",
-    "grunt-contrib-jshint": "~1.0.0",
     "grunt-contrib-uglify": "~4.0.1",
     "http-server": "^13.0.2",
-    "jshint": "~2.9.1",
     "jszip-utils": "~0.0.2",
     "package-json-versionify": "1.0.2",
     "playwright": "^1.15.2",

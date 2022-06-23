@@ -1,5 +1,4 @@
-/* global QUnit,JSZip,JSZipTestUtils */
-'use strict';
+"use strict";
 
 QUnit.module("version");
 

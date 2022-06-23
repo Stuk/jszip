@@ -1,20 +1,23 @@
+"use strict";
+
 /**
  * Reset the message.
  */
 function resetMessage () {
     $("#result")
-    .removeClass()
-    .text("");
+        .removeClass()
+        .text("");
 }
 /**
  * show a successful message.
  * @param {String} text the text to show.
  */
+// eslint-disable-next-line no-unused-vars
 function showMessage(text) {
     resetMessage();
     $("#result")
-    .addClass("alert alert-success")
-    .text(text);
+        .addClass("alert alert-success")
+        .text(text);
 }
 /**
  * show an error message.
@@ -23,24 +26,23 @@ function showMessage(text) {
 function showError(text) {
     resetMessage();
     $("#result")
-    .addClass("alert alert-danger")
-    .text(text);
+        .addClass("alert alert-danger")
+        .text(text);
 }
 /**
  * Update the progress bar.
  * @param {Integer} percent the current percent
  */
+// eslint-disable-next-line no-unused-vars
 function updatePercent(percent) {
     $("#progress_bar").removeClass("hide")
-    .find(".progress-bar")
-    .attr("aria-valuenow", percent)
-    .css({
-        width : percent + "%"
-    });
+        .find(".progress-bar")
+        .attr("aria-valuenow", percent)
+        .css({
+            width : percent + "%"
+        });
 }
 
 if(!JSZip.support.blob) {
     showError("This demo works only with a recent browser !");
-    return;
 }
-

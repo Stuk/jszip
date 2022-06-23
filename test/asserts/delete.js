@@ -1,5 +1,4 @@
-/* global QUnit,JSZip,JSZipTestUtils */
-'use strict';
+"use strict";
 
 QUnit.module("delete");
 
@@ -12,7 +11,7 @@ JSZipTestUtils.testZipFile("Delete file", "ref/text.zip", function(assert, expec
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
         assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
         done();
-    })['catch'](JSZipTestUtils.assertNoError);
+    })["catch"](JSZipTestUtils.assertNoError);
 });
 
 JSZipTestUtils.testZipFile("Delete file in folder", "ref/folder.zip", function(assert, expected) {
@@ -23,7 +22,7 @@ JSZipTestUtils.testZipFile("Delete file in folder", "ref/folder.zip", function(a
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
         assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
         done();
-    })['catch'](JSZipTestUtils.assertNoError);
+    })["catch"](JSZipTestUtils.assertNoError);
 });
 
 JSZipTestUtils.testZipFile("Delete file in folder, with a relative path", "ref/folder.zip", function(assert, expected) {
@@ -35,7 +34,7 @@ JSZipTestUtils.testZipFile("Delete file in folder, with a relative path", "ref/f
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
         assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
         done();
-    })['catch'](JSZipTestUtils.assertNoError);
+    })["catch"](JSZipTestUtils.assertNoError);
 });
 
 JSZipTestUtils.testZipFile("Delete folder", "ref/text.zip", function(assert, expected) {
@@ -47,7 +46,7 @@ JSZipTestUtils.testZipFile("Delete folder", "ref/text.zip", function(assert, exp
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
         assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
         done();
-    })['catch'](JSZipTestUtils.assertNoError);
+    })["catch"](JSZipTestUtils.assertNoError);
 });
 
 JSZipTestUtils.testZipFile("Delete folder with a final /", "ref/text.zip", function(assert, expected) {
@@ -59,7 +58,7 @@ JSZipTestUtils.testZipFile("Delete folder with a final /", "ref/text.zip", funct
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
         assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
         done();
-    })['catch'](JSZipTestUtils.assertNoError);
+    })["catch"](JSZipTestUtils.assertNoError);
 });
 
 JSZipTestUtils.testZipFile("Delete unknown path", "ref/text.zip", function(assert, expected) {
@@ -71,7 +70,7 @@ JSZipTestUtils.testZipFile("Delete unknown path", "ref/text.zip", function(asser
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
         assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
         done();
-    })['catch'](JSZipTestUtils.assertNoError);
+    })["catch"](JSZipTestUtils.assertNoError);
 });
 
 JSZipTestUtils.testZipFile("Delete nested folders", "ref/text.zip", function(assert, expected) {
@@ -85,7 +84,7 @@ JSZipTestUtils.testZipFile("Delete nested folders", "ref/text.zip", function(ass
     zip.generateAsync({type:"binarystring"}).then(function(actual) {
         assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
         done();
-    })['catch'](JSZipTestUtils.assertNoError);
+    })["catch"](JSZipTestUtils.assertNoError);
 });
 
 JSZipTestUtils.testZipFile("Delete nested folders from relative path", "ref/folder.zip", function(assert, expected) {
@@ -98,6 +97,5 @@ JSZipTestUtils.testZipFile("Delete nested folders from relative path", "ref/fold
         assert.ok(JSZipTestUtils.similar(actual, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
         JSZipTestUtils.checkGenerateStability(assert, actual);
         done();
-    })['catch'](JSZipTestUtils.assertNoError);
+    })["catch"](JSZipTestUtils.assertNoError);
 });
-
