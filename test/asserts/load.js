@@ -22,7 +22,7 @@ QUnit.module("load", function () {
         assert.ok(typeof file === "string");
         JSZip.loadAsync(file)
         .then(function (zip) {
-            assert.notEqual(Object.getPrototypeOf(zip.files), zip.files.__proto__); // jshint ignore:line
+            assert.notEqual(Object.getPrototypeOf(zip.files), zip.files.__proto__);
             return zip.file("__proto__").async("string");        })
         .then(function(result) {
             assert.equal(result, "hello\n", "the zip was correctly read.");

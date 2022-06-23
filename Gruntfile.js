@@ -1,29 +1,9 @@
-/*jshint node: true */
 "use strict";
 
 module.exports = function(grunt) {
   var version = require("./package.json").version;
 
   grunt.initConfig({
-    jshint: {
-      // see https://github.com/gruntjs/grunt-contrib-jshint/issues/198
-      // we can't override the options using the jshintrc path
-      options: grunt.file.readJSON('.jshintrc'),
-      production: ['./lib/**/*.js'],
-      test: ['./test/helpers/**/*.js', './test/asserts/**/*.js'],
-      documentation: {
-        options: {
-          // we include js files with jekyll, jshint can't see all
-          // variables and we can't declare all of them
-          undef: false,
-          // 'implied' still give false positives in our case
-          strict: false
-        },
-        files: {
-          src: ['./documentation/**/*.js']
-        }
-      }
-    },
     browserify: {
       all: {
         files: {
@@ -59,9 +39,8 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-browserify');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask("build", ["browserify", "uglify"]);
-  grunt.registerTask("default", ["jshint", "build"]);
+  grunt.registerTask("default", ["build"]);
 };

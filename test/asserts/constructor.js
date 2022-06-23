@@ -13,7 +13,6 @@ QUnit.test("new JSZip()", function(assert){
 });
 
 QUnit.test("JSZip()", function(assert){
-    var zip = JSZip(); // jshint ignore:line
+    var zip = JSZip();
     assert.ok(zip instanceof JSZip, "Constructor adds `new` before itself where necessary");
 });
-
