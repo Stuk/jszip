@@ -1,5 +1,4 @@
-/* global QUnit,JSZip,JSZipTestUtils */
-'use strict';
+"use strict";
 
 QUnit.module("filter");
 
@@ -8,7 +7,7 @@ QUnit.test("Filtering a zip", function(assert) {
     zip.file("1.txt", "1\n");
     zip.file("2.txt", "2\n");
     zip.file("3.log", "3\n");
-    var result = zip.filter(function(relativeFilename, file) {
+    var result = zip.filter(function(relativeFilename) {
         return relativeFilename.indexOf(".txt") !== -1;
     });
     assert.equal(result.length, 2, "filter has filtered");
@@ -26,7 +25,7 @@ QUnit.test("Filtering a zip from a relative path", function(assert) {
     zip.file("3.log", "3\n");
 
     var count = 0;
-    var result = zip.folder("foo").filter(function(relativeFilename, file) {
+    var result = zip.folder("foo").filter(function(relativeFilename) {
         count++;
         return relativeFilename.indexOf("3") !== -1;
     });

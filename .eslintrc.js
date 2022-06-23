@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = {
     "env": {
         "browser": true,
@@ -9,7 +11,7 @@ module.exports = {
     "parserOptions": {
         "ecmaVersion": "latest"
     },
-    "ignorePatterns": ["vendor/*.js", "dist/*.js"],
+    "ignorePatterns": ["vendor/*.js", "dist/*.js", "test/jquery-1.8.3.min.js"],
     "rules": {
         "indent": [
             "error",

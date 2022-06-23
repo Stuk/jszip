@@ -1,5 +1,4 @@
-/* global QUnit,JSZip,JSZipTestUtils */
-'use strict';
+"use strict";
 
 (function (global) {
     // Expose assert object globally
@@ -64,7 +63,7 @@
         }).then(function (content) {
             assert.ok(JSZipTestUtils.similar(bytesStream, content, 0), "generate stability : stable");
             done();
-        })['catch'](JSZipTestUtils.assertNoError);
+        })["catch"](JSZipTestUtils.assertNoError);
     };
 
     JSZipTestUtils.checkBasicStreamBehavior = function checkBasicStreamBehavior(assert, stream, testName) {
@@ -74,26 +73,26 @@
         }
         var triggeredStream = false;
         stream
-        .on("data", function (data, metadata) {
+            .on("data", function (data, metadata) {
             // triggering a lot of passing checks makes the result unreadable
-            if (!data) {
-                assert.ok(data, testName + "basic check stream, data event handler, data is defined");
-            }
-            if(!metadata) {
-                assert.ok(metadata, testName + "basic check stream, data event handler, metadata is defined");
-            }
-            triggeredStream = true;
-        })
-        .on("error", function (e) {
-            assert.ok(e, testName + "basic check stream, error event handler, error is defined");
-            triggeredStream = true;
-            done();
-        })
-        .on("end", function () {
-            triggeredStream = true;
-            done();
-        })
-        .resume()
+                if (!data) {
+                    assert.ok(data, testName + "basic check stream, data event handler, data is defined");
+                }
+                if(!metadata) {
+                    assert.ok(metadata, testName + "basic check stream, data event handler, metadata is defined");
+                }
+                triggeredStream = true;
+            })
+            .on("error", function (e) {
+                assert.ok(e, testName + "basic check stream, error event handler, error is defined");
+                triggeredStream = true;
+                done();
+            })
+            .on("end", function () {
+                triggeredStream = true;
+                done();
+            })
+            .resume()
         ;
         assert.ok(!triggeredStream, testName + "basic check stream, the stream callback is async");
     };
@@ -189,7 +188,7 @@
 
     var base64Dict = {
         "": "",
-        "\xE2\x82\xAC15\n": "4oKsMTUK",
+        "\xE2\x82\xAC15\n": "4oKsMTUK",
         "test\r\ntest\r\n": "dGVzdA0KdGVzdA0K",
         "all.zip.base64,stream=false": "UEsDBAoAAAAAAO+7TTrj5ZWwDAAAAAwAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsDBAoAAAAAAA9qUToAAAAAAAAAAAAAAAAHAAAAaW1hZ2VzL1BLAwQKAAAAAACZoEg6PD/riikAAAApAAAAEAAAAGltYWdlcy9zbWlsZS5naWZHSUY4N2EFAAUAgAIAAAAA/94ALAAAAAAFAAUAAAIIjA+RZ6sKUgEAO1BLAQIUAAoAAAAAAO+7TTrj5ZWwDAAAAAwAAAAJAAAAAAAAAAAAAAAAAAAAAABIZWxsby50eHRQSwECFAAKAAAAAAAPalE6AAAAAAAAAAAAAAAABwAAAAAAAAAAABAAAAAzAAAAaW1hZ2VzL1BLAQIUAAoAAAAAAJmgSDo8P+uKKQAAACkAAAAQAAAAAAAAAAAAAAAAAFgAAABpbWFnZXMvc21pbGUuZ2lmUEsFBgAAAAADAAMAqgAAAK8AAAAAAA==",
         "all.zip.base64,stream=true": "UEsDBAoACAAAAO+7TToAAAAAAAAAAAAAAAAJAAAASGVsbG8udHh0SGVsbG8gV29ybGQKUEsHCOPllbAMAAAADAAAAFBLAwQKAAAAAAAPalE6AAAAAAAAAAAAAAAABwAAAGltYWdlcy9QSwMECgAIAAAAmaBIOgAAAAAAAAAAAAAAABAAAABpbWFnZXMvc21pbGUuZ2lmR0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADtQSwcIPD/riikAAAApAAAAUEsBAhQACgAIAAAA77tNOuPllbAMAAAADAAAAAkAAAAAAAAAAAAAAAAAAAAAAEhlbGxvLnR4dFBLAQIUAAoAAAAAAA9qUToAAAAAAAAAAAAAAAAHAAAAAAAAAAAAEAAAAEMAAABpbWFnZXMvUEsBAhQACgAIAAAAmaBIOjw/64opAAAAKQAAABAAAAAAAAAAAAAAAAAAaAAAAGltYWdlcy9zbWlsZS5naWZQSwUGAAAAAAMAAwCqAAAAzwAAAAAA"

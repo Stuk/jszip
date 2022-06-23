@@ -1,8 +1,6 @@
-
-var Promise = window.Promise;
-if (!Promise) {
-    Promise = JSZip.external.Promise;
-}
+"use strict";
+// From helpers.js:
+/* global resetMessage, showMessage, showError, updatePercent */
 
 /**
  * Fetch the content and return the associated promise.
@@ -21,8 +19,7 @@ function urlToPromise(url) {
     });
 }
 
-var $form = $("#download_form").on("submit", function () {
-
+$("#download_form").on("submit", function () {
     resetMessage();
 
     var zip = new JSZip();
@@ -44,15 +41,15 @@ var $form = $("#download_form").on("submit", function () {
         showMessage(msg);
         updatePercent(metadata.percent|0);
     })
-    .then(function callback(blob) {
+        .then(function callback(blob) {
 
-        // see FileSaver.js
-        saveAs(blob, "example.zip");
+            // see FileSaver.js
+            saveAs(blob, "example.zip");
 
-        showMessage("done !");
-    }, function (e) {
-        showError(e);
-    });
+            showMessage("done !");
+        }, function (e) {
+            showError(e);
+        });
 
     return false;
 });

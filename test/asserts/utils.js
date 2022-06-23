@@ -1,5 +1,4 @@
-/* global QUnit,JSZip,JSZipTestUtils */
-'use strict';
+"use strict";
 
 // These tests only run in Node
 var utils = require("../../lib/utils");
