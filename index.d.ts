@@ -172,7 +172,7 @@ declare namespace JSZip {
 
     interface JSZipMetadata {
         percent: number;
-        currentFile: string;
+        currentFile: string | null;
     }
 
     type DataEventCallback<T> = (dataChunk: T, metadata: JSZipMetadata) => void
