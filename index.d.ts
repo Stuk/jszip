@@ -23,13 +23,6 @@ interface CompressionOptions {
     level: number;
 }
 
-interface Metadata  {
-    percent: number;
-    currentFile: string | null;
-}
-
-type OnUpdateCallback = (metadata: Metadata) => void;
-
 interface InputByType {
     base64: string;
     string: string;
@@ -70,6 +63,13 @@ declare namespace JSZip {
     type InputType = keyof InputByType;
 
     type OutputType = keyof OutputByType;
+
+    interface JSZipMetadata {
+        percent: number;
+        currentFile: string | null;
+    }
+
+    type OnUpdateCallback = (metadata: JSZipMetadata) => void;
 
     interface JSZipObject {
         name: string;
@@ -168,11 +168,6 @@ declare namespace JSZip {
         optimizedBinaryString?: boolean;
         createFolders?: boolean;
         decodeFileName?: (bytes: string[] | Uint8Array | Buffer) => string;
-    }
-
-    interface JSZipMetadata {
-        percent: number;
-        currentFile: string;
     }
 
     type DataEventCallback<T> = (dataChunk: T, metadata: JSZipMetadata) => void
@@ -287,7 +282,7 @@ interface JSZip {
      * @param onUpdate The optional function called on each internal update with the metadata.
      * @return The serialized archive
      */
-    generateAsync<T extends JSZip.OutputType>(options?: JSZip.JSZipGeneratorOptions<T>, onUpdate?: OnUpdateCallback): Promise<OutputByType[T]>;
+    generateAsync<T extends JSZip.OutputType>(options?: JSZip.JSZipGeneratorOptions<T>, onUpdate?: JSZip.OnUpdateCallback): Promise<OutputByType[T]>;
 
     /**
      * Generates a new archive asynchronously
@@ -296,7 +291,7 @@ interface JSZip {
      * @param onUpdate The optional function called on each internal update with the metadata.
      * @return A Node.js `ReadableStream`
      */
-    generateNodeStream(options?: JSZip.JSZipGeneratorOptions<'nodebuffer'>, onUpdate?: OnUpdateCallback): NodeJS.ReadableStream;
+    generateNodeStream(options?: JSZip.JSZipGeneratorOptions<'nodebuffer'>, onUpdate?: JSZip.OnUpdateCallback): NodeJS.ReadableStream;
 
     /**
      * Generates the complete zip file with the internal stream implementation
