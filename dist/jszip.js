@@ -1307,8 +1307,6 @@ var out = {
     filter: function(search) {
         var result = [],
             filename, relativePath, file, fileClone;
-        /* jshint ignore:start */
-        // ignore warning about unwanted properties because this.files is a null prototype object
         for (filename in this.files) {
             file = this.files[filename];
             // return a new object, don't let the user mess with our internal objects :)
