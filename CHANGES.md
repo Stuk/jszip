@@ -4,6 +4,19 @@ layout: default
 section: main
 ---
 
+### v3.10.1 2022-08-02
+
+- Add sponsorship files.
+    + If you appreciate the time spent maintaining JSZip then I would really appreciate [your sponsorship](https://github.com/sponsors/Stuk).
+- Consolidate metadata types and expose OnUpdateCallback [#851](https://github.com/Stuk/jszip/pull/851) and [#852](https://github.com/Stuk/jszip/pull/852)
+- use `const` instead `var` in example from README.markdown [#828](https://github.com/Stuk/jszip/pull/828)
+- Switch manual download link to HTTPS [#839](https://github.com/Stuk/jszip/pull/839)
+
+Internals:
+
+- Replace jshint with eslint [#842](https://github.com/Stuk/jszip/pull/842)
+- Add performance tests [#834](https://github.com/Stuk/jszip/pull/834)
+
 ### v3.10.0 2022-05-20
 
 - Change setimmediate dependency to more efficient one. Fixes https://github.com/Stuk/jszip/issues/617 (see [#829](https://github.com/Stuk/jszip/pull/829))
@@ -189,4 +202,3 @@ This release changes a lot of methods, please see [the upgrade guide](http://stu
 # v1.0.0, 2013-02-14
 
 - First release after a long period without version.
-
