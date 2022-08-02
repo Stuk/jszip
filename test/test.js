@@ -1167,6 +1167,13 @@ testZipFile("load(string) works", "ref/all.zip", function(file) {
    equal(zip.file("Hello.txt").asText(), "Hello World\n", "the zip was correctly read.");
 });
 
+testZipFile("Load files which shadow Object prototype methods", "ref/pollution.zip", function(file) {
+   ok(typeof file === "string");
+   var zip = JSZip(file);
+   notEqual(Object.getPrototypeOf(zip.files), zip.files.__proto__);
+   equal(zip.file("__proto__").asText(), "hello\n", "the zip was correctly read.");
+});
+
 testZipFile("load(string) handles bytes > 255", "ref/all.zip", function(file) {
    // the method used to load zip with ajax will remove the extra bits.
    // adding extra bits :)
