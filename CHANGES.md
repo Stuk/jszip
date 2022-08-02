@@ -4,6 +4,11 @@ layout: default
 section: main
 ---
 
+#### v2.7.0 2022-08-02
+
+- Fix: Use a null prototype object for this.files (see [#824](https://github.com/Stuk/jszip/pull/824))
+    + This change might break existing code if it uses prototype methods on the .files property of a zip object, for example zip.files.toString(). This approach is taken to prevent files in the zip overriding object methods that would exist on a normal object.
+
 ### v2.6.1 2016-07-28
 - update pako to v1.0.2 to fix a DEFLATE bug (see [#322](https://github.com/Stuk/jszip/pull/322)).
 
@@ -77,4 +82,3 @@ section: main
 # v1.0.0, 2013-02-14
 
 - First release after a long period without version.
-
