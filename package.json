@@ -31,6 +31,12 @@
     "./lib/index": "./dist/jszip.min.js",
     "readable-stream": "./lib/readable-stream-browser.js"
   },
+  "exports": {
+    ".": {
+      "node": "./lib/index.js",
+      "default": "./dist/jszip.js"
+    }
+  },
   "types": "./index.d.ts",
   "repository": {
     "type": "git",
