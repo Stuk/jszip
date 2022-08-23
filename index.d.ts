@@ -240,9 +240,9 @@ interface JSZip {
      * Returns an new JSZip instance with the given folder as root
      *
      * @param name Name of the folder
-     * @return New JSZip object with the given folder as root or null
+     * @return New JSZip object with the given folder as root
      */
-    folder(name: string): JSZip | null;
+    folder(name: string): JSZip;
 
     /**
      * Returns new JSZip instances with the matching folders as root
