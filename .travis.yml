@@ -10,6 +10,18 @@ matrix:
       env: COMMAND=test-node
     - node_js: "stable"
       env: COMMAND=test-browser
+    - node_js: "stable"
+      arch: ppc64le
+      env: COMMAND=lint
+    - node_js: "lts/*"
+      arch: ppc64le
+      env: COMMAND=test-node
+    - node_js: "stable"
+      arch: ppc64le
+      env: COMMAND=test-node
+    - node_js: "stable"
+      arch: ppc64le
+      env: COMMAND=test-browser
 env:
   global:
   - secure: MhA8GHU42X3GWTUMaqdZVvarx4BMjhQCUGNi3kvuD/iCmKVb7gMwj4jbds7AcJdsCRsRk8bBGzZs/E7HidBJMPDa5DhgLKy9EV1s42JlHq8lVzbJeWIGgrtyJvhVUkGRy2OJjnDSgh3U6elkQmvDn74jreSQc6m/yGoPFF1nqq8=
