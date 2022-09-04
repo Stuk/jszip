@@ -4,7 +4,7 @@ layout: default
 section: api
 ---
 
-Call a callback function for each entry at this folder level.
+Call a callback function for each entry at or below this folder level.
 
 __Returns__ : Nothing.
 
