@@ -1,3 +1,5 @@
+"use strict";
+
 var $result = $("#result");
 $("#file").on("change", function(evt) {
     // remove content
@@ -16,24 +18,24 @@ $("#file").on("change", function(evt) {
 
         var dateBefore = new Date();
         JSZip.loadAsync(f)                                   // 1) read the Blob
-        .then(function(zip) {
-            var dateAfter = new Date();
-            $title.append($("<span>", {
-                "class": "small",
-                text:" (loaded in " + (dateAfter - dateBefore) + "ms)"
-            }));
+            .then(function(zip) {
+                var dateAfter = new Date();
+                $title.append($("<span>", {
+                    "class": "small",
+                    text:" (loaded in " + (dateAfter - dateBefore) + "ms)"
+                }));
 
-            zip.forEach(function (relativePath, zipEntry) {  // 2) print entries
-                $fileContent.append($("<li>", {
-                    text : zipEntry.name
+                zip.forEach(function (relativePath, zipEntry) {  // 2) print entries
+                    $fileContent.append($("<li>", {
+                        text : zipEntry.name
+                    }));
+                });
+            }, function (e) {
+                $result.append($("<div>", {
+                    "class" : "alert alert-danger",
+                    text : "Error reading " + f.name + ": " + e.message
                 }));
             });
-        }, function (e) {
-            $result.append($("<div>", {
-                "class" : "alert alert-danger",
-                text : "Error reading " + f.name + ": " + e.message
-            }));
-        });
     }
 
     var files = evt.target.files;
@@ -41,4 +43,3 @@ $("#file").on("change", function(evt) {
         handleFile(files[i]);
     }
 });
-

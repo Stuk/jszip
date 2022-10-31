@@ -1,5 +1,4 @@
-/* global QUnit,JSZip,JSZipTestUtils */
-'use strict';
+"use strict";
 
 QUnit.module("generate");
 
@@ -13,31 +12,31 @@ function testGenerateFor(testCases, fn) {
 function testGenerate(assert, options) {
     var done = assert.async();
     var triggeredCallback = false;
-    new JSZip.external.Promise(function(resolve, reject) {
+    new JSZip.external.Promise(function(resolve) {
         resolve(options.prepare());
     })
-    .then(function (zip) {
-        JSZipTestUtils.checkBasicStreamBehavior(assert, zip.generateInternalStream(options.options));
-        return zip;
-    })
-    .then(function(zip) {
-        var promise = zip.generateAsync(options.options);
-        zip.file("Hello.txt", "updating the zip file after the call won't change the result");
-        return promise;
-    })
-    .then(function(result) {
-        triggeredCallback = true;
-        options.assertions(null, result);
+        .then(function (zip) {
+            JSZipTestUtils.checkBasicStreamBehavior(assert, zip.generateInternalStream(options.options));
+            return zip;
+        })
+        .then(function(zip) {
+            var promise = zip.generateAsync(options.options);
+            zip.file("Hello.txt", "updating the zip file after the call won't change the result");
+            return promise;
+        })
+        .then(function(result) {
+            triggeredCallback = true;
+            options.assertions(null, result);
 
-        if (!options.skipReloadTest) {
-            JSZipTestUtils.checkGenerateStability(assert, result, options.options);
-        }
-        done();
-    }, function (err) {
-        triggeredCallback = true;
-        options.assertions(err, null);
-        done();
-    });
+            if (!options.skipReloadTest) {
+                JSZipTestUtils.checkGenerateStability(assert, result, options.options);
+            }
+            done();
+        }, function (err) {
+            triggeredCallback = true;
+            options.assertions(err, null);
+            done();
+        });
     assert.ok(!triggeredCallback, "the async callback is async");
 }
 
@@ -62,7 +61,7 @@ testGenerateFor([{
             }
         });
     });
-    JSZipTestUtils.testZipFile("generate : type:base64. " + testName, file, function(assert, expected) {
+    JSZipTestUtils.testZipFile("generate : type:base64. " + testName, file, function(assert) {
         testGenerate(assert, {
             prepare : function () {
                 // fix date to get a predictable output
@@ -238,11 +237,11 @@ JSZipTestUtils.testZipFile("STORE is the default method", "ref/text.zip", functi
     var zip = new JSZip();
     zip.file("Hello.txt", "Hello World\n");
     var done = assert.async();
-    zip.generateAsync({type:"binarystring", compression:'STORE'}).then(function(content) {
+    zip.generateAsync({type:"binarystring", compression:"STORE"}).then(function(content) {
         // no difference with the "Zip text file" test.
         assert.ok(JSZipTestUtils.similar(content, expected, JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "Generated ZIP matches reference ZIP");
         done();
-    })['catch'](JSZipTestUtils.assertNoError);
+    })["catch"](JSZipTestUtils.assertNoError);
 });
 
 JSZipTestUtils.testZipFile("AES-256 encrypted", "ref/aes.zip", function(assert, expected) {
@@ -292,11 +291,11 @@ function testLazyDecompression(assert, from, to) {
             },
             skipReloadTest : true,
             options : {type:"binarystring", compression:to},
-            assertions : function (err, result) {
+            assertions : function (err) {
                 assert.equal(err, null, from + " -> " + to + " : no error");
             }
         });
-    })['catch'](JSZipTestUtils.assertNoError);
+    })["catch"](JSZipTestUtils.assertNoError);
 }
 QUnit.test("Lazy decompression works", function(assert) {
     testLazyDecompression(assert, "STORE", "STORE");
@@ -324,7 +323,7 @@ JSZipTestUtils.testZipFile("empty zip", "ref/empty.zip", function(assert, expect
 QUnit.test("unknown compression throws an exception", function (assert) {
     testGenerate(assert, {
         prepare : JSZipTestUtils.createZipAll,
-        options : {type:"string",compression:'MAYBE'},
+        options : {type:"string",compression:"MAYBE"},
         assertions : function (err, result) {
             assert.equal(result, null, "no data");
             assert.ok(err.message.match("not a valid compression"), "the error message is useful");
@@ -351,16 +350,16 @@ QUnit.test("generateAsync uses the current folder level", function (assert) {
     zip.folder("root1");
     zip.folder("root2").file("leaf1", "a");
     zip.folder("root2")
-    .generateAsync({type:"string"})
-    .then(JSZip.loadAsync)
-    .then(function(zip) {
-        assert.ok(!zip.file("file1"), "root files are not present");
-        assert.ok(!zip.file("root1"), "root folders are not present");
-        assert.ok(!zip.file("root2"), "root folders are not present");
-        assert.ok(zip.file("leaf1"), "leaves are present");
+        .generateAsync({type:"string"})
+        .then(JSZip.loadAsync)
+        .then(function(zip) {
+            assert.ok(!zip.file("file1"), "root files are not present");
+            assert.ok(!zip.file("root1"), "root folders are not present");
+            assert.ok(!zip.file("root2"), "root folders are not present");
+            assert.ok(zip.file("leaf1"), "leaves are present");
 
-        done();
-    })['catch'](JSZipTestUtils.assertNoError);
+            done();
+        })["catch"](JSZipTestUtils.assertNoError);
 });
 
 QUnit.test("generateAsync keep the explicit / folder", function (assert) {
@@ -370,32 +369,32 @@ QUnit.test("generateAsync keep the explicit / folder", function (assert) {
     zip.file("/file1", "a");
     zip.file("/root1/file2", "b");
     zip.generateAsync({type:"string"})
-    .then(JSZip.loadAsync)
-    .then(function(zip) {
-        assert.ok(zip.file("/file1"), "root files are present");
-        assert.ok(zip.file("/root1/file2"), "root folders are present");
+        .then(JSZip.loadAsync)
+        .then(function(zip) {
+            assert.ok(zip.file("/file1"), "root files are present");
+            assert.ok(zip.file("/root1/file2"), "root folders are present");
 
-        done();
-    })['catch'](JSZipTestUtils.assertNoError);
+            done();
+        })["catch"](JSZipTestUtils.assertNoError);
 });
 
 JSZipTestUtils.testZipFile("generate with promises as files", "ref/all.zip", function (assert, expected) {
     var done = assert.async();
     var zip = new JSZip();
-    zip.file("Hello.txt", new JSZip.external.Promise(function (resolve, reject) {
+    zip.file("Hello.txt", new JSZip.external.Promise(function (resolve) {
         setTimeout(function () {
             resolve("Hello World\n");
         }, 50);
     }));
-    zip.folder("images").file("smile.gif", new JSZip.external.Promise(function (resolve, reject) {
+    zip.folder("images").file("smile.gif", new JSZip.external.Promise(function (resolve) {
         setTimeout(function () {
             resolve("R0lGODdhBQAFAIACAAAAAP/eACwAAAAABQAFAAACCIwPkWerClIBADs=");
         }, 100);
     }), {base64: true});
 
     zip.generateAsync({type:"string"})
-    .then(function (result) {
-        assert.ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
-        done();
-    })['catch'](JSZipTestUtils.assertNoError);
+        .then(function (result) {
+            assert.ok(JSZipTestUtils.similar(result, expected, 3 * JSZipTestUtils.MAX_BYTES_DIFFERENCE_PER_ZIP_ENTRY) , "generated ZIP matches reference ZIP");
+            done();
+        })["catch"](JSZipTestUtils.assertNoError);
 });

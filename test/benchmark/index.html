@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>JSZip Benchmark</title>
+</head>
+<body>
+    <script src="../../node_modules/benchmark/node_modules/lodash/lodash.js"></script>
+    <script src="../../node_modules/benchmark/benchmark.js"></script>
+    <script src="../../dist/jszip.js"></script>
+    <script src="./benchmark.js"></script>
+    <script>
+        benchmark("arraybuffer");
+    </script>
+</body>
+</html>

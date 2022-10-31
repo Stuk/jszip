@@ -13,7 +13,7 @@ need one to create the pull request).
 
 If you just want the get the source code, you can use git and do
 `git clone https://github.com/Stuk/jszip.git` to get the sources. You can also
-download the latest sources [here](https://github.com/Stuk/jszip/archive/master.zip).
+download the latest sources [here](https://github.com/Stuk/jszip/archive/main.zip).
 
 ### Building the project
 
@@ -30,7 +30,7 @@ Here are the interesting build commands :
 * `npm run test-browser` will the tests in some browsers using SauceLabs, see
   below.
 * `npm run test` will run the tests in nodejs and in the browser.
-* `npm run lint` will use jshint the check the source code.
+* `npm run lint` will use eslint the check the source code.
 
 #### Documentation
 
@@ -63,12 +63,16 @@ If you have tested bug fixes or new features, you can open a
 
 ## Releasing a new version
 
-1. Run `npm test`
+1. In `package.json` temporarily remove `browser["./lib/index"]`.
+2. Run `npm test`
     * Locally open http://localhost:8080/test/
     * Or use the SauceLabs configuration above
-2. Update `JSZip.version` in `index.js` and in `package.json`
-3. Run `grunt` to generate the new dist files
+3. Update `JSZip.version` in `index.js`, `index.html` and in `package.json`
+4. Run `grunt` to generate the new dist files
     * undo the package.json change, it was just needed to replace the `__VERSION__` in the header
-4. Update CHANGES.md
-5. Run `npm version ...` where `...` is `major`, `minor`, or `patch`
-6. Run npm publish
+5. Undo step 1.
+6. Change version back in `package.json` (it will get update by the npm command below)
+7. Update CHANGES.md
+8. Commit the appropriate changes
+9. Run `npm version ...` where `...` is `major`, `minor`, or `patch`
+10. Run npm publish

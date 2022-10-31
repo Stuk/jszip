@@ -1,7 +1,5 @@
-JSZip [![Build Status](https://api.travis-ci.org/Stuk/jszip.svg?branch=master)](http://travis-ci.org/Stuk/jszip) [![Code Climate](https://codeclimate.com/github/Stuk/jszip/badges/gpa.svg)](https://codeclimate.com/github/Stuk/jszip)
+JSZip
 =====
-
-[![Selenium Test Status](https://saucelabs.com/browser-matrix/jszip.svg)](https://saucelabs.com/u/jszip)
 
 A library for creating, reading and editing .zip files with JavaScript, with a
 lovely and simple API.
@@ -9,11 +7,11 @@ lovely and simple API.
 See https://stuk.github.io/jszip for all the documentation.
 
 ```javascript
-var zip = new JSZip();
+const zip = new JSZip();
 
 zip.file("Hello.txt", "Hello World\n");
 
-var img = zip.folder("images");
+const img = zip.folder("images");
 img.file("smile.gif", imgData, {base64: true});
 
 zip.generateAsync({type:"blob"}).then(function(content) {
