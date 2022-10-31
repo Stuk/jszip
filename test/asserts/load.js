@@ -440,23 +440,23 @@ QUnit.module("load", function () {
     JSZipTestUtils.testZipFile("aes encrypted zip file", "ref/aes.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file, {password: "12345678"})
-        .then(function success(zip) {
-            return zip.file("aes.txt").async("string");
-        }).then(function (content) {
-            assert.equal(content, "aes encrypted", "the zip was correctly read.");
-            done();
-        })['catch'](JSZipTestUtils.assertNoError);
+            .then(function success(zip) {
+                return zip.file("aes.txt").async("string");
+            }).then(function (content) {
+                assert.equal(content, "aes encrypted", "the zip was correctly read.");
+                done();
+            })["catch"](JSZipTestUtils.assertNoError);
     });
 
     JSZipTestUtils.testZipFile("aes encrypted only one zip file", "ref/aes_only_one.zip", function(assert, file) {
         var done = assert.async();
         JSZip.loadAsync(file)
-        .then(function success(zip) {
-            return zip.file("aes.txt").password("12345678").async("string");
-        }).then(function (content) {
-            assert.equal(content, "aes encrypted", "the zip was correctly read.");
-            done();
-        })['catch'](JSZipTestUtils.assertNoError);
+            .then(function success(zip) {
+                return zip.file("aes.txt").password("12345678").async("string");
+            }).then(function (content) {
+                assert.equal(content, "aes encrypted", "the zip was correctly read.");
+                done();
+            })["catch"](JSZipTestUtils.assertNoError);
     });
     
     JSZipTestUtils.testZipFile("load(promise) works", "ref/all.zip", function(assert, fileAsString) {
