@@ -638,7 +638,10 @@ module.exports = function(data, options) {
     files = zipEntries.files;
     for (i = 0; i < files.length; i++) {
         input = files[i];
-        this.file(input.fileNameStr, input.decompressed, {
+        var unsafeName = input.fileNameStr;
+        var safeName = utils.resolve(input.fileNameStr);
+
+        this.file(safeName, input.decompressed, {
             binary: true,
             optimizedBinaryString: true,
             date: input.date,
@@ -648,6 +651,10 @@ module.exports = function(data, options) {
             dosPermissions : input.dosPermissions,
             createFolders: options.createFolders
         });
+        
+        if (!input.dir) {
+            this.file(safeName).unsafeOriginalName = unsafeName;
+        }
     }
     if (zipEntries.zipComment.length) {
         this.comment = zipEntries.zipComment;
@@ -2195,6 +2202,31 @@ exports.transformTo = function(outputType, input) {
     var inputType = exports.getTypeOf(input);
     var result = transform[inputType][outputType](input);
     return result;
+};
+
+/**
+ * Resolve all relative path components, "." and "..", in a path. If these relative components
+ * traverse above the root then the resulting path will only contain the final path component.
+ *
+ * All empty components, e.g. "//", are removed.
+ * @param {string} path A path with / or \ separators
+ * @returns {string} The path with all relative path components resolved.
+ */
+exports.resolve = function(path) {
+    var parts = path.split("/");
+    var result = [];
+    for (var index = 0; index < parts.length; index++) {
+        var part = parts[index];
+        // Allow the first and last component to be empty for trailing slashes.
+        if (part === "." || (part === "" && index !== 0 && index !== parts.length - 1)) {
+            continue;
+        } else if (part === "..") {
+            result.pop();
+        } else {
+            result.push(part);
+        }
+    }
+    return result.join("/");
 };
 
 /**
