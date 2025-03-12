@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-          sudo npx playwright install-deps
+          npx playwright install --with-deps
 
       - name: Lint
         run: npm run lint
