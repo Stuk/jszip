@@ -1,0 +1,93 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up workspace
+        uses: ./.github/actions/setup
+
+      - name: Run linter
+        run: npm run lint
+
+  test-node:
+    name: Test on Node.js ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["0.10", "0.12", 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up workspace
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Run tests
+        run: npm run test-node
+
+  test-browser:
+    name: Test in browser
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up workspace
+        uses: ./.github/actions/setup
+
+      - name: Install browsers
+        run: npx playwright install --with-deps
+
+      - name: Run tests
+        run: npm run test-browser
+
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+    permissions:
+      # To deploy GitHub pages website.
+      deployments: write
+      # To update benchmark contents in gh-pages branch.
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up workspace
+        uses: ./.github/actions/setup
+
+      - name: Install browsers
+        run: npx playwright install --with-deps
+
+      - name: Run benchmark
+        run: npm run benchmark | tee benchmark.txt
+
+      - name: Download previous benchmark data
+        uses: actions/cache@v4
+        with:
+          path: ./cache
+          key: ${{ runner.os }}-benchmark
+
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: benchmarkjs
+          output-file-path: benchmark.txt
+          external-data-json-path: ./cache/benchmark-data.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          alert-threshold: 150%
+          comment-on-alert: true
+          fail-on-alert: true
+          alert-comment-cc-users: "@Stuk"
