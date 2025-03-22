@@ -27,6 +27,7 @@
     }
   ],
   "main": "./lib/index",
+  "unpkg": "./dist/jszip.js",
   "browser": {
     "./lib/index": "./dist/jszip.min.js",
     "readable-stream": "./lib/readable-stream-browser.js"
