@@ -1,0 +1,38 @@
+name: Benchmark
+on:
+  push:
+    branches: [main]
+jobs:
+  benchmark:
+    name: Run benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up workspace
+        uses: ./.github/actions/setup
+
+      - name: Install browsers
+        run: npx playwright install --with-deps
+
+      - name: Run benchmark
+        run: npm run benchmark | tee benchmark.txt
+
+      - name: Download previous benchmark data
+        uses: actions/cache@v4
+        with:
+          path: ./cache
+          key: ${{ runner.os }}-benchmark
+
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: benchmarkjs
+          output-file-path: benchmark.txt
+          external-data-json-path: ./cache/benchmark-data.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          alert-threshold: 150%
+          comment-on-alert: true
+          fail-on-alert: true
+          alert-comment-cc-users: "@Stuk"

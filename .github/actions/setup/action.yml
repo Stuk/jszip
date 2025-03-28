@@ -1,0 +1,23 @@
+name: Set up workspace
+description: Sets up the workspace by installing Node.js and dependencies.
+
+inputs:
+  node-version:
+    description: The Node.js version to install.
+    required: false
+    default: "lts/*"
+
+runs:
+  using: composite
+  steps:
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+    - name: Install dependencies
+      # Because the lockfile is not compatible between all supported Node.js versions we need to run `npm install`.
+      # When support for older versions of Node.js is dropped, this can be changed to `npm ci`.
+      run: npm install
+      shell: bash
