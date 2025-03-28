@@ -170,6 +170,19 @@ declare namespace JSZip {
         decodeFileName?: (bytes: string[] | Uint8Array | Buffer) => string;
     }
 
+    interface JSZipDefaults {
+        base64: boolean;
+        binary: boolean;
+        dir: boolean;
+        createFolders: boolean;
+        date: Date;
+        compression: Compression;
+        compressionOptions: null | CompressionOptions;
+        comment: string;
+        unixPermissions: number | string | null;
+        dosPermissions: number | null;
+    }
+
     type DataEventCallback<T> = (dataChunk: T, metadata: JSZipMetadata) => void
     type EndEventCallback = () => void
     type ErrorEventCallback = (error: Error) => void
@@ -319,6 +332,7 @@ interface JSZip {
 
     prototype: JSZip;
     support: JSZipSupport;
+    defaults: JSZip.JSZipDefaults;
     external: {
         Promise: PromiseConstructorLike;
     };
