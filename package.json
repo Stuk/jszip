@@ -1,6 +1,6 @@
 {
   "name": "@node-projects/jszip",
-  "version": "4.1.4",
+  "version": "4.1.5",
   "author": "Stuart Knightley <stuart@stuartk.com>",
   "description": "Create, read and edit .zip files with JavaScript http://stuartk.com/jszip",
   "scripts": {
