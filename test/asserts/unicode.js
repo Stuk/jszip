@@ -185,8 +185,7 @@ QUnit.test("Astral characters at chunk boundary should not produce CESU-8", func
     var zip = new JSZip();
     zip.file("test.txt", testStr);
     
-    var done = assert.async();
-    zip.generateAsync({type:"uint8array"})
+    return zip.generateAsync({type:"uint8array"})
         .then(function(zipData) {
             return JSZip.loadAsync(zipData);
         })
@@ -212,6 +211,5 @@ QUnit.test("Astral characters at chunk boundary should not produce CESU-8", func
         })
         .then(function(content) {
             assert.equal(content, testStr, "Content should round-trip correctly");
-            done();
-        })["catch"](JSZipTestUtils.assertNoError);
+        });
 });
