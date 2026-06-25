@@ -212,6 +212,28 @@ QUnit.module("load", function () {
         })["catch"](JSZipTestUtils.assertNoError);
     });
 
+    QUnit.test("load a zip whose comment contains the end of central directory signature", function (assert) {
+        var done = assert.async();
+        // "PK\x05\x06" is the end of central directory signature: it can
+        // legitimately appear inside the archive comment and must not be
+        // mistaken for the real record (APPNOTE.TXT §4.3.16).
+        var comment = "\x50\x4b\x05\x06" + "Z".repeat(18);
+        var zip = new JSZip();
+        zip.file("a.txt", "hi");
+        zip.generateAsync({type: "binarystring", comment: comment})
+            .then(function (generated) {
+                return JSZip.loadAsync(generated);
+            })
+            .then(function (loaded) {
+                assert.equal(loaded.comment, comment, "the archive comment was correctly read.");
+                return loaded.file("a.txt").async("string");
+            })
+            .then(function (content) {
+                assert.equal(content, "hi", "the zip was correctly read.");
+                done();
+            })["catch"](JSZipTestUtils.assertNoError);
+    });
+
     // zip -0 extra_attributes.zip Hello.txt
     JSZipTestUtils.testZipFile("zip with extra attributes", "ref/extra_attributes.zip", function(assert, file) {
         var done = assert.async();
