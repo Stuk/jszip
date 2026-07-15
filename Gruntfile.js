@@ -19,7 +19,12 @@ module.exports = function(grunt) {
                             __filename: undefined,
                             __dirname: undefined
                         },
-                        builtins: false
+                        builtins: false,
+                        // ignore the "browser" field of package.json:
+                        // it redirects ./lib/index to the previously
+                        // released dist/jszip.min.js, so the fresh build
+                        // would bundle the old code
+                        browserField: false
                     },
                     banner: grunt.file.read("lib/license_header.js").replace(/__VERSION__/, version)
                 }
