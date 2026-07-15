@@ -134,6 +134,23 @@ declare namespace JSZip {
         unixPermissions?: number | string | null;
     }
 
+    interface JSZipFolderOptions {
+        /**
+         * The last modification date, defaults to the current date.
+         */
+        date?: Date;
+        comment?: string;
+        /** Set to `true` if folders in the folder path should be automatically created, otherwise there will only be virtual folders that represent the path to the folder. */
+        createFolders?: boolean;
+        /** 6 bits number. The DOS permissions of the folder, if any. */
+        dosPermissions?: number | null;
+        /**
+         * 16 bits number. The UNIX permissions of the folder, if any.
+         * Also accepts a `string` representing the octal value: `"644"`, `"755"`, etc.
+         */
+        unixPermissions?: number | string | null;
+    }
+
     interface JSZipObjectOptions {
         compression: Compression;
     }
@@ -240,9 +257,10 @@ interface JSZip {
      * Returns an new JSZip instance with the given folder as root
      *
      * @param name Name of the folder
+     * @param options Folder options, only applied to this folder and not to the automatically created sub folders
      * @return New JSZip object with the given folder as root or null
      */
-    folder(name: string): JSZip | null;
+    folder(name: string, options?: JSZip.JSZipFolderOptions): JSZip | null;
 
     /**
      * Returns new JSZip instances with the matching folders as root

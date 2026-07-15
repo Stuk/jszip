@@ -636,11 +636,72 @@ QUnit.module("file", function () {
             unixPermissions : parseInt("40500", 8)
         });
 
-        // calling folder() doesn't override it
-        zip.folder("folder");
+        // calling folder() doesn't override it, even with options
+        zip.folder("folder", {
+            comment : "new comment",
+            unixPermissions : "40755"
+        });
 
         assert.equal(zip.files["folder/"].comment, referenceComment, "the folder with options has the correct comment");
         assert.equal(zip.files["folder/"].unixPermissions.toString(8), "40500", "the folder with options has the correct UNIX permissions");
+    });
+
+    QUnit.test("folder() accepts options", function (assert) {
+        var referenceDate = new Date("July 17, 2009 14:36:57");
+        var zip = new JSZip();
+        zip.folder("unix", {
+            comment : "my comment",
+            date : referenceDate,
+            unixPermissions : "40755"
+        });
+        zip.folder("dos", {
+            dosPermissions : 16
+        });
+
+        assert.equal(zip.files["unix/"].dir, true, "the folder with options is marked as a folder");
+        assert.equal(zip.files["unix/"].comment, "my comment", "the folder with options has the correct comment");
+        assert.equal(zip.files["unix/"].date.getTime(), referenceDate.getTime(), "the folder with options has the correct date");
+        assert.equal(zip.files["unix/"].unixPermissions.toString(8), "40755", "the folder with options has the correct UNIX permissions");
+        assert.equal(zip.files["dos/"].dir, true, "the folder with DOS options is marked as a folder");
+        assert.equal(zip.files["dos/"].dosPermissions, 16, "the folder with options has the correct DOS permissions");
+    });
+
+    QUnit.test("folder() options apply to the folder, not to the created sub folders", function (assert) {
+        var zip = new JSZip();
+        zip.folder("0/1/folder", {unixPermissions : "40755"});
+
+        assert.equal(zip.files["0/"].unixPermissions, null, "0/ has no UNIX permissions");
+        assert.equal(zip.files["0/1/"].unixPermissions, null, "0/1/ has no UNIX permissions");
+        assert.equal(zip.files["0/1/folder/"].unixPermissions.toString(8), "40755", "the folder has the correct UNIX permissions");
+    });
+
+    QUnit.test("nested folder() options work like chained folder() calls", function (assert) {
+        var nested = new JSZip();
+        nested.folder("0/1/folder", {unixPermissions : "40755"});
+        var chained = new JSZip();
+        chained.folder("0").folder("1").folder("folder", {unixPermissions : "40755"});
+
+        ["0/", "0/1/", "0/1/folder/"].forEach(function (name) {
+            assert.equal(
+                nested.files[name].unixPermissions,
+                chained.files[name].unixPermissions,
+                name + " has the same UNIX permissions"
+            );
+        });
+    });
+
+    QUnit.test("folder() options survive a reload", function (assert) {
+        var zip = new JSZip();
+        zip.folder("folder", {unixPermissions : "40755"});
+
+        var done = assert.async();
+
+        zip.generateAsync({type:"binarystring", platform:"UNIX"})
+            .then(JSZip.loadAsync)
+            .then(function (reloaded) {
+                assert.equal(reloaded.files["folder/"].unixPermissions.toString(8), "40755", "the folder has the correct UNIX permissions");
+                done();
+            })["catch"](JSZipTestUtils.assertNoError);
     });
 
     QUnit.test("createFolders works on a file", function (assert) {
