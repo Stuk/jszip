@@ -104,4 +104,24 @@ QUnit.module("permissions", function () {
     JSZipTestUtils.testZipFile("permissions on windows : file created by winrar", "ref/permissions/windows_winrar.zip", assertDosPermissions);
     JSZipTestUtils.testZipFile("permissions on windows : file created by winrar, reloaded", "ref/permissions/windows_winrar.zip", reloadAndAssertDosPermissions);
 
+    QUnit.test("unixPermissions without file type bits get a type (regular file / directory)", function (assert) {
+        var done = assert.async();
+        var zip = new JSZip();
+        // as documented, bare permissions without S_IFMT bits
+        zip.file("script.sh", "#!/bin/bash", {unixPermissions: "755"});
+        zip.file("data", "content", {unixPermissions: parseInt("644", 8)});
+        zip.file("dir/", null, {dir: true, unixPermissions: parseInt("755", 8)});
+        // a full mode (here a symlink) must be preserved unchanged, see #428
+        zip.file("link", "target", {unixPermissions: parseInt("120777", 8)});
+        zip.generateAsync({type: "string", platform: "UNIX"})
+            .then(JSZip.loadAsync)
+            .then(function (reloaded) {
+                assert.equal(reloaded.files["script.sh"].unixPermissions.toString(8), "100755", "the file gets the regular file type bit");
+                assert.equal(reloaded.files["data"].unixPermissions.toString(8), "100644", "the file gets the regular file type bit");
+                assert.equal(reloaded.files["dir/"].unixPermissions.toString(8), "40755", "the folder gets the directory type bit");
+                assert.equal(reloaded.files["link"].unixPermissions.toString(8), "120777", "an existing file type is left untouched");
+                done();
+            })["catch"](JSZipTestUtils.assertNoError);
+    });
+
 });
