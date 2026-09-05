@@ -1,6 +1,6 @@
 /*!
 
-JSZip v3.10.1 - A JavaScript class for generating and reading zip files
+JSZip v3.10.2 - A JavaScript class for generating and reading zip files
 <http://stuartk.com/jszip>
 
 (c) 2009-2016 Stuart Knightley <stuart [at] stuartk.com>
@@ -1057,7 +1057,7 @@ JSZip.defaults = require("./defaults");
 
 // TODO find a better way to handle this version,
 // a require('package.json').version doesn't work with webpack, see #327
-JSZip.version = "3.10.1";
+JSZip.version = "3.10.2";
 
 JSZip.loadAsync = function (content, options) {
     return new JSZip().loadAsync(content, options);
@@ -3492,21 +3492,29 @@ exports.prepareContent = function(name, inputData, isBinary, isOptimizedBinarySt
 
         var isBlob = support.blob && (data instanceof Blob || ["[object File]", "[object Blob]"].indexOf(Object.prototype.toString.call(data)) !== -1);
 
-        if (isBlob && typeof FileReader !== "undefined") {
-            return new external.Promise(function (resolve, reject) {
-                var reader = new FileReader();
+        if (isBlob) {
+            if (typeof Blob.prototype.arrayBuffer !== "undefined") {
+                return data.arrayBuffer();
+            } else if (typeof FileReader !== "undefined") {
+                return new external.Promise(function (resolve, reject) {
+                    var reader = new FileReader();
 
-                reader.onload = function(e) {
-                    resolve(e.target.result);
-                };
-                reader.onerror = function(e) {
-                    reject(e.target.error);
-                };
-                reader.readAsArrayBuffer(data);
-            });
-        } else {
-            return data;
+                    reader.onload = function(e) {
+                        resolve(e.target.result);
+                    };
+                    reader.onerror = function(e) {
+                        reject(e.target.error);
+                    };
+                    reader.readAsArrayBuffer(data);
+                });
+            } else {
+                return external.Promise.reject(
+                    new Error(name + " is a Blob, but we have no way of reading it.")
+                );
+            }
         }
+
+        return data;
     });
 
     return promise.then(function(data) {

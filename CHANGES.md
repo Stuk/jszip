@@ -4,6 +4,10 @@ layout: default
 section: main
 ---
 
+### v3.10.2 2026-09-05
+
+- Fix Blob support in Node.js 18 and up. Fixes [#941](https://github.com/Stuk/jszip/issues/941) (see [#955](https://github.com/Stuk/jszip/pull/955))
+
 ### v3.10.1 2022-08-02
 
 - Add sponsorship files.
