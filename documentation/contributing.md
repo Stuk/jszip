@@ -63,16 +63,13 @@ If you have tested bug fixes or new features, you can open a
 
 ## Releasing a new version
 
-1. In `package.json` temporarily remove `browser["./lib/index"]`.
-2. Run `npm test`
+1. Run `npm test`
     * Locally open http://localhost:8080/test/
     * Or use the SauceLabs configuration above
-3. Update `JSZip.version` in `index.js`, `index.html` and in `package.json`
-4. Run `grunt` to generate the new dist files
-    * undo the package.json change, it was just needed to replace the `__VERSION__` in the header
-5. Undo step 1.
-6. Change version back in `package.json` (it will get update by the npm command below)
-7. Update CHANGES.md
-8. Commit the appropriate changes
-9. Run `npm version ...` where `...` is `major`, `minor`, or `patch`
-10. Run npm publish
+2. Update `JSZip.version` in `index.js`, `index.html` and in `package.json`
+3. Run `grunt` to generate the new dist files
+4. Change version back in `package.json` (it will get update by the npm command below)
+5. Update CHANGES.md
+6. Commit the appropriate changes
+7. Run `npm version ...` where `...` is `major`, `minor`, or `patch`
+8. Run npm publish

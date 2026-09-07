@@ -41,6 +41,40 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-contrib-uglify");
 
-    grunt.registerTask("build", ["browserify", "uglify"]);
+    var packagePath = "package.json";
+    var browserIndexKey = "./lib/index";
+
+    grunt.registerTask("unmap-browser-entry", function() {
+        var original = grunt.file.read(packagePath);
+        var pkg = JSON.parse(original);
+
+        if (!pkg.browser || !pkg.browser[browserIndexKey]) {
+            return;
+        }
+
+        grunt.config.set("packageJsonBackup", original);
+        var browser = Object.assign({}, pkg.browser);
+        delete browser[browserIndexKey];
+        pkg.browser = browser;
+        grunt.file.write(packagePath, JSON.stringify(pkg, null, 2));
+    });
+
+    grunt.registerTask("restore-browser-entry", function() {
+        var original = grunt.config.get("packageJsonBackup");
+
+        if (!original) {
+            return;
+        }
+
+        grunt.file.write(packagePath, original);
+        grunt.config.set("packageJsonBackup", null);
+    });
+
+    grunt.registerTask("build", [
+        "unmap-browser-entry",
+        "browserify",
+        "uglify",
+        "restore-browser-entry"
+    ]);
     grunt.registerTask("default", ["build"]);
 };
