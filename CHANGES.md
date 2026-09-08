@@ -4,6 +4,12 @@ layout: default
 section: main
 ---
 
+### v3.10.2 2026-09-09
+
+- Fix cross-realm binary type detection in `getTypeOf`. Fixes [#759](https://github.com/Stuk/jszip/issues/759) (see [#578](https://github.com/Stuk/jszip/pull/578))
+- Add missing types for `JSZip.defaults`. Fixes [#690](https://github.com/Stuk/jszip/issues/690) (see [#927](https://github.com/Stuk/jszip/pull/927))
+- Fix Blob support in Node.js 18 and up. Fixes [#941](https://github.com/Stuk/jszip/issues/941) (see [#955](https://github.com/Stuk/jszip/pull/955))
+
 ### v3.10.1 2022-08-02
 
 - Add sponsorship files.
