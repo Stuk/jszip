@@ -695,6 +695,29 @@ QUnit.module("file", function () {
         assert.ok(zip.files["test/"], "the folder exists");
     });
 
+    QUnit.test("auto-created folders inherit the file date", function (assert) {
+        var referenceDate = new Date("July 17, 2009 14:36:56");
+        var zip = new JSZip();
+        zip.file("a/b/c/file.txt", "content", {date: referenceDate});
+
+        assert.equal(zip.files["a/"].date.getTime(), referenceDate.getTime(), "the first nested folder has the file date");
+        assert.equal(zip.files["a/b/"].date.getTime(), referenceDate.getTime(), "the intermediate folder has the file date");
+        assert.equal(zip.files["a/b/c/"].date.getTime(), referenceDate.getTime(), "the leaf folder has the file date");
+        assert.equal(zip.files["a/b/c/file.txt"].date.getTime(), referenceDate.getTime(), "the file keeps its date");
+    });
+
+    QUnit.test("auto-created folders share the unstamped file date", function (assert) {
+        JSZipTestUtils.withDistinctUnstampedDates(function () {
+            var zip = new JSZip();
+            zip.file("a/b/c/file.txt", "content");
+
+            var fileDate = zip.files["a/b/c/file.txt"].date.getTime();
+            assert.equal(zip.files["a/"].date.getTime(), fileDate, "the first nested folder shares the unstamped file date");
+            assert.equal(zip.files["a/b/"].date.getTime(), fileDate, "the intermediate folder shares the unstamped file date");
+            assert.equal(zip.files["a/b/c/"].date.getTime(), fileDate, "the leaf folder shares the unstamped file date");
+        });
+    });
+
     QUnit.test("Folders can be avoided with createFolders", function (assert) {
         var zip = new JSZip();
         zip.file("test/Readme", "Hello World!\n", {createFolders: false});

@@ -130,6 +130,35 @@
         }
     };
 
+    /**
+     * Run a function with `Date` stubbed so each bare `new Date()` returns a
+     * distinct value. Use to test unstamped date inheritance when separate
+     * `new Date()` calls would otherwise land in the same millisecond.
+     * Restores the real `Date` afterward, including when fn throws.
+     */
+    JSZipTestUtils.withDistinctUnstampedDates = function withDistinctUnstampedDates(fn) {
+        var RealDate = global.Date;
+        var ticks = 0;
+        function FakeDate() {
+            var args = Array.prototype.slice.call(arguments);
+            if (args.length === 0) {
+                ticks += 1;
+                return new RealDate(2000, 0, 1, 0, 0, ticks);
+            }
+            return new (Function.prototype.bind.apply(RealDate, [null].concat(args)));
+        }
+        FakeDate.now = RealDate.now;
+        FakeDate.UTC = RealDate.UTC;
+        FakeDate.parse = RealDate.parse;
+        FakeDate.prototype = RealDate.prototype;
+        global.Date = FakeDate;
+        try {
+            return fn();
+        } finally {
+            global.Date = RealDate;
+        }
+    };
+
     JSZipTestUtils.assertNoError = function assertNoError(err) {
         if (typeof console !== "undefined" && console.error) {
             console.error(err.stack);
