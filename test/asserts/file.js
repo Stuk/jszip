@@ -718,6 +718,28 @@ QUnit.module("file", function () {
         });
     });
 
+    QUnit.test("unstamped files inherit the parent folder date", function (assert) {
+        JSZipTestUtils.withDistinctUnstampedDates(function () {
+            var zip = new JSZip();
+            zip.folder("nested");
+            var folderDate = zip.files["nested/"].date.getTime();
+            zip.file("nested/hello.txt", "content");
+
+            assert.equal(zip.files["nested/hello.txt"].date.getTime(), folderDate, "the file inherits the folder date");
+        });
+    });
+
+    QUnit.test("explicit file dates do not change the parent folder date", function (assert) {
+        var referenceDate = new Date("August 1, 2010 12:00:00");
+        var zip = new JSZip();
+        zip.folder("nested");
+        var folderDate = zip.files["nested/"].date.getTime();
+        zip.file("nested/hello.txt", "content", {date: referenceDate});
+
+        assert.equal(zip.files["nested/"].date.getTime(), folderDate, "the folder date is unchanged");
+        assert.equal(zip.files["nested/hello.txt"].date.getTime(), referenceDate.getTime(), "the file keeps its explicit date");
+    });
+
     QUnit.test("Folders can be avoided with createFolders", function (assert) {
         var zip = new JSZip();
         zip.file("test/Readme", "Hello World!\n", {createFolders: false});
