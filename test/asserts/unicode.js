@@ -166,3 +166,50 @@ JSZipTestUtils.testZipFile("Zip text file and UTF-8, Pile Of Poo test", "ref/pil
         done();
     })["catch"](JSZipTestUtils.assertNoError);
 });
+
+QUnit.test("Astral characters at chunk boundary should not produce CESU-8", function(assert) {
+    // Test that surrogate pairs split across chunk boundaries are correctly
+    // encoded as 4-byte UTF-8 sequences, not as two 3-byte CESU-8 sequences.
+    // This bug occurred because DataWorker.substring() can split surrogate pairs.
+    var BLOCK_SIZE = 16 * 1024; // JSZip's internal chunk size
+    
+    // Position an astral character (U+1F600, 😀) right at the chunk boundary
+    var padding = "";
+    for (var i = 0; i < BLOCK_SIZE - 1; i++) {
+        padding += "x";
+    }
+    // U+1F600 is represented as surrogate pair \uD83D\uDE00 in JavaScript
+    var emoji = "\uD83D\uDE00";
+    var testStr = padding + emoji + "end";
+    
+    var zip = new JSZip();
+    zip.file("test.txt", testStr);
+    
+    return zip.generateAsync({type:"uint8array"})
+        .then(function(zipData) {
+            return JSZip.loadAsync(zipData);
+        })
+        .then(function(loadedZip) {
+            return loadedZip.file("test.txt").async("uint8array");
+        })
+        .then(function(bytes) {
+            // Check for CESU-8 sequences (ED xx xx pattern for surrogates)
+            var foundCesu8 = false;
+            for (var j = 0; j < bytes.length - 2; j++) {
+                if (bytes[j] === 0xED && bytes[j+1] >= 0xA0 && bytes[j+1] <= 0xBF) {
+                    foundCesu8 = true;
+                    break;
+                }
+            }
+            assert.ok(!foundCesu8, "No CESU-8 sequences should be present");
+            
+            // Also verify the content round-trips correctly
+            return JSZip.loadAsync(zip.generateAsync({type:"uint8array"}));
+        })
+        .then(function(reloadedZip) {
+            return reloadedZip.file("test.txt").async("string");
+        })
+        .then(function(content) {
+            assert.equal(content, testStr, "Content should round-trip correctly");
+        });
+});
