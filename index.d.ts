@@ -155,7 +155,7 @@ declare namespace JSZip {
          * @default 'application/zip'
          */
         mimeType?: string;
-        encodeFileName?(filename: string): string;
+        encodeFileName?(filename: string): Buffer;
         /** Stream the files and create file descriptors */
         streamFiles?: boolean;
         /** DOS (default) or UNIX */
