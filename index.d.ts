@@ -266,7 +266,7 @@ interface JSZip {
     folder(name: RegExp): JSZip.JSZipObject[];
 
     /**
-     * Call a callback function for each entry at this folder level.
+     * Call a callback function for each entry at or below this folder level.
      *
      * @param callback function
      */
