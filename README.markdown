@@ -14,6 +14,13 @@ zip.file("Hello.txt", "Hello World\n");
 const img = zip.folder("images");
 img.file("smile.gif", imgData, {base64: true});
 
+/* 1. Create a zip file with compressed contents by specifying a compression and compression level (1 is "best speed", 9 is "best compression") */
+zip.generateAsync({type:"blob", compression:"DEFLATE", compressionOptions: {level:9}}).then(function(content) {
+    // see FileSaver.js
+    saveAs(content, "example.zip");
+});
+
+/* 2. Or, if you prefer a zip with uncompressed contents, you can omit the compression options */
 zip.generateAsync({type:"blob"}).then(function(content) {
     // see FileSaver.js
     saveAs(content, "example.zip");
