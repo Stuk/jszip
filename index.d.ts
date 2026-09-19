@@ -95,6 +95,13 @@ declare namespace JSZip {
          */
         async<T extends OutputType>(type: T, onUpdate?: OnUpdateCallback): Promise<OutputByType[T]>;
         nodeStream(type?: 'nodebuffer', onUpdate?: OnUpdateCallback): NodeJS.ReadableStream;
+
+        /**
+         * Create an internal stream for the content in the requested type.
+         * @param type the type of the result.
+         * @return a StreamHelper.
+         */
+        internalStream<T extends OutputType>(type: T): JSZipStreamHelper<OutputByType[T]>;
     }
 
     interface JSZipFileOptions {
