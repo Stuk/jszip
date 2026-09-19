@@ -42,6 +42,7 @@
     "inflate"
   ],
   "devDependencies": {
+    "@types/node": "16.11.26",
     "benchmark": "^2.1.4",
     "browserify": "~13.0.0",
     "eslint": "^8.18.0",
