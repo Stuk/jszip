@@ -116,6 +116,27 @@ QUnit.module("stream", function () {
 
     if (JSZip.support.nodestream) {
 
+        ["file", "archive", "streamed archive"].forEach(function (output) {
+            QUnit.test("paused input errors reject " + output, function (assert) {
+                var input = new (require("stream").PassThrough)();
+                var error = new Error("input failed while paused");
+                var zip = new JSZip();
+                zip.file("failed.txt", input);
+                assert.ok(input.isPaused(), "JSZip pauses the input before consuming it");
+                input.emit("error", error);
+                assert.strictEqual(input.generatedError, undefined, "the input is not used as worker error storage");
+                input.end("incomplete content");
+
+                var result = output === "file" ? zip.file("failed.txt").async("string") :
+                    zip.generateAsync({type: "nodebuffer", streamFiles: output === "streamed archive"});
+                return result.then(function () {
+                    assert.ok(false, "a failed input must not produce successful output");
+                }, function (actual) {
+                    assert.strictEqual(actual, error, "the original error reaches the consumer");
+                });
+            });
+        });
+
         generateStreamTest(
             "generateNodeStream(type:nodebuffer / !streamFiles) generates a working stream", "ref/all.zip",
             JSZipTestUtils.createZipAll,
