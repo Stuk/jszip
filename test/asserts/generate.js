@@ -363,3 +363,85 @@ JSZipTestUtils.testZipFile("generate with promises as files", "ref/all.zip", fun
             done();
         })["catch"](JSZipTestUtils.assertNoError);
 });
+
+QUnit.test("generateAsync with many files keeps the files, their order and the progress", function (assert) {
+    var done = assert.async();
+    var count = 3000;
+    var names = [];
+    var zip = new JSZip();
+    for (var i = 0; i < count; i++) {
+        names.push("file" + i + ".txt");
+        zip.file(names[i], "content " + i);
+    }
+
+    var percents = [];
+    var seenFiles = [];
+    zip.generateAsync({type: "uint8array"}, function (metadata) {
+        percents.push(metadata.percent);
+        var current = metadata.currentFile;
+        if (current && seenFiles[seenFiles.length - 1] !== current) {
+            seenFiles.push(current);
+        }
+    })
+        .then(function (result) {
+            var increasing = true;
+            for (var j = 1; j < percents.length; j++) {
+                if (percents[j] < percents[j - 1]) {
+                    increasing = false;
+                }
+            }
+            assert.ok(increasing, "the progress never goes backward");
+            assert.equal(percents[percents.length - 1], 100, "the progress ends at 100%");
+            assert.deepEqual(seenFiles, names, "the files are reported in the order they were added");
+            return JSZip.loadAsync(result);
+        })
+        .then(function (loaded) {
+            assert.deepEqual(Object.keys(loaded.files).filter(function (name) {
+                return !loaded.files[name].dir;
+            }), names, "the files are written in the order they were added");
+            return loaded.file(names[count - 1]).async("string");
+        })
+        .then(function (text) {
+            assert.equal(text, "content " + (count - 1), "the last file has the right content");
+            done();
+        })["catch"](JSZipTestUtils.assertNoError);
+});
+
+QUnit.test("generateAsync does not shift the list of sources", function (assert) {
+    // Array#shift is linear on big arrays: consuming the sources with it made
+    // the generation quadratic in the number of files.
+    var done = assert.async();
+    var count = 3000;
+    var zip = new JSZip();
+    for (var i = 0; i < count; i++) {
+        zip.file("file" + i + ".txt", "content");
+    }
+
+    /* eslint-disable no-extend-native */
+    var originalShift = Array.prototype.shift;
+    var bigShifts = 0;
+    Array.prototype.shift = function () {
+        if (this.length >= count / 2) {
+            bigShifts++;
+        }
+        return originalShift.apply(this, arguments);
+    };
+    var restore = function () {
+        Array.prototype.shift = originalShift;
+    };
+    /* eslint-enable no-extend-native */
+
+    zip.generateAsync({type: "uint8array"})
+        .then(function (result) {
+            restore();
+            assert.equal(bigShifts, 0, "Array#shift is not called on a big array");
+            return JSZip.loadAsync(result);
+        })
+        .then(function (loaded) {
+            assert.equal(Object.keys(loaded.files).length, count, "all the files are generated");
+            done();
+        })["catch"](function (e) {
+            restore();
+            JSZipTestUtils.assertNoError(e);
+        });
+});
