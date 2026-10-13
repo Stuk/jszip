@@ -237,6 +237,72 @@ QUnit.module("load", function () {
             })["catch"](JSZipTestUtils.assertNoError);
     });
 
+    ["zip64.zip", "zip64_prepended_bytes.zip", "zip64_appended_bytes.zip"].forEach(function (zipName) {
+        JSZipTestUtils.testZipFile("zip 64 without sentinel values: " + zipName, "ref/" + zipName, function(assert, file) {
+            var done = assert.async();
+            // Keep the ZIP64 records, but use the actual central directory offset
+            // in the ordinary end record instead of 0xFFFFFFFF (see #922).
+            var zip64End = file.lastIndexOf("\x50\x4b\x06\x06");
+            var end = file.lastIndexOf("\x50\x4b\x05\x06");
+            file = file.slice(0, end + 16) + file.slice(zip64End + 48, zip64End + 52) + file.slice(end + 20);
+
+            JSZip.loadAsync(file)
+                .then(function (zip) {
+                    return zip.file("Hello.txt").async("string");
+                }).then(function (content) {
+                    assert.equal(content, "Hello World\n", "the zip was correctly read.");
+                    done();
+                })["catch"](JSZipTestUtils.assertNoError);
+        });
+    });
+
+    ["file", "archive"].forEach(function (commentLocation) {
+        QUnit.test("ZIP64 locator signature in " + commentLocation + " comment", function (assert) {
+            var zip = new JSZip();
+            var comment = "\x50\x4b\x06\x07" + new Array(17).join("\x00");
+            zip.file("Hello.txt", "Hello World\n", {comment: commentLocation === "file" ? comment : ""});
+            return zip.generateAsync({type: "binarystring", comment: commentLocation === "archive" ? comment : ""})
+                .then(JSZip.loadAsync)
+                .then(function (loaded) {
+                    assert.equal(commentLocation === "file" ? loaded.file("Hello.txt").comment : loaded.comment, comment);
+                    return loaded.file("Hello.txt").async("string");
+                }).then(function (content) {
+                    assert.equal(content, "Hello World\n", "the zip was correctly read.");
+                });
+        });
+    });
+
+    ["empty", "matching"].forEach(function (metadata) {
+        QUnit.test("ZIP64 end records in a file comment with " + metadata + " metadata", function (assert) {
+            var zip = new JSZip();
+            var zeros = new Array(9).join("\x00");
+            zip.file("Hello.txt", "Hello World\n", {comment: new Array(77).join("x")});
+            return zip.generateAsync({type: "binarystring"})
+                .then(function (generated) {
+                    var end = generated.lastIndexOf("\x50\x4b\x05\x06");
+                    var offset = end - 76;
+                    var zip64Offset = String.fromCharCode(offset & 0xff, (offset >>> 8) & 0xff,
+                        (offset >>> 16) & 0xff, (offset >>> 24) & 0xff) + zeros.slice(0, 4);
+                    var fields = metadata === "matching" ?
+                        generated.slice(end + 8, end + 10) + zeros.slice(0, 6) +
+                        generated.slice(end + 10, end + 12) + zeros.slice(0, 6) +
+                        generated.slice(end + 12, end + 16) + zeros.slice(0, 4) +
+                        generated.slice(end + 16, end + 20) + zeros.slice(0, 4) :
+                        zeros + zeros + zeros + zeros;
+                    var comment = "\x50\x4b\x06\x06\x2c" + zeros.slice(0, 7) +
+                        "\x2d\x00\x2d\x00" + zeros + fields +
+                        "\x50\x4b\x06\x07" + zeros.slice(0, 4) + zip64Offset + "\x01\x00\x00\x00";
+                    generated = generated.slice(0, offset) + comment + generated.slice(end);
+                    return JSZip.loadAsync(generated);
+                }).then(function (loaded) {
+                    assert.deepEqual(Object.keys(loaded.files), ["Hello.txt"], "the real central directory was used.");
+                    return loaded.file("Hello.txt").async("string");
+                }).then(function (content) {
+                    assert.equal(content, "Hello World\n", "the file content was preserved.");
+                });
+        });
+    });
+
     // use -fd to force data descriptors as if streaming
     // zip -fd -0 data_descriptor.zip Hello.txt
     JSZipTestUtils.testZipFile("zip with data descriptor", "ref/data_descriptor.zip", function(assert, file) {
