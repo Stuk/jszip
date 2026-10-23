@@ -740,6 +740,36 @@ QUnit.module("file", function () {
         assert.equal(zip.files["nested/hello.txt"].date.getTime(), referenceDate.getTime(), "the file keeps its explicit date");
     });
 
+    QUnit.test("dates outside the zip date range are clamped", function (assert) {
+        var epoch = new Date(0);
+        var minDate = new Date(Date.UTC(1980, 0, 1, 0, 0, 0));
+        var maxDate = new Date(Date.UTC(2107, 11, 31, 23, 59, 58));
+        var zip = new JSZip();
+        zip.file("epoch.txt", "content", {date: epoch});
+        zip.file("before.txt", "content", {date: new Date(Date.UTC(1979, 11, 31, 23, 0, 0))});
+        zip.file("min.txt", "content", {date: minDate});
+        zip.file("max.txt", "content", {date: maxDate});
+        zip.file("last.txt", "content", {date: new Date(Date.UTC(2107, 11, 31, 23, 59, 59, 999))});
+        zip.file("after.txt", "content", {date: new Date(Date.UTC(2108, 0, 1, 0, 0, 0))});
+
+        var done = assert.async();
+        zip.generateAsync({type:"uint8array"})
+            .then(function (content) {
+                assert.equal(epoch.getTime(), 0, "the date given to file() is unchanged");
+                assert.equal(zip.files["epoch.txt"].date.getTime(), 0, "the file keeps its original date");
+                return JSZip.loadAsync(content);
+            })
+            .then(function (reloaded) {
+                assert.equal(reloaded.files["epoch.txt"].date.getTime(), minDate.getTime(), "the epoch is clamped to the earliest zip date");
+                assert.equal(reloaded.files["before.txt"].date.getTime(), minDate.getTime(), "a date just before 1980 is clamped to the earliest zip date");
+                assert.equal(reloaded.files["min.txt"].date.getTime(), minDate.getTime(), "the earliest zip date is kept");
+                assert.equal(reloaded.files["max.txt"].date.getTime(), maxDate.getTime(), "the latest zip date is kept");
+                assert.equal(reloaded.files["last.txt"].date.getTime(), maxDate.getTime(), "the last millisecond of 2107 is saved as the latest zip date");
+                assert.equal(reloaded.files["after.txt"].date.getTime(), maxDate.getTime(), "a date after 2107 is clamped to the latest zip date");
+                done();
+            })["catch"](JSZipTestUtils.assertNoError);
+    });
+
     QUnit.test("Folders can be avoided with createFolders", function (assert) {
         var zip = new JSZip();
         zip.file("test/Readme", "Hello World!\n", {createFolders: false});

@@ -138,6 +138,10 @@ zip.file("Xmas.txt", "Ho ho ho !", {
 });
 ```
 
+The DOS date fields written by JSZip store the years 1980 to 2107, with a
+precision of two seconds. When generating the zip file, earlier dates are saved
+as January 1, 1980 00:00:00 UTC and later dates as December 31, 2107 23:59:58 UTC.
+
 ### `compression` and `compressionOptions` options
 
 See also the same options on [`JSZip#generateAsync()`]({{site.baseurl}}/documentation/api_jszip/generate_async.html#compression-and-compressionoptions-options).
