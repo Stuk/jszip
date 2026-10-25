@@ -766,6 +766,34 @@ QUnit.module("file", function () {
         assert.equal(zip.file(/pirate/i).length, 1, "Match regex 1 result");
     });
 
+    QUnit.test("Finding files with a global regex", function (assert) {
+        var zip = new JSZip();
+        zip.file("Readme.txt", "first");
+        zip.file("Readme.md", "second");
+        zip.file("Readme.rst", "third");
+        var pattern = /Readme/g;
+        pattern.lastIndex = 2;
+
+        assert.equal(zip.file(pattern).length, 3, "every matching file is found");
+        assert.equal(pattern.lastIndex, 2, "the caller's search position is preserved");
+        assert.equal(zip.file(pattern).length, 3, "reusing the regex gives the same results");
+    });
+
+    QUnit.test("Finding folders with a global regex", function (assert) {
+        var zip = new JSZip();
+        var root = zip.folder("root");
+        root.folder("sub1");
+        root.folder("sub2");
+        root.folder("sub3");
+        root.file("sub.txt", "not a folder");
+        var pattern = /^sub/g;
+        pattern.lastIndex = 2;
+
+        assert.equal(root.folder(pattern).length, 3, "every matching relative folder is found");
+        assert.equal(pattern.lastIndex, 2, "the caller's search position is preserved");
+        assert.equal(root.folder(pattern).length, 3, "reusing the regex gives the same results");
+    });
+
     QUnit.test("Finding a file (text search) with a relative folder", function (assert) {
         var zip = new JSZip();
         zip.folder("files/default").file("Readme", "Hello World!\n");
