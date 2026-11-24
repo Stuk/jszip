@@ -539,6 +539,49 @@ QUnit.module("file", function () {
     }
 
 
+    QUnit.module("about clone");
+
+    QUnit.test("clone() adding or removing files does not alter the original", function (assert) {
+        var zip = new JSZip();
+        zip.file("a.txt", "a");
+        var clone = zip.clone();
+
+        clone.file("b.txt", "b");
+        assert.ok(zip.file("b.txt") === null, "a file added to the clone is not in the original");
+        assert.ok(clone.file("b.txt") !== null, "a file added to the clone is in the clone");
+
+        clone.remove("a.txt");
+        assert.ok(zip.file("a.txt") !== null, "a file removed from the clone is still in the original");
+        assert.ok(clone.file("a.txt") === null, "a file removed from the clone is not in the clone");
+
+        zip.file("c.txt", "c");
+        assert.ok(clone.file("c.txt") === null, "a file added to the original is not in the clone");
+    });
+
+    QUnit.test("clone() replacing a file does not alter the original content", function (assert) {
+        var done = assert.async();
+        var zip = new JSZip();
+        zip.file("a.txt", "original");
+        var clone = zip.clone();
+        clone.file("a.txt", "changed");
+        zip.file("a.txt").async("string").then(function (content) {
+            assert.equal(content, "original", "the original content is unchanged");
+            return clone.file("a.txt").async("string");
+        }).then(function (content) {
+            assert.equal(content, "changed", "the clone content is updated");
+            done();
+        })["catch"](JSZipTestUtils.assertNoError);
+    });
+
+    QUnit.test("folder() still shares the files of the archive", function (assert) {
+        var zip = new JSZip();
+        var folder = zip.folder("sub");
+        folder.file("inside.txt", "data");
+        assert.ok(zip.file("sub/inside.txt") !== null, "a file added through a folder is in the archive");
+        zip.remove("sub/inside.txt");
+        assert.ok(folder.file("inside.txt") === null, "a file removed from the archive is not in the folder");
+    });
+
     QUnit.module("about folders");
 
     QUnit.test("Zip folder() shouldn't throw an exception", function (assert) {
