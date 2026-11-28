@@ -170,6 +170,11 @@ declare namespace JSZip {
         decodeFileName?: (bytes: string[] | Uint8Array | Buffer) => string;
     }
 
+    /**
+     * @deprecated JSZip.defaults is deprecated and will be removed in a future
+     * version. Prefer passing the options to each file() or generateAsync()
+     * call instead.
+     */
     interface JSZipDefaults {
         base64: boolean;
         binary: boolean;
@@ -332,6 +337,11 @@ interface JSZip {
 
     prototype: JSZip;
     support: JSZipSupport;
+    /**
+     * @deprecated JSZip.defaults is deprecated and will be removed in a future
+     * version. Prefer passing the options to each file() or generateAsync()
+     * call instead.
+     */
     defaults: JSZip.JSZipDefaults;
     external: {
         Promise: PromiseConstructorLike;
